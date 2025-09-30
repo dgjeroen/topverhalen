@@ -1,0 +1,16 @@
+# Forceert de server om index.html te serveren bij een map-verzoek
+DirectoryIndex index.html
+
+# Vangt de 'niet-bestaande' paden op en leidt ze naar de juiste HTML-file
+# Dit is handig voor 'slashes' in de URL die ontbreken
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /redactie/jeroen/
+
+  # Voorkomt conflicten met bestaande bestanden en mappen
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Leidt elke URL zonder .html-extensie om naar de juiste map/index.html
+  RewriteRule ^(.+)$ $1/index.html [L]
+</IfModule>

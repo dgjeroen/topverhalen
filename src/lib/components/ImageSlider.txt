@@ -1,0 +1,199 @@
+<script lang="ts">
+	import type { SliderContent } from '$lib/types';
+	import { lightbox } from '$lib/stores/lightbox';
+
+	// DE FIX: Destructure de props direct uit de SliderContent interface
+	let { images }: SliderContent = $props();
+
+	let currentIndex = $state(0);
+	const currentImage = $derived(images[currentIndex]);
+
+	function next() {
+		currentIndex = (currentIndex + 1) % images.length;
+	}
+	function prev() {
+		currentIndex = (currentIndex - 1 + images.length) % images.length;
+	}
+	function goTo(index: number) {
+		currentIndex = index;
+	}
+</script>
+
+<figure class="slider-container">
+	<div
+		class="slider-viewport"
+		role="button"
+		tabindex="0"
+		onclick={() => lightbox.open(images, currentIndex)}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') lightbox.open(images, currentIndex);
+		}}
+		aria-label="Open afbeelding in lightbox"
+	>
+		<div class="dots-nav">
+			{#each images as _, i}
+				<button
+					class:active={currentIndex === i}
+					tabindex="0"
+					onclick={(e) => {
+						e.stopPropagation();
+						goTo(i);
+					}}
+					onkeydown={(e) => {
+						if (e.key === 'ArrowLeft') {
+							e.preventDefault();
+							goTo((i - 1 + images.length) % images.length);
+							const prev = e.currentTarget.parentElement?.children[
+								(i - 1 + images.length) % images.length
+							] as HTMLButtonElement;
+							prev?.focus();
+						}
+						if (e.key === 'ArrowRight') {
+							e.preventDefault();
+							goTo((i + 1) % images.length);
+							const next = e.currentTarget.parentElement?.children[
+								(i + 1) % images.length
+							] as HTMLButtonElement;
+							next?.focus();
+						}
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							goTo(i);
+						}
+					}}
+					aria-label="Ga naar slide {i + 1}"
+				></button>
+			{/each}
+		</div>
+
+		<div class="slides" style:transform="translateX(-{currentIndex * 100}%)">
+			{#each images as image}
+				<div class="slide" style:background-image="url({image.url})"></div>
+			{/each}
+		</div>
+
+		<button
+			class="slider-btn prev"
+			onclick={(e) => {
+				e.stopPropagation();
+				prev();
+			}}
+			aria-label="Vorige slide">‹</button
+		>
+		<button
+			class="slider-btn next"
+			onclick={(e) => {
+				e.stopPropagation();
+				next();
+			}}
+			aria-label="Volgende slide">›</button
+		>
+	</div>
+
+	<figcaption class="slider-footer">
+		<span class="caption">{currentImage.caption}</span>
+		{#if currentImage.source}<span class="source">{currentImage.source}</span>{/if}
+	</figcaption>
+</figure>
+
+<style>
+	.slider-container {
+		position: relative;
+		margin: 0;
+	}
+	.slider-viewport {
+		overflow: hidden;
+		border-radius: var(--border-radius-base);
+		position: relative;
+		height: 0;
+		padding-bottom: 56.25%;
+		cursor: pointer;
+		background-color: var(--color-background-light);
+	}
+	.slides {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+	}
+	.slide {
+		flex: 0 0 100%;
+		min-width: 100%;
+		background-size: cover;
+		background-position: center;
+	}
+	.slider-btn {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		background-color: rgba(var(--color-text), 0.5);
+		color: var(--color-white);
+		border: none;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		font-size: 24px;
+		line-height: 40px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		z-index: 10;
+	}
+	.slider-btn:hover {
+		background-color: rgba(var(--color-text), 0.8);
+	}
+	.slider-btn.prev {
+		left: var(--space-s);
+	}
+	.slider-btn.next {
+		right: var(--space-s);
+	}
+	figcaption.slider-footer {
+		padding-top: var(--space-s);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--space-m);
+		color: var(--color-text-muted);
+		font-size: var(--font-size-s);
+	}
+	.caption {
+		text-align: left;
+	}
+	.source {
+		text-align: right;
+		font-style: italic;
+	}
+	.dots-nav {
+		position: absolute;
+		bottom: var(--space-s);
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 20;
+		display: flex;
+		gap: 8px;
+		background: rgba(255, 255, 255, 0.5);
+		padding: 4px 8px;
+		border-radius: 12px;
+	}
+	.dots-nav button {
+		width: 16px;
+		height: 16px;
+		aspect-ratio: 1/1;
+		border-radius: 50%;
+		border: 1px solid var(--color-border);
+		background-color: transparent;
+		margin: 0 4px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		outline: none;
+	}
+	.dots-nav button:focus {
+		box-shadow: 0 0 0 2px var(--color-primary);
+	}
+	.dots-nav button.active {
+		background-color: var(--color-text-muted);
+	}
+</style>
