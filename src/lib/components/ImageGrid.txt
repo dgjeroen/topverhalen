@@ -1,0 +1,118 @@
+<script lang="ts">
+	import type { GalleryContent } from '$lib/types';
+	import { lightbox } from '$lib/stores/lightbox';
+
+	let { images }: GalleryContent = $props();
+</script>
+
+<div
+	class="gallery-grid"
+	class:is-2-images={images.length === 2}
+	class:is-4-images={images.length === 4}
+	class:is-3-images={images.length === 3}
+	class:is-6-images={images.length === 6}
+>
+	{#each images as image, i}
+		<div
+			class="gallery-item"
+			role="button"
+			tabindex="0"
+			onclick={() => lightbox.open(images, i)}
+			onkeydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') lightbox.open(images, i);
+			}}
+		>
+			<div class="image-container">
+				<img src={image.url} alt={image.caption || ''} loading="lazy" />
+			</div>
+
+			{#if image.caption || image.source}
+				<div class="caption-container">
+					<span class="caption">{image.caption}</span>
+					{#if image.source}<span class="source">{image.source}</span>{/if}
+				</div>
+			{/if}
+		</div>
+	{/each}
+</div>
+
+<style>
+	.gallery-grid {
+		display: grid;
+		gap: var(--space-m);
+	}
+
+	/* --- DESKTOP LAYOUTS --- */
+	/* 2 foto's: 1x2 */
+	.is-2-images {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	/* 4 foto's: 1x4 */
+	.is-4-images {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	/* 3 foto's: 1x2, 1x1 */
+	.is-3-images {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	/* 6 foto's: 2 rijen van 3 */
+	.is-6-images {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	/* --- MOBIELE LAYOUTS --- */
+	@media (max-width: 768px) {
+		/* 2 foto's: onder elkaar */
+		.is-2-images {
+			grid-template-columns: 1fr;
+		}
+
+		/* 4 foto's: 2 rijen van 2 */
+		.is-4-images {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		/* 6 foto's: 3 rijen van 2 */
+		.is-6-images {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.gallery-item {
+		margin: 0;
+		cursor: pointer;
+	}
+
+	.image-container {
+		border-radius: var(--border-radius-base);
+		overflow: hidden;
+		line-height: 0;
+	}
+
+	img {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	.caption-container {
+		padding-top: var(--space-s);
+		font-size: var(--font-size-s);
+		color: var(--color-text-muted);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+	}
+
+	.caption {
+		text-align: left;
+	}
+
+	.source {
+		text-align: right;
+		font-style: italic;
+	}
+</style>

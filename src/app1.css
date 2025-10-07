@@ -1,0 +1,187 @@
+/* src/app.css */
+
+/* ============================================= */
+/* 1. GLOBALE RESET                              */
+/* ============================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* ============================================= */
+/* 2. DESIGN TOKENS (VARIABELEN)                 */
+/* ============================================= */
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    /* --- Layout Breedtes --- */
+    --standard-max-width: 720px;
+    --wide-max-width: 960px;
+
+    /* --- Afstanden (Spacing) --- */
+    --space-s: 0.5rem;
+    /* 8px */
+    --space-m: 1rem;
+    /* 16px */
+    --space-l: 1.5rem;
+    /* 24px */
+    --space-xl: 2rem;
+    /* 32px */
+    --space-xxl: 3rem;
+    /* 48px */
+    --space-xxxl: 5rem;
+    /* 80px */
+
+    /* --- Verticale Marge tussen blokken --- */
+    --block-vertical-margin: 3rem;
+
+    /* --- Kleuren --- */
+    --color-text: #111827;
+    --color-text-rgb: 17, 24, 39;
+    --color-text-muted: #4b5563;
+    --color-background-light: #f6e8d9;
+    --color-border: #d1d5db;
+    --color-accent: #ef4444;
+    --color-white: #ffffff;
+
+    /* --- Typografie --- */
+    --font-family-base: 'Inter', sans-serif;
+    --font-family-quote: 'Lora', serif;
+    --font-size-s: 0.9rem;
+    --font-size-base: 1rem;
+    --font-size-m: 1.1rem;
+    --font-size-l: 1.2rem;
+    --font-size-xl: 1.6em;
+    --font-size-hero-title: clamp(2.5rem, 6vw, 4rem);
+
+    /* --- Overig --- */
+    --linked-block-spacing: 0.5rem;
+    --parallax-height: 10vh;
+    --parallax-aspect-ratio: 18 / 9;
+    --border-radius-base: 8px;
+    --box-shadow-base: 0 2px 10px rgba(0, 0, 0, .1);
+
+    /* --- Heading Font Sizes --- */
+    --font-size-h1: 2.5rem;
+    --font-size-h2: 2rem;
+    --font-size-h3: 1.75rem;
+    --font-size-h4: 1.25rem;
+    /* eventueel H% en H6 toevoegen */
+    --font-weight-headings: 700;
+
+    /* --- Subheaders --- */
+    --font-size-subheading: 1.5rem;
+    --font-weight-subheading: 600;
+    --color-subheading: var(--color-text-muted);
+
+    /* --- Speciale Font Styles --- */
+    --font-family-hero-title: var(--font-family-quote);
+}
+
+.hero-container+main {
+    margin-top: var(--block-vertical-margin);
+}
+
+main>*:first-child {
+    margin-top: 0;
+}
+
+/* ============================================= */
+/* 3. WRAPPER CLASSES                          */
+/* ============================================= */
+
+body {
+    margin: 0;
+    /* Goede gewoonte om standaard marge te verwijderen */
+    font-family: var(--font-family-base);
+    /* HIER passen we het lettertype toe */
+    color: var(--color-text);
+    background-color: #f8dcbb;
+    /* Standaard achtergrondkleur */
+    -webkit-font-smoothing: antialiased;
+    /* Zorgt voor scherpere tekst op Mac/iOS */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.wrapper-standard,
+.wrapper-wide {
+    width: 100%;
+    padding: 0 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-block: var(--block-vertical-margin);
+}
+
+.is-linked-to-next {
+    margin-bottom: 0;
+}
+
+/* ============================================= */
+/* 4. BASIS ELEMENT STIJLEN                      */
+/* ============================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    line-height: 1.3;
+    font-weight: var(--font-weight-headings);
+}
+
+h1 {
+    font-size: var(--font-size-h1);
+}
+
+h2 {
+    font-size: var(--font-size-h2);
+}
+
+h3 {
+    font-size: var(--font-size-h3);
+}
+
+h4 {
+    font-size: var(--font-size-h4);
+}
+
+/* ============================================= */
+/* 5. Witruimte voor blokken die elkaar opvolgen                          */
+/* ============================================= */
+
+.is-linked-to-next+.wrapper-standard,
+.is-linked-to-next+.wrapper-wide {
+    margin-top: var(--linked-block-spacing);
+    /* Gebruikt onze bestaande variabele! */
+}
+
+/* ============================================= */
+/* 6. RESPONSIVE AANPASSINGEN                        */
+/* ============================================= */
+@media (max-width: 768px) {
+    :root {
+        /* Verlaag de hoogte van het parallax-blok op kleinere schermen */
+        --parallax-height: 35vh;
+
+        /* We kunnen hier in de toekomst meer aanpassingen voor mobiel toevoegen */
+    }
+
+    .hero-container+main {
+        margin-top: 0;
+    }
+}
+
+@media (min-width: 768px) {
+    .wrapper-standard {
+        max-width: var(--standard-max-width);
+    }
+
+    .wrapper-wide {
+        max-width: var(--wide-max-width);
+    }
+}

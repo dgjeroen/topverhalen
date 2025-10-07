@@ -1,0 +1,111 @@
+<script lang="ts">
+	import type { QuoteContent } from '$lib/types';
+
+	let { text, author }: QuoteContent = $props();
+
+	let typingProgress = $state(0);
+	let showAuthor = $state(false);
+
+	$effect(() => {
+		if (text.length === 0) return;
+
+		const typeSpeed = 20;
+		const authorDelay = 500;
+
+		let charIndex = 0;
+		const typingTimer = setInterval(() => {
+			if (charIndex < text.length) {
+				typingProgress = charIndex + 1;
+				charIndex++;
+			} else {
+				clearInterval(typingTimer);
+				setTimeout(() => (showAuthor = true), authorDelay);
+			}
+		}, typeSpeed);
+
+		return () => clearInterval(typingTimer);
+	});
+</script>
+
+<blockquote class="quote-block">
+	<p class="quote-text" class:typing={typingProgress < text.length}>
+		{text.substring(0, typingProgress)}
+	</p>
+	<footer class="quote-author" class:visible={showAuthor}>— {author}</footer>
+</blockquote>
+
+<style>
+	.quote-block {
+		position: relative;
+		margin: 0;
+		padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-xxl);
+		border-left: 5px solid var(--color-text);
+		background-color: var(--color-background-light);
+		border-radius: var(--border-radius-base);
+	}
+
+	.quote-block::before {
+		content: '“';
+		position: absolute;
+		top: -0.2em;
+		left: 0.1em;
+		font-size: 8em;
+		font-family: var(--font-family-quote);
+		color: var(--color-text-muted);
+		opacity: 0.5;
+		z-index: 10;
+		line-height: 1;
+	}
+
+	.quote-text {
+		position: relative;
+		z-index: 1;
+		font-family: var(--font-family-quote);
+		font-size: var(--font-size-xl);
+		font-style: italic;
+		color: var(--color-text);
+		line-height: 1.6;
+		min-height: 1.6em;
+	}
+	.quote-text.typing::after {
+		content: '|';
+		animation: blink 1s step-end infinite;
+		margin-left: 2px;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+	@keyframes blink {
+		from,
+		to {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+	}
+
+	.quote-author {
+		position: relative;
+		z-index: 1;
+		margin-top: var(--space-m);
+		font-size: var(--font-size-base);
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-align: right;
+		opacity: 0;
+	}
+
+	.quote-author.visible {
+		animation: slideAndFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+	}
+	@keyframes slideAndFadeIn {
+		from {
+			opacity: 0;
+			transform: translateX(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+</style>
