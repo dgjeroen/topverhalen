@@ -1,22 +1,29 @@
 // src/routes/+layout.server.ts
 import { readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import path from 'path';
 
 import type { LayoutServerLoad } from './$types';
-import type { ContentFile } from '$lib/types'; // Importeer je zelfgemaakte, betrouwbare type
+import type { ContentFile } from '$lib/types';
 
+export const load: LayoutServerLoad = async ({ url }) => {
+    // Skip content loading voor CMS routes
+    if (url.pathname.startsWith('/cms')) {
+        return {};
+    }
 
-export const load: LayoutServerLoad = async () => {
-    // Bouw een pad naar het bestand vanuit de project-root. Dit is 100% betrouwbaar.
+    // Alleen laden voor story routes
     const filePath = path.join(process.cwd(), 'src/lib/data/content.json');
 
-    // Lees de inhoud van het bestand
-    const fileContent = readFileSync(filePath, 'utf-8');
+    // Check of bestand bestaat (voor Vercel compatibility)
+    if (!existsSync(filePath)) {
+        console.warn('content.json niet gevonden, skip laden');
+        return {};
+    }
 
-    // Parse de JSON en dwing het om te voldoen aan jouw ContentFile-type
+    const fileContent = readFileSync(filePath, 'utf-8');
     const contentData: ContentFile = JSON.parse(fileContent);
 
-    // Geef de correct getypeerde data door
     return {
         content: contentData
     };
