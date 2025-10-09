@@ -1,13 +1,10 @@
 // src/routes/+layout.server.ts
-
-// Gebruik Node.js' eigen 'fs' en 'path' modules voor betrouwbare file-access
 import { readFileSync } from 'fs';
 import path from 'path';
 
 import type { LayoutServerLoad } from './$types';
 import type { ContentFile } from '$lib/types'; // Importeer je zelfgemaakte, betrouwbare type
 
-export const prerender = true;
 
 export const load: LayoutServerLoad = async () => {
     // Bouw een pad naar het bestand vanuit de project-root. Dit is 100% betrouwbaar.

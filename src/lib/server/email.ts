@@ -1,10 +1,15 @@
 // src/lib/server/email.ts
 import { Resend } from 'resend';
-import { RESEND_API_KEY } from '$env/static/private';
-
-const resend = new Resend(RESEND_API_KEY);
 
 export async function sendMagicLink(email: string, token: string, baseUrl: string) {
+    // Haal API key op uit environment (runtime, niet build-time)
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+        throw new Error('RESEND_API_KEY is niet ingesteld');
+    }
+
+    const resend = new Resend(apiKey);
     const magicLink = `${baseUrl}/cms/auth/verify?token=${token}`;
 
     try {

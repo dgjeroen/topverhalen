@@ -3,7 +3,8 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createMagicToken, isAllowedEmail } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
-import { ALLOWED_EMAIL_DOMAIN } from '$env/static/private';
+
+const ALLOWED_EMAIL_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'persgroep.net';
 
 export const POST: RequestHandler = async ({ request, url }) => {
     try {
@@ -31,7 +32,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
         console.error('Magic link send error:', err);
 
         if (err instanceof Error && 'status' in err) {
-            throw err; // Re-throw SvelteKit errors
+            throw err;
         }
 
         throw error(500, 'Kon magic link niet versturen');

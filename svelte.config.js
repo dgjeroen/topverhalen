@@ -1,25 +1,19 @@
 // svelte.config.js
-import adapter from '@sveltejs/adapter-static';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'; // Goede gewoonte om deze ook toe te voegen
+import adapter from '@sveltejs/adapter-vercel';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// Voeg preprocess toe voor o.a. TypeScript en PostCSS ondersteuning in <style> blokken
 	preprocess: vitePreprocess(),
 
 	kit: {
 		adapter: adapter({
-			pages: 'build',
-			assets: 'build'
+			runtime: 'nodejs20.x'
 		}),
 
-		// ===================================================
-		// ========= VOEG DEZE SECTIE TOE ====================
 		alias: {
 			'$lib': 'src/lib'
 		}
-		// ===================================================
-		// ===================================================
 	}
 };
 
