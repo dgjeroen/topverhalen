@@ -1,5 +1,7 @@
 // src/lib/server/auth.ts
 import { nanoid } from 'nanoid';
+import jwt from 'jsonwebtoken';
+import { env } from '$env/dynamic/private';
 
 interface Session {
     email: string;
@@ -7,14 +9,26 @@ interface Session {
     expiresAt: number;
 }
 
-// In-memory store (voor productie: gebruik database)
+interface MagicTokenPayload {
+    email: string;
+    exp: number;
+}
+
 const sessions = new Map<string, Session>();
-const magicTokens = new Map<string, Session>();
+
+// ✅ Gebruik $env/dynamic/private
+const getAuthSecret = (): string => {
+    const secret = env.AUTH_SECRET;
+    if (!secret) {
+        throw new Error('AUTH_SECRET is niet ingesteld');
+    }
+    return secret;
+};
 
 export async function createSession(email: string): Promise<string> {
     const sessionId = nanoid(32);
     const name = email.split('@')[0];
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 uur
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
     sessions.set(sessionId, { email, name, expiresAt });
     return sessionId;
@@ -35,26 +49,36 @@ export async function verifySession(sessionId: string | undefined): Promise<Sess
 }
 
 export async function createMagicToken(email: string): Promise<string> {
-    const token = nanoid(32);
-    const name = email.split('@')[0];
-    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minuten
+    const payload: MagicTokenPayload = {
+        email,
+        exp: Math.floor(Date.now() / 1000) + (15 * 60)
+    };
 
-    magicTokens.set(token, { email, name, expiresAt });
+    const token = jwt.sign(payload, getAuthSecret());
     return token;
 }
 
 export async function verifyMagicToken(token: string): Promise<Session | null> {
-    const session = magicTokens.get(token);
-    if (!session) return null;
+    try {
+        const payload = jwt.verify(token, getAuthSecret()) as MagicTokenPayload;
 
-    if (Date.now() > session.expiresAt) {
-        magicTokens.delete(token);
+        const name = payload.email.split('@')[0];
+
+        return {
+            email: payload.email,
+            name,
+            expiresAt: payload.exp * 1000
+        };
+    } catch (error) {
+        if (error instanceof jwt.TokenExpiredError) {
+            console.log('Magic token expired');
+        } else if (error instanceof jwt.JsonWebTokenError) {
+            console.error('Invalid magic token:', error.message);
+        } else {
+            console.error('Magic token verification failed:', error);
+        }
         return null;
     }
-
-    // Verwijder token (eenmalig gebruik)
-    magicTokens.delete(token);
-    return session;
 }
 
 export function isAllowedEmail(email: string, allowedDomain: string): boolean {

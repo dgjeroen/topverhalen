@@ -1,9 +1,10 @@
 // src/lib/server/email.ts
 import { Resend } from 'resend';
+import { env } from '$env/dynamic/private';
 
 export async function sendMagicLink(email: string, token: string, baseUrl: string) {
-    // Haal API key op uit environment (runtime, niet build-time)
-    const apiKey = process.env.RESEND_API_KEY;
+    // ✅ Gebruik $env/dynamic/private
+    const apiKey = env.RESEND_API_KEY;
 
     if (!apiKey) {
         throw new Error('RESEND_API_KEY is niet ingesteld');

@@ -3,8 +3,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createMagicToken, isAllowedEmail } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
-
-const ALLOWED_EMAIL_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'persgroep.net';
+import { env } from '$env/dynamic/private';
 
 export const POST: RequestHandler = async ({ request, url }) => {
     try {
@@ -15,9 +14,12 @@ export const POST: RequestHandler = async ({ request, url }) => {
             throw error(400, 'Email is verplicht');
         }
 
+        // ✅ Gebruik $env/dynamic/private
+        const allowedDomain = env.ALLOWED_EMAIL_DOMAIN || 'persgroep.net';
+
         // Check of email toegestaan is
-        if (!isAllowedEmail(email, ALLOWED_EMAIL_DOMAIN)) {
-            throw error(403, `Alleen @${ALLOWED_EMAIL_DOMAIN} emails zijn toegestaan`);
+        if (!isAllowedEmail(email, allowedDomain)) {
+            throw error(403, `Alleen @${allowedDomain} emails zijn toegestaan`);
         }
 
         // Maak magic token aan
