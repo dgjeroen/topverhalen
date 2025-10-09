@@ -1,4 +1,27 @@
-// --- Definieer de 'content' voor elk bloktype ---
+// src/lib/types.ts
+
+// =================================================================
+// 1. DEFINITIE VOOR HET THEMA-OBJECT
+// =================================================================
+export type Theme = {
+    'standard-max-width'?: string;
+    'wide-max-width'?: string;
+    'color-text'?: string;
+    'color-text-muted'?: string;
+    'color-background-light'?: string;
+    'color-border'?: string;
+    'color-accent'?: string;
+    'font-family-base'?: string;
+    'font-family-quote'?: string;
+    'border-radius-base'?: string;
+    'box-shadow-base'?: string;
+    // Voeg hier alle andere CSS-variabelen toe die je aanpasbaar wilt maken
+};
+
+// =================================================================
+// 2. DEFINITIES VOOR INDIVIDUELE CONTENTBLOKKEN
+// (Jouw bestaande, uitstekende definities)
+// =================================================================
 
 export interface TextBlockContent {
     text: string[];
@@ -73,24 +96,24 @@ export type MediaItem = {
     type: 'image' | 'video';
     orientation: 'portrait' | 'landscape';
     url: string;
-    caption?: string; // Optioneel, want video's hebben dit niet altijd
-    poster?: string;  // Optioneel, want alleen video's hebben dit
-    source?: string; // Optioneel, bronvermelding voor afbeeldingen
-    showControls?: boolean; // Optioneel, om controls te tonen/verbergen
+    caption?: string;
+    poster?: string;
+    source?: string;
+    showControls?: boolean;
 };
 
-// --- Definieer dan de 'content' voor het HELE media-pair blok ---
 export interface MediaPairContent {
     verticalAlign: 'top' | 'bottom';
-    // Een 'tuple' die exact TWEE MediaItem objecten verwacht.
     items: [MediaItem, MediaItem];
 }
 
-// Dan definiëren we de 'content' voor het HELE timeline-blok
 export interface TimelineContent {
-    timelines: TimelineItem[]; // De content is een array van items
+    timelines: TimelineItem[];
 }
-// --- Creëer een 'union type': een ContentBlock is EEN van de volgende opties ---
+
+// =================================================================
+// 3. UNION TYPE DIE ALLE MOGELIJKE BLOKKEN VERZAMELT
+// =================================================================
 export type ContentBlock =
     | { type: 'textblock'; content: TextBlockContent }
     | { type: 'heading'; content: HeadingContent }
@@ -98,10 +121,21 @@ export type ContentBlock =
     | { type: 'image'; content: ImageContent }
     | { type: 'quote'; content: QuoteContent }
     | { type: 'audio'; content: AudioContent }
-    | { type: 'heroVideo', content: HeroVideoContent }
-    | { type: 'gallery', content: GalleryContent }
-    | { type: 'video', content: VideoContent }
-    | { type: 'slider', content: SliderContent }
-    | { type: 'colofon', content: ColofonContent }
-    | { type: 'timeline', content: TimelineContent }
+    | { type: 'heroVideo'; content: HeroVideoContent }
+    | { type: 'gallery'; content: GalleryContent }
+    | { type: 'video'; content: VideoContent }
+    | { type: 'slider'; content: SliderContent }
+    | { type: 'colofon'; content: ColofonContent }
+    | { type: 'timeline'; content: TimelineContent }
     | { type: 'mediaPair'; content: MediaPairContent };
+
+// =================================================================
+// 4. HET HOOFDTYPE DAT DE VOLLEDIGE STRUCTUUR VAN content.json BESCHRIJFT
+// =================================================================
+export interface ContentFile {
+    version: number;
+    storyName: string;
+    theme: Theme;
+    /** De 'data' array mag uitsluitend objecten bevatten die voldoen aan het ContentBlock type. */
+    data: ContentBlock[];
+}

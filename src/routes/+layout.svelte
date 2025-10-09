@@ -1,13 +1,16 @@
 <script lang="ts">
-	// Jouw bestaande imports
+	import type { Snippet } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import Lightbox from '$lib/components/Lightbox.svelte';
 	import '../app.css';
-
 	import { PUBLIC_GTM_ID } from '$env/static/public';
+	import ThemeLoader from '$lib/components/ThemeLoader.svelte';
+	import type { PageData } from './$types'; // ✨ NIEUW: Importeer het type
 
-	// Jouw bestaande props
-	let { children } = $props();
+	// ✨ AANGEPAST: Geef 'data' het juiste type
+	let { children, data }: { children: Snippet; data: PageData } = $props();
+
+	const theme = data.content?.theme;
 </script>
 
 <svelte:head>
@@ -43,5 +46,9 @@
 		title="Google Tag Manager"
 	></iframe></noscript
 >
+
+<ThemeLoader {theme} />
+
 <Lightbox />
+
 {@render children?.()}
