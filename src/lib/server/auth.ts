@@ -16,7 +16,6 @@ interface MagicTokenPayload {
 
 const sessions = new Map<string, Session>();
 
-// ✅ Gebruik $env/dynamic/private
 const getAuthSecret = (): string => {
     const secret = env.AUTH_SECRET;
     if (!secret) {
@@ -81,6 +80,20 @@ export async function verifyMagicToken(token: string): Promise<Session | null> {
     }
 }
 
+// ✅ AANGEPASTE FUNCTIE
 export function isAllowedEmail(email: string, allowedDomain: string): boolean {
-    return email.endsWith(`@${allowedDomain}`);
+    // Sta meerdere DPG Media domeinen toe
+    const allowedDomains = [
+        'persgroep.net',
+        'gelderlander.nl',
+        'ad.nl',
+        'bd.nl',
+        'tubantia.nl',
+        'ed.nl',
+        'pzc.nl',
+        'bndestem.nl',
+        'destentor.nl'
+    ];
+
+    return allowedDomains.some(domain => email.endsWith(`@${domain}`));
 }
