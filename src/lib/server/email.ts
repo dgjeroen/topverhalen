@@ -14,7 +14,7 @@ export async function sendMagicLink(email: string, token: string, baseUrl: strin
 
     try {
         await resend.emails.send({
-            from: 'Topverhalen CMS <onboarding@resend.dev>',
+            from: 'Topverhalen CMS <noreply@topverhaal.nl>',
             to: email,
             subject: 'Login naar Topverhalen CMS',
             html: `

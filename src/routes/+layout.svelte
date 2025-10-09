@@ -5,12 +5,12 @@
 	import '../app.css';
 	import { PUBLIC_GTM_ID } from '$env/static/public';
 	import ThemeLoader from '$lib/components/ThemeLoader.svelte';
-	import type { PageData } from './$types'; // ✨ NIEUW: Importeer het type
+	import type { LayoutData } from './$types';
 
-	// ✨ AANGEPAST: Geef 'data' het juiste type
-	let { children, data }: { children: Snippet; data: PageData } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	const theme = data.content?.theme;
+	// ✅ Veilige theme extractie met fallback
+	const theme = $derived(data?.content?.theme ?? null);
 </script>
 
 <svelte:head>
@@ -33,7 +33,7 @@
 			j.async = true;
 			j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
 			f.parentNode.insertBefore(j, f);
-		})(window, document, 'script', 'dataLayer', PUBLIC_GTM_ID);
+		})(window, document, 'script', 'dataLayer', '%sveltekit.env.PUBLIC_GTM_ID%');
 	</script>
 </svelte:head>
 
