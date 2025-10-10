@@ -1,5 +1,6 @@
 // src/routes/cms/auth/send-link/+server.ts
 import { json, error } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import type { RequestHandler } from './$types';
 import { createMagicToken, isAllowedEmail } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
@@ -25,8 +26,11 @@ export const POST: RequestHandler = async ({ request, url }) => {
         // Maak magic token aan
         const token = await createMagicToken(email);
 
-        // Verstuur email
-        const baseUrl = url.origin;
+        // ✅ FIX: Gebruik custom domain in productie, origin in dev
+        const baseUrl = dev
+            ? url.origin
+            : 'https://cms.topverhaal.nl';
+
         await sendMagicLink(email, token, baseUrl);
 
         return json({ success: true });
