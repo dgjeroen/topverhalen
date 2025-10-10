@@ -51,8 +51,8 @@
 				placeholder="jouw.naam@persgroep.net"
 				required
 				disabled={loading}
-				pattern=".*@persgroep\.net$"
-				title="Alleen @persgroep.net emails zijn toegestaan"
+				pattern=".*@(persgroep\.net|gelderlander\.nl|ad\.nl|bd\.nl|tubantia\.nl|ed\.nl|pzc\.nl|bndestem\.nl|destentor\.nl)$"
+				title="Gebruik een DPG Media email adres"
 			/>
 
 			<button type="submit" disabled={loading || !email}>

@@ -1,5 +1,6 @@
 // src/routes/cms/auth/verify/+server.ts
 import { redirect } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import type { RequestHandler } from './$types';
 import { verifyMagicToken, createSession } from '$lib/server/auth';
 
@@ -26,7 +27,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
             path: '/',
             httpOnly: true,
             sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            secure: !dev, // ✅ In productie: true, in dev: false
             maxAge: 60 * 60 * 24 // 24 uur
         });
 
@@ -35,10 +36,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     } catch (err) {
         console.error('Token verification error:', err);
 
-        if (err instanceof Error && 'status' in err && (err as any).status === 303) {
-            throw err; // Re-throw redirect
+        // Als het een redirect is, gooi door
+        if (err && typeof err === 'object' && 'status' in err && err.status === 303) {
+            throw err;
         }
 
+        // Anders: verificatie gefaald
         throw redirect(303, '/cms/login?error=verification_failed');
     }
 };
