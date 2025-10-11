@@ -269,7 +269,69 @@
 							<div class="drag-handle">⋮⋮</div>
 							<button class="remove-btn" onclick={() => removeBlock(block.id)}>×</button>
 							<div class="content">
-								{#if block.type === 'heading'}
+								{#if block.type === 'heroVideo'}
+									<div class="hero-video-editor">
+										<label>Video URL (.m3u8)</label>
+										<input
+											type="url"
+											placeholder="https://..."
+											bind:value={block.content.url}
+											class="block-input"
+										/>
+
+										<label>Poster Afbeelding</label>
+										<input
+											type="url"
+											placeholder="https://..."
+											bind:value={block.content.poster}
+											class="block-input"
+										/>
+
+										{#if block.content.poster}
+											<img src={block.content.poster} alt="Poster" class="block-preview" />
+										{/if}
+
+										<label>Label (optioneel)</label>
+										<input
+											type="text"
+											placeholder="Bijv. SPECIAL"
+											bind:value={block.content.label}
+											class="block-input"
+										/>
+
+										<label>Titel</label>
+										<input
+											type="text"
+											placeholder="Hoofdtitel..."
+											bind:value={block.content.title}
+											class="block-input"
+										/>
+
+										<label>Bron (verplicht)</label>
+										<input
+											type="text"
+											placeholder="Bijv. ANP"
+											bind:value={block.content.source}
+											class="block-input"
+										/>
+
+										<label>Tekstpositie</label>
+										<div class="text-align-picker">
+											<label class="radio-option">
+												<input type="radio" bind:group={block.content.textAlign} value="top" />
+												<span>Boven</span>
+											</label>
+											<label class="radio-option">
+												<input type="radio" bind:group={block.content.textAlign} value="center" />
+												<span>Midden</span>
+											</label>
+											<label class="radio-option">
+												<input type="radio" bind:group={block.content.textAlign} value="bottom" />
+												<span>Onder</span>
+											</label>
+										</div>
+									</div>
+								{:else if block.type === 'heading'}
 									<input
 										type="text"
 										placeholder="Tekst kop..."
@@ -645,5 +707,48 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+	/* ===== HERO VIDEO EDITOR ===== */
+	.hero-video-editor label {
+		display: block;
+		font-weight: 600;
+		color: #333;
+		margin: 1rem 0 0.5rem;
+		font-size: 0.875rem;
+	}
+
+	.hero-video-editor label:first-child {
+		margin-top: 0;
+	}
+
+	.text-align-picker {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+	}
+
+	.radio-option {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		border: 2px solid #dee2e6;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.radio-option:has(input:checked) {
+		border-color: #667eea;
+		background: rgba(102, 126, 234, 0.05);
+	}
+
+	.radio-option input[type='radio'] {
+		margin: 0;
+	}
+
+	.radio-option span {
+		font-size: 0.875rem;
 	}
 </style>
