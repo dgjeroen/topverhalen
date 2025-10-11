@@ -103,26 +103,26 @@
 		}
 
 		// ✅ Update video players when URLs change
+		// ✅ Update video players when URLs change
 		$effect(() => {
 			canvasBlocks.forEach(async (block) => {
 				if (block.type === 'heroVideo' && block.content.url) {
 					const videoEl = document.getElementById(`hero-video-${block.id}`) as HTMLVideoElement;
 
 					if (videoEl && block.content.url.endsWith('.m3u8')) {
-						// Dynamisch importeer HLS.js
-						const Hls = (await import('hls.js')).default;
-
-						if (Hls.isSupported()) {
+						// @ts-ignore - HLS.js from CDN
+						if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+							// @ts-ignore
 							const hls = new Hls();
 							hls.loadSource(block.content.url);
 							hls.attachMedia(videoEl);
+							hls.on(Hls.Events.MANIFEST_PARSED, () => {
+								videoEl.play().catch(() => {});
+							});
 						} else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-							// Safari native support
 							videoEl.src = block.content.url;
+							videoEl.play().catch(() => {});
 						}
-					} else if (videoEl) {
-						// Normale video (mp4, etc.)
-						videoEl.src = block.content.url;
 					}
 				}
 			});
@@ -178,11 +178,11 @@
 
 <svelte:head>
 	<title>Editor - {data.project.storyName}</title>
-	<!-- ✅ Splide CSS -->
 	<link
 		rel="stylesheet"
 		href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
 	/>
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </svelte:head>
 
 <div class="editor">
@@ -297,6 +297,39 @@
 							<div class="content">
 								{#if block.type === 'heroVideo'}
 									<div class="hero-video-editor">
+										<!-- Live Preview -->
+										<div class="hero-preview">
+											{#if block.content.url || block.content.poster}
+												<div class="hero-preview-video">
+													<video
+														id="hero-video-{block.id}"
+														poster={block.content.poster || ''}
+														muted
+														loop
+														class="video-preview-bg"
+													></video>
+													<div
+														class="hero-preview-overlay"
+														class:align-top={block.content.textAlign === 'top'}
+														class:align-center={block.content.textAlign === 'center'}
+														class:align-bottom={block.content.textAlign === 'bottom'}
+													>
+														{#if block.content.label}
+															<span class="hero-preview-label">{block.content.label}</span>
+														{/if}
+														{#if block.content.title}
+															<h1 class="hero-preview-title">{block.content.title}</h1>
+														{/if}
+													</div>
+												</div>
+											{:else}
+												<div class="hero-preview-placeholder">
+													<p>Vul video URL in om preview te zien</p>
+												</div>
+											{/if}
+										</div>
+
+										<!-- Inputs -->
 										<div class="input-row">
 											<div class="input-col">
 												<label>Video URL (.m3u8)</label>
@@ -316,45 +349,18 @@
 											</div>
 										</div>
 
-										{#if block.content.url || block.content.poster}
-											<div class="media-preview-row">
-												{#if block.content.url}
-													<div class="preview-col">
-														<label>Video Preview</label>
-														<video
-															id="hero-video-{block.id}"
-															poster={block.content.poster || ''}
-															controls
-															class="video-preview"
-														></video>
-													</div>
-												{/if}
-												{#if block.content.poster}
-													<div class="preview-col">
-														<label>Poster Preview</label>
-														<img
-															src={block.content.poster}
-															alt="Poster"
-															class="block-preview-small"
-														/>
-													</div>
-												{/if}
-											</div>
-										{/if}
+										<div class="input-col-full">
+											<label>Label (optioneel)</label>
+											<input type="text" placeholder="SPECIAL" bind:value={block.content.label} />
+										</div>
 
-										<div class="input-row">
-											<div class="input-col-small">
-												<label>Label</label>
-												<input type="text" placeholder="SPECIAL" bind:value={block.content.label} />
-											</div>
-											<div class="input-col-large">
-												<label>Titel</label>
-												<input
-													type="text"
-													placeholder="Hoofdtitel"
-													bind:value={block.content.title}
-												/>
-											</div>
+										<div class="input-col-full">
+											<label>Titel</label>
+											<input
+												type="text"
+												placeholder="Hoofdtitel"
+												bind:value={block.content.title}
+											/>
 										</div>
 
 										<div class="input-row">
@@ -367,53 +373,51 @@
 												<div class="hero-align-picker">
 													<label class:active={block.content.textAlign === 'top'}>
 														<input type="radio" bind:group={block.content.textAlign} value="top" />
-														<div class="hero-align-icon align-top">
+														<div class="hero-align-icon">
 															<svg viewBox="0 0 24 24" fill="none">
 																<text
 																	x="12"
 																	y="8"
 																	text-anchor="middle"
-																	font-size="8"
+																	font-size="7"
 																	font-weight="600"
 																	fill="currentColor">TOP</text
 																>
 															</svg>
 														</div>
 													</label>
-
 													<label class:active={block.content.textAlign === 'center'}>
 														<input
 															type="radio"
 															bind:group={block.content.textAlign}
 															value="center"
 														/>
-														<div class="hero-align-icon align-center">
+														<div class="hero-align-icon">
 															<svg viewBox="0 0 24 24" fill="none">
 																<text
 																	x="12"
 																	y="14"
 																	text-anchor="middle"
-																	font-size="7"
+																	font-size="6"
 																	font-weight="600"
 																	fill="currentColor">CENTER</text
 																>
 															</svg>
 														</div>
 													</label>
-
 													<label class:active={block.content.textAlign === 'bottom'}>
 														<input
 															type="radio"
 															bind:group={block.content.textAlign}
 															value="bottom"
 														/>
-														<div class="hero-align-icon align-bottom">
+														<div class="hero-align-icon">
 															<svg viewBox="0 0 24 24" fill="none">
 																<text
 																	x="12"
-																	y="22"
+																	y="21"
 																	text-anchor="middle"
-																	font-size="7"
+																	font-size="6"
 																	font-weight="600"
 																	fill="currentColor">BOTTOM</text
 																>
@@ -968,5 +972,82 @@
 
 	.hero-align-icon.align-bottom {
 		align-items: flex-end;
+	}
+	/* ===== HERO PREVIEW ===== */
+	.hero-preview {
+		margin-bottom: 1rem;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #000;
+	}
+
+	.hero-preview-video {
+		position: relative;
+		width: 100%;
+		height: 200px;
+		overflow: hidden;
+	}
+
+	.video-preview-bg {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.hero-preview-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		flex-direction: column;
+		padding: 1.5rem;
+		background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+		color: white;
+	}
+
+	.hero-preview-overlay.align-top {
+		justify-content: flex-start;
+	}
+
+	.hero-preview-overlay.align-center {
+		justify-content: center;
+	}
+
+	.hero-preview-overlay.align-bottom {
+		justify-content: flex-end;
+	}
+
+	.hero-preview-label {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		margin-bottom: 0.5rem;
+		opacity: 0.9;
+	}
+
+	.hero-preview-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		margin: 0;
+		line-height: 1.2;
+	}
+
+	.hero-preview-placeholder {
+		height: 200px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #f8f9fa;
+		color: #999;
+		font-style: italic;
+	}
+
+	.input-col-full {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
 	}
 </style>
