@@ -14,7 +14,7 @@ interface MagicTokenPayload {
     exp: number;
 }
 
-const sessions = new Map<string, Session>();
+// ❌ VERWIJDER: const sessions = new Map<string, Session>();
 
 const getAuthSecret = (): string => {
     const secret = env.AUTH_SECRET;
@@ -24,27 +24,44 @@ const getAuthSecret = (): string => {
     return secret;
 };
 
+// ✅ NIEUW: Maak JWT-based session
 export async function createSession(email: string): Promise<string> {
-    const sessionId = nanoid(32);
     const name = email.split('@')[0];
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
-    sessions.set(sessionId, { email, name, expiresAt });
-    return sessionId;
+    // Maak JWT met session data
+    const sessionToken = jwt.sign(
+        { email, name, expiresAt },
+        getAuthSecret(),
+        { expiresIn: '24h' }
+    );
+
+    return sessionToken;
 }
 
-export async function verifySession(sessionId: string | undefined): Promise<Session | null> {
-    if (!sessionId) return null;
+// ✅ NIEUW: Verifieer JWT-based session
+export async function verifySession(sessionToken: string | undefined): Promise<Session | null> {
+    if (!sessionToken) return null;
 
-    const session = sessions.get(sessionId);
-    if (!session) return null;
+    try {
+        const decoded = jwt.verify(sessionToken, getAuthSecret()) as Session;
 
-    if (Date.now() > session.expiresAt) {
-        sessions.delete(sessionId);
+        // Check expiratie
+        if (Date.now() > decoded.expiresAt) {
+            return null;
+        }
+
+        return decoded;
+    } catch (error) {
+        console.error('Session verification failed:', error);
         return null;
     }
+}
 
-    return session;
+// ✅ AANGEPAST: destroySession is nu no-op (JWT kan niet worden ingetrokken)
+export function destroySession(sessionId: string): void {
+    // JWT sessions kunnen niet server-side worden vernietigd
+    // Cookie wordt client-side verwijderd
 }
 
 export async function createMagicToken(email: string): Promise<string> {
@@ -80,9 +97,7 @@ export async function verifyMagicToken(token: string): Promise<Session | null> {
     }
 }
 
-// ✅ AANGEPASTE FUNCTIE
 export function isAllowedEmail(email: string, allowedDomain: string): boolean {
-    // Sta meerdere DPG Media domeinen toe
     const allowedDomains = [
         'persgroep.net',
         'gelderlander.nl',
