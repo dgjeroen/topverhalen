@@ -8,14 +8,51 @@
 	let canvasBlocks = $state<any[]>(data.project.data || []);
 	let toolboxEl: HTMLElement;
 	let canvasEl: HTMLElement;
+	let canvasSortable: any;
+
+	// ✅ Maak editable block (simpele versie voor nu)
+	function createEditableBlock(type: string) {
+		const blockId = `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+		return {
+			id: blockId,
+			type,
+			content: getDefaultContent(type)
+		};
+	}
+
+	// ✅ Default content per block type
+	function getDefaultContent(type: string) {
+		switch (type) {
+			case 'heroVideo':
+				return { url: '', poster: '', title: '', source: '', textAlign: 'center' };
+			case 'heading':
+				return { text: '', level: 2 };
+			case 'subheading':
+				return { text: '', level: 4 };
+			case 'textblock':
+				return { text: [''], isLead: false };
+			case 'quote':
+				return { text: '', author: '' };
+			case 'image':
+				return { url: '', caption: '', source: '', parallax: false };
+			case 'video':
+				return { url: '', poster: '' };
+			default:
+				return {};
+		}
+	}
+
+	// ✅ Verwijder block
+	function removeBlock(blockId: string) {
+		canvasBlocks = canvasBlocks.filter((b) => b.id !== blockId);
+	}
 
 	// ✅ Initialiseer libraries na mount
 	onMount(async () => {
-		// Dynamisch importeren (werkt beter met SSR)
 		const Sortable = (await import('sortablejs')).default;
-		const Splide = (await import('@splidejs/splide')).default;
 
-		// Initialiseer drag & drop
+		// Toolbox (alleen clonen, niet sorteren)
 		if (toolboxEl) {
 			new Sortable(toolboxEl, {
 				group: {
@@ -28,8 +65,9 @@
 			});
 		}
 
+		// Canvas (accepteer drops, sorteerbaar)
 		if (canvasEl) {
-			new Sortable(canvasEl, {
+			canvasSortable = new Sortable(canvasEl, {
 				group: {
 					name: 'shared',
 					pull: true,
@@ -37,9 +75,38 @@
 				},
 				animation: 150,
 				handle: '.drag-handle',
+				ghostClass: 'sortable-ghost',
 				onAdd: (evt) => {
-					console.log('Block toegevoegd:', evt.item.dataset.type);
-					// Hier komt later de createEditableBlock() logica
+					const blockType = evt.item.dataset.type;
+
+					if (!blockType) {
+						evt.item.remove();
+						return;
+					}
+
+					// Maak nieuw editable block
+					const newBlock = createEditableBlock(blockType);
+
+					// Voeg toe aan state op juiste positie
+					const newIndex = evt.newIndex ?? canvasBlocks.length;
+					canvasBlocks = [
+						...canvasBlocks.slice(0, newIndex),
+						newBlock,
+						...canvasBlocks.slice(newIndex)
+					];
+
+					// Verwijder de geklonede toolbox knop
+					evt.item.remove();
+				},
+				onUpdate: () => {
+					// Herorder blocks in state
+					const newOrder: any[] = [];
+					Array.from(canvasEl.children).forEach((el) => {
+						const blockId = (el as HTMLElement).dataset.blockId;
+						const block = canvasBlocks.find((b) => b.id === blockId);
+						if (block) newOrder.push(block);
+					});
+					canvasBlocks = newOrder;
 				}
 			});
 		}
@@ -147,13 +214,52 @@
 						<p>Sleep hier je blokken om te beginnen...</p>
 					</div>
 				{:else}
-					{#each canvasBlocks as block}
-						<div class="canvas-block" data-type={block.type}>
+					{#each canvasBlocks as block (block.id)}
+						<div class="canvas-block" data-type={block.type} data-block-id={block.id}>
 							<div class="drag-handle">⋮⋮</div>
-							<button class="remove-btn">×</button>
+							<button class="remove-btn" onclick={() => removeBlock(block.id)}>×</button>
 							<div class="content">
-								<p>Block type: {block.type}</p>
-								<pre>{JSON.stringify(block.content, null, 2)}</pre>
+								{#if block.type === 'heading'}
+									<input
+										type="text"
+										placeholder="Tekst kop..."
+										bind:value={block.content.text}
+										class="block-input"
+									/>
+								{:else if block.type === 'textblock'}
+									<textarea
+										placeholder="Typ hier je tekst..."
+										bind:value={block.content.text[0]}
+										class="block-textarea"
+										rows="4"
+									></textarea>
+								{:else if block.type === 'image'}
+									<input
+										type="url"
+										placeholder="Afbeeldings-URL..."
+										bind:value={block.content.url}
+										class="block-input"
+									/>
+									{#if block.content.url}
+										<img src={block.content.url} alt="" class="block-preview" />
+									{/if}
+								{:else if block.type === 'quote'}
+									<textarea
+										placeholder="Citaat tekst..."
+										bind:value={block.content.text}
+										class="block-textarea"
+										rows="3"
+									></textarea>
+									<input
+										type="text"
+										placeholder="Auteur..."
+										bind:value={block.content.author}
+										class="block-input"
+									/>
+								{:else}
+									<p class="block-placeholder">Block type: <strong>{block.type}</strong></p>
+									<p class="block-hint">Editor komt hier (volgende stap)</p>
+								{/if}
 							</div>
 						</div>
 					{/each}
@@ -402,5 +508,56 @@
 		border-radius: 4px;
 		font-size: 0.75rem;
 		overflow: auto;
+	}
+
+	/* ===== BLOCK INPUTS ===== */
+	.block-input,
+	.block-textarea {
+		width: 100%;
+		padding: 0.75rem;
+		border: 1px solid #dee2e6;
+		border-radius: 4px;
+		font-family: inherit;
+		font-size: 1rem;
+		margin-bottom: 0.5rem;
+		box-sizing: border-box;
+	}
+
+	.block-textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+
+	.block-input:focus,
+	.block-textarea:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+
+	.block-preview {
+		width: 100%;
+		max-height: 300px;
+		object-fit: cover;
+		border-radius: 4px;
+		margin-top: 0.5rem;
+	}
+
+	.block-placeholder {
+		margin: 0;
+		color: #666;
+	}
+
+	.block-hint {
+		margin: 0.5rem 0 0;
+		color: #999;
+		font-size: 0.875rem;
+		font-style: italic;
+	}
+
+	/* ===== SORTABLE GHOST ===== */
+	.sortable-ghost {
+		opacity: 0.4;
+		background: #e9ecef;
 	}
 </style>
