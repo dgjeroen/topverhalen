@@ -23,6 +23,7 @@
 		"@types/hls.js": "^0.13.3",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^24.7.0",
+		"@types/sortablejs": "^1.15.8",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
@@ -38,10 +39,12 @@
 	"dependencies": {
 		"@auth/core": "^0.41.0",
 		"@auth/sveltekit": "^1.11.0",
+		"@splidejs/splide": "^4.1.4",
 		"@vercel/client": "^17.0.3",
-		"hls.js": "^1.6.10",
+		"hls.js": "^1.6.13",
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.1.6",
-		"resend": "^6.1.2"
+		"resend": "^6.1.2",
+		"sortablejs": "^1.15.6"
 	}
 }
