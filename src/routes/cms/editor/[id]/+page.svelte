@@ -102,6 +102,32 @@
 			});
 		}
 
+		// ✅ Update video players when URLs change
+		$effect(() => {
+			canvasBlocks.forEach(async (block) => {
+				if (block.type === 'heroVideo' && block.content.url) {
+					const videoEl = document.getElementById(`hero-video-${block.id}`) as HTMLVideoElement;
+
+					if (videoEl && block.content.url.endsWith('.m3u8')) {
+						// Dynamisch importeer HLS.js
+						const Hls = (await import('hls.js')).default;
+
+						if (Hls.isSupported()) {
+							const hls = new Hls();
+							hls.loadSource(block.content.url);
+							hls.attachMedia(videoEl);
+						} else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+							// Safari native support
+							videoEl.src = block.content.url;
+						}
+					} else if (videoEl) {
+						// Normale video (mp4, etc.)
+						videoEl.src = block.content.url;
+					}
+				}
+			});
+		});
+
 		// Canvas (accepteer drops, sorteerbaar)
 		if (canvasEl) {
 			canvasSortable = new Sortable(canvasEl, {
@@ -271,64 +297,131 @@
 							<div class="content">
 								{#if block.type === 'heroVideo'}
 									<div class="hero-video-editor">
-										<label>Video URL (.m3u8)</label>
-										<input
-											type="url"
-											placeholder="https://..."
-											bind:value={block.content.url}
-											class="block-input"
-										/>
+										<div class="input-row">
+											<div class="input-col">
+												<label>Video URL (.m3u8)</label>
+												<input
+													type="url"
+													placeholder="https://..."
+													bind:value={block.content.url}
+												/>
+											</div>
+											<div class="input-col">
+												<label>Poster Afbeelding</label>
+												<input
+													type="url"
+													placeholder="https://..."
+													bind:value={block.content.poster}
+												/>
+											</div>
+										</div>
 
-										<label>Poster Afbeelding</label>
-										<input
-											type="url"
-											placeholder="https://..."
-											bind:value={block.content.poster}
-											class="block-input"
-										/>
-
-										{#if block.content.poster}
-											<img src={block.content.poster} alt="Poster" class="block-preview" />
+										{#if block.content.url || block.content.poster}
+											<div class="media-preview-row">
+												{#if block.content.url}
+													<div class="preview-col">
+														<label>Video Preview</label>
+														<video
+															id="hero-video-{block.id}"
+															poster={block.content.poster || ''}
+															controls
+															class="video-preview"
+														></video>
+													</div>
+												{/if}
+												{#if block.content.poster}
+													<div class="preview-col">
+														<label>Poster Preview</label>
+														<img
+															src={block.content.poster}
+															alt="Poster"
+															class="block-preview-small"
+														/>
+													</div>
+												{/if}
+											</div>
 										{/if}
 
-										<label>Label (optioneel)</label>
-										<input
-											type="text"
-											placeholder="Bijv. SPECIAL"
-											bind:value={block.content.label}
-											class="block-input"
-										/>
+										<div class="input-row">
+											<div class="input-col-small">
+												<label>Label</label>
+												<input type="text" placeholder="SPECIAL" bind:value={block.content.label} />
+											</div>
+											<div class="input-col-large">
+												<label>Titel</label>
+												<input
+													type="text"
+													placeholder="Hoofdtitel"
+													bind:value={block.content.title}
+												/>
+											</div>
+										</div>
 
-										<label>Titel</label>
-										<input
-											type="text"
-											placeholder="Hoofdtitel..."
-											bind:value={block.content.title}
-											class="block-input"
-										/>
+										<div class="input-row">
+											<div class="input-col">
+												<label>Bron (verplicht)</label>
+												<input type="text" placeholder="ANP" bind:value={block.content.source} />
+											</div>
+											<div class="input-col">
+												<label>Tekstpositie</label>
+												<div class="hero-align-picker">
+													<label class:active={block.content.textAlign === 'top'}>
+														<input type="radio" bind:group={block.content.textAlign} value="top" />
+														<div class="hero-align-icon align-top">
+															<svg viewBox="0 0 24 24" fill="none">
+																<text
+																	x="12"
+																	y="8"
+																	text-anchor="middle"
+																	font-size="8"
+																	font-weight="600"
+																	fill="currentColor">TOP</text
+																>
+															</svg>
+														</div>
+													</label>
 
-										<label>Bron (verplicht)</label>
-										<input
-											type="text"
-											placeholder="Bijv. ANP"
-											bind:value={block.content.source}
-											class="block-input"
-										/>
+													<label class:active={block.content.textAlign === 'center'}>
+														<input
+															type="radio"
+															bind:group={block.content.textAlign}
+															value="center"
+														/>
+														<div class="hero-align-icon align-center">
+															<svg viewBox="0 0 24 24" fill="none">
+																<text
+																	x="12"
+																	y="14"
+																	text-anchor="middle"
+																	font-size="7"
+																	font-weight="600"
+																	fill="currentColor">CENTER</text
+																>
+															</svg>
+														</div>
+													</label>
 
-										<label>Tekstpositie</label>
-										<div class="text-align-picker">
-											<label class="radio-option">
-												<input type="radio" bind:group={block.content.textAlign} value="top" />
-												<span>Boven</span>
-											</label>
-											<label class="radio-option">
-												<input type="radio" bind:group={block.content.textAlign} value="center" />
-												<span>Midden</span>
-											</label>
-											<label class="radio-option">
-												<input type="radio" bind:group={block.content.textAlign} value="bottom" />
-												<span>Onder</span>
-											</label>
+													<label class:active={block.content.textAlign === 'bottom'}>
+														<input
+															type="radio"
+															bind:group={block.content.textAlign}
+															value="bottom"
+														/>
+														<div class="hero-align-icon align-bottom">
+															<svg viewBox="0 0 24 24" fill="none">
+																<text
+																	x="12"
+																	y="22"
+																	text-anchor="middle"
+																	font-size="7"
+																	font-weight="600"
+																	fill="currentColor">BOTTOM</text
+																>
+															</svg>
+														</div>
+													</label>
+												</div>
+											</div>
 										</div>
 									</div>
 								{:else if block.type === 'heading'}
@@ -709,46 +802,171 @@
 		}
 	}
 	/* ===== HERO VIDEO EDITOR ===== */
+	.hero-video-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.input-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.input-col,
+	.input-col-small,
+	.input-col-large {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
 	.hero-video-editor label {
-		display: block;
 		font-weight: 600;
-		color: #333;
-		margin: 1rem 0 0.5rem;
+		font-size: 0.75rem;
+		color: #666;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.hero-video-editor input[type='url'],
+	.hero-video-editor input[type='text'] {
+		padding: 0.5rem;
+		border: 1px solid #dee2e6;
+		border-radius: 4px;
 		font-size: 0.875rem;
 	}
 
-	.hero-video-editor label:first-child {
-		margin-top: 0;
+	/* ===== MEDIA PREVIEW ===== */
+	.media-preview-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
 	}
 
-	.text-align-picker {
+	.preview-col {
+		width: 100%;
+	}
+
+	.video-preview {
+		width: 100%;
+		max-height: 200px;
+		border-radius: 4px;
+		background: #000;
+	}
+
+	.block-preview-small {
+		width: 100%;
+		max-height: 200px;
+		object-fit: cover;
+		border-radius: 4px;
+	}
+
+	/* ===== ALIGN PICKER ===== */
+	.align-picker {
 		display: flex;
 		gap: 0.5rem;
-		margin-top: 0.5rem;
+		margin-top: 0.25rem;
 	}
 
-	.radio-option {
+	.align-picker label {
 		flex: 1;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+		cursor: pointer;
 		padding: 0.5rem;
 		border: 2px solid #dee2e6;
 		border-radius: 4px;
-		cursor: pointer;
 		transition: all 0.2s;
+		text-transform: none;
+		letter-spacing: normal;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.radio-option:has(input:checked) {
-		border-color: #667eea;
-		background: rgba(102, 126, 234, 0.05);
+	.align-picker label.active {
+		border-color: #d10a10;
+		background: rgba(209, 10, 16, 0.05);
 	}
 
-	.radio-option input[type='radio'] {
-		margin: 0;
+	.align-picker input[type='radio'] {
+		display: none;
 	}
 
-	.radio-option span {
-		font-size: 0.875rem;
+	.align-text {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: #6c757d;
+		letter-spacing: 0.5px;
+	}
+
+	.align-picker label.active .align-text {
+		color: #d10a10;
+	}
+	/* ===== HERO ALIGN PICKER ===== */
+	.hero-align-picker {
+		display: flex;
+		gap: 5px;
+		background: white;
+		padding: 4px;
+		border-radius: 4px;
+		border: 1px solid #dee2e6;
+		margin-top: 0.25rem;
+	}
+
+	.hero-align-picker input[type='radio'] {
+		display: none;
+	}
+
+	.hero-align-picker label {
+		cursor: pointer;
+		padding: 6px;
+		border-radius: 3px;
+		transition: all 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 2px solid transparent;
+		flex: 1;
+	}
+
+	.hero-align-picker label.active {
+		border-color: #d10a10;
+		background: #f8f9fa;
+	}
+
+	.hero-align-icon {
+		width: 40px;
+		height: 30px;
+		border: 1px solid #dee2e6;
+		border-radius: 3px;
+		display: flex;
+		position: relative;
+		background: white;
+	}
+
+	.hero-align-icon svg {
+		width: 100%;
+		height: 100%;
+		opacity: 0.3;
+		transition: opacity 0.2s;
+		color: #6c757d;
+	}
+
+	.hero-align-picker label.active .hero-align-icon svg {
+		opacity: 1;
+		color: #d10a10;
+	}
+
+	.hero-align-icon.align-top {
+		align-items: flex-start;
+	}
+
+	.hero-align-icon.align-center {
+		align-items: center;
+	}
+
+	.hero-align-icon.align-bottom {
+		align-items: flex-end;
 	}
 </style>
