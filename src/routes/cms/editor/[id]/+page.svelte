@@ -10,10 +10,9 @@
 	let canvasEl: HTMLElement;
 	let canvasSortable: any;
 
-	// ✅ Maak editable block (simpele versie voor nu)
+	// ✅ Maak editable block
 	function createEditableBlock(type: string) {
 		const blockId = `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
 		return {
 			id: blockId,
 			type,
@@ -25,7 +24,7 @@
 	function getDefaultContent(type: string) {
 		switch (type) {
 			case 'heroVideo':
-				return { url: '', poster: '', title: '', source: '', textAlign: 'center' };
+				return { url: '', poster: '', label: '', title: '', source: '', textAlign: 'center' };
 			case 'heading':
 				return { text: '', level: 2 };
 			case 'subheading':
@@ -47,6 +46,61 @@
 	function removeBlock(blockId: string) {
 		canvasBlocks = canvasBlocks.filter((b) => b.id !== blockId);
 	}
+
+	// ✅ Helper function to initialize HLS player
+	function initHlsPlayer(block: any) {
+		if ((block.type !== 'heroVideo' && block.type !== 'video') || !block.content.url) return;
+
+		const videoEl = document.getElementById(
+			block.type === 'heroVideo' ? `hero-video-${block.id}` : `video-${block.id}`
+		) as HTMLVideoElement;
+
+		if (!videoEl) return;
+
+		// YouTube check
+		const youtubeRegex =
+			/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+		const youtubeMatch = block.content.url.match(youtubeRegex);
+
+		if (youtubeMatch) {
+			// YouTube embed (vervang video met iframe)
+			const videoId = youtubeMatch[1];
+			const iframe = document.createElement('iframe');
+			iframe.width = '100%';
+			iframe.height = '315';
+			iframe.src = `https://www.youtube.com/embed/${videoId}`;
+			iframe.frameBorder = '0';
+			iframe.allow =
+				'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+			iframe.allowFullscreen = true;
+			videoEl.replaceWith(iframe);
+		} else if (block.content.url.endsWith('.m3u8')) {
+			// HLS video
+			// @ts-ignore
+			if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+				// @ts-ignore
+				const hls = new Hls();
+				hls.loadSource(block.content.url);
+				hls.attachMedia(videoEl);
+			} else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+				videoEl.src = block.content.url;
+			}
+		} else {
+			// Regular video
+			videoEl.src = block.content.url;
+		}
+	}
+
+	// ✅ Watch for URL changes and reinitialize players
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			canvasBlocks.forEach((block) => {
+				if ((block.type === 'heroVideo' || block.type === 'video') && block.content.url) {
+					setTimeout(() => initHlsPlayer(block), 50);
+				}
+			});
+		}
+	});
 
 	// ✅ Opslaan naar Gist
 	let saving = $state(false);
@@ -89,7 +143,7 @@
 	onMount(async () => {
 		const Sortable = (await import('sortablejs')).default;
 
-		// Toolbox (alleen clonen, niet sorteren)
+		// Toolbox setup
 		if (toolboxEl) {
 			new Sortable(toolboxEl, {
 				group: {
@@ -102,33 +156,7 @@
 			});
 		}
 
-		// ✅ Update video players when URLs change
-		// ✅ Update video players when URLs change
-		$effect(() => {
-			canvasBlocks.forEach(async (block) => {
-				if (block.type === 'heroVideo' && block.content.url) {
-					const videoEl = document.getElementById(`hero-video-${block.id}`) as HTMLVideoElement;
-
-					if (videoEl && block.content.url.endsWith('.m3u8')) {
-						// @ts-ignore - HLS.js from CDN
-						if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-							// @ts-ignore
-							const hls = new Hls();
-							hls.loadSource(block.content.url);
-							hls.attachMedia(videoEl);
-							hls.on(Hls.Events.MANIFEST_PARSED, () => {
-								videoEl.play().catch(() => {});
-							});
-						} else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-							videoEl.src = block.content.url;
-							videoEl.play().catch(() => {});
-						}
-					}
-				}
-			});
-		});
-
-		// Canvas (accepteer drops, sorteerbaar)
+		// Canvas setup
 		if (canvasEl) {
 			canvasSortable = new Sortable(canvasEl, {
 				group: {
@@ -147,10 +175,7 @@
 						return;
 					}
 
-					// Maak nieuw editable block
 					const newBlock = createEditableBlock(blockType);
-
-					// Voeg toe aan state op juiste positie
 					const newIndex = evt.newIndex ?? canvasBlocks.length;
 					canvasBlocks = [
 						...canvasBlocks.slice(0, newIndex),
@@ -158,11 +183,14 @@
 						...canvasBlocks.slice(newIndex)
 					];
 
-					// Verwijder de geklonede toolbox knop
 					evt.item.remove();
+
+					// Initialize HLS for new hero video blocks
+					if (blockType === 'heroVideo') {
+						setTimeout(() => initHlsPlayer(newBlock), 100);
+					}
 				},
 				onUpdate: () => {
-					// Herorder blocks in state
 					const newOrder: any[] = [];
 					Array.from(canvasEl.children).forEach((el) => {
 						const blockId = (el as HTMLElement).dataset.blockId;
@@ -173,6 +201,13 @@
 				}
 			});
 		}
+
+		// Initialize HLS for existing blocks
+		canvasBlocks.forEach((block) => {
+			if (block.type === 'heroVideo') {
+				setTimeout(() => initHlsPlayer(block), 100);
+			}
+		});
 	});
 </script>
 
@@ -232,15 +267,16 @@
 			<hr />
 
 			<div class="block" data-type="heading">
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h7"
-					></path>
+				<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor">H1</text>
 				</svg>
 				<span>Kop</span>
+			</div>
+			<div class="block" data-type="subheading">
+				<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor">H3</text>
+				</svg>
+				<span>Tussenkop</span>
 			</div>
 
 			<div class="block" data-type="textblock">
@@ -254,7 +290,25 @@
 				</svg>
 				<span>Tekstblok</span>
 			</div>
+			<hr />
 
+			<div class="block" data-type="video">
+				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+					></path>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+					></path>
+				</svg>
+				<span>Video</span>
+			</div>
 			<div class="block" data-type="image">
 				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -297,39 +351,7 @@
 							<div class="content">
 								{#if block.type === 'heroVideo'}
 									<div class="hero-video-editor">
-										<!-- Live Preview -->
-										<div class="hero-preview">
-											{#if block.content.url || block.content.poster}
-												<div class="hero-preview-video">
-													<video
-														id="hero-video-{block.id}"
-														poster={block.content.poster || ''}
-														muted
-														loop
-														class="video-preview-bg"
-													></video>
-													<div
-														class="hero-preview-overlay"
-														class:align-top={block.content.textAlign === 'top'}
-														class:align-center={block.content.textAlign === 'center'}
-														class:align-bottom={block.content.textAlign === 'bottom'}
-													>
-														{#if block.content.label}
-															<span class="hero-preview-label">{block.content.label}</span>
-														{/if}
-														{#if block.content.title}
-															<h1 class="hero-preview-title">{block.content.title}</h1>
-														{/if}
-													</div>
-												</div>
-											{:else}
-												<div class="hero-preview-placeholder">
-													<p>Vul video URL in om preview te zien</p>
-												</div>
-											{/if}
-										</div>
-
-										<!-- Inputs -->
+										<!-- Row 1: URLs -->
 										<div class="input-row">
 											<div class="input-col">
 												<label>Video URL (.m3u8)</label>
@@ -349,26 +371,57 @@
 											</div>
 										</div>
 
-										<div class="input-col-full">
-											<label>Label (optioneel)</label>
-											<input type="text" placeholder="SPECIAL" bind:value={block.content.label} />
-										</div>
-
-										<div class="input-col-full">
-											<label>Titel</label>
-											<input
-												type="text"
-												placeholder="Hoofdtitel"
-												bind:value={block.content.title}
-											/>
-										</div>
-
-										<div class="input-row">
-											<div class="input-col">
-												<label>Bron (verplicht)</label>
-												<input type="text" placeholder="ANP" bind:value={block.content.source} />
+										<!-- Row 2: Previews -->
+										{#if block.content.url || block.content.poster}
+											<div class="input-row">
+												{#if block.content.url}
+													<div class="preview-col">
+														<video
+															id="hero-video-{block.id}"
+															poster={block.content.poster || ''}
+															controls
+															muted
+															loop
+															class="media-preview"
+														></video>
+													</div>
+												{/if}
+												{#if block.content.poster}
+													<div class="preview-col">
+														<img src={block.content.poster} alt="Poster" class="media-preview" />
+													</div>
+												{/if}
 											</div>
-											<div class="input-col">
+										{/if}
+
+										<!-- Row 3: Label + Titel + Bron (links) | Tekstpositie (rechts) -->
+										<div class="input-row-split">
+											<div class="input-col-left">
+												<div class="input-group">
+													<label>Label (optioneel)</label>
+													<input
+														type="text"
+														placeholder="SPECIAL"
+														bind:value={block.content.label}
+													/>
+												</div>
+
+												<div class="input-group">
+													<label>Titel</label>
+													<input
+														type="text"
+														placeholder="Hoofdtitel"
+														bind:value={block.content.title}
+													/>
+												</div>
+
+												<div class="input-group">
+													<label>Bron (verplicht)</label>
+													<input type="text" placeholder="ANP" bind:value={block.content.source} />
+												</div>
+											</div>
+
+											<div class="input-col-right">
 												<label>Tekstpositie</label>
 												<div class="hero-align-picker">
 													<label class:active={block.content.textAlign === 'top'}>
@@ -435,6 +488,13 @@
 										bind:value={block.content.text}
 										class="block-input"
 									/>
+								{:else if block.type === 'subheading'}
+									<input
+										type="text"
+										placeholder="Tekst tussenkop..."
+										bind:value={block.content.text}
+										class="block-input block-input-subheading"
+									/>
 								{:else if block.type === 'textblock'}
 									<textarea
 										placeholder="Typ hier je tekst..."
@@ -442,6 +502,47 @@
 										class="block-textarea"
 										rows="4"
 									></textarea>
+								{:else if block.type === 'video'}
+									<div class="video-editor">
+										<div class="input-row">
+											<div class="input-col">
+												<label>Video URL (YouTube of .m3u8)</label>
+												<input
+													type="url"
+													placeholder="https://..."
+													bind:value={block.content.url}
+												/>
+											</div>
+											<div class="input-col">
+												<label>Poster (optioneel)</label>
+												<input
+													type="url"
+													placeholder="https://..."
+													bind:value={block.content.poster}
+												/>
+											</div>
+										</div>
+
+										{#if block.content.url || block.content.poster}
+											<div class="input-row">
+												{#if block.content.url}
+													<div class="preview-col">
+														<video
+															id="video-{block.id}"
+															poster={block.content.poster || ''}
+															controls
+															class="media-preview"
+														></video>
+													</div>
+												{/if}
+												{#if block.content.poster}
+													<div class="preview-col">
+														<img src={block.content.poster} alt="Poster" class="media-preview" />
+													</div>
+												{/if}
+											</div>
+										{/if}
+									</div>
 								{:else if block.type === 'image'}
 									<input
 										type="url"
@@ -638,7 +739,10 @@
 		color: #6c757d;
 		flex-shrink: 0;
 	}
-
+	.block-input-subheading {
+		font-size: 1.125rem;
+		font-weight: 600;
+	}
 	/* ===== CANVAS ===== */
 	.canvas {
 		flex: 1;
@@ -818,9 +922,32 @@
 		gap: 0.75rem;
 	}
 
+	.input-row-split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.input-col-left {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.input-col-right {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.input-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
 	.input-col,
-	.input-col-small,
-	.input-col-large {
+	.input-col-full {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
@@ -847,6 +974,14 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 0.75rem;
+	}
+
+	.media-preview {
+		width: 100%;
+		height: 150px;
+		object-fit: cover;
+		border-radius: 4px;
+		background: #000;
 	}
 
 	.preview-col {
@@ -932,6 +1067,8 @@
 		justify-content: center;
 		border: 2px solid transparent;
 		flex: 1;
+		text-transform: none;
+		letter-spacing: normal;
 	}
 
 	.hero-align-picker label.active {
@@ -945,7 +1082,8 @@
 		border: 1px solid #dee2e6;
 		border-radius: 3px;
 		display: flex;
-		position: relative;
+		align-items: center;
+		justify-content: center;
 		background: white;
 	}
 
@@ -960,18 +1098,6 @@
 	.hero-align-picker label.active .hero-align-icon svg {
 		opacity: 1;
 		color: #d10a10;
-	}
-
-	.hero-align-icon.align-top {
-		align-items: flex-start;
-	}
-
-	.hero-align-icon.align-center {
-		align-items: center;
-	}
-
-	.hero-align-icon.align-bottom {
-		align-items: flex-end;
 	}
 	/* ===== HERO PREVIEW ===== */
 	.hero-preview {
