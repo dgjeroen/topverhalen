@@ -48,6 +48,43 @@
 		canvasBlocks = canvasBlocks.filter((b) => b.id !== blockId);
 	}
 
+	// ✅ Opslaan naar Gist
+	let saving = $state(false);
+	let saveMessage = $state('');
+
+	async function saveProject() {
+		saving = true;
+		saveMessage = '';
+
+		try {
+			const response = await fetch(`/cms/api/projects/${data.gistId}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					version: data.project.version + 1,
+					storyName: data.project.storyName,
+					gistId: data.gistId,
+					theme: data.project.theme || {},
+					data: canvasBlocks
+				})
+			});
+
+			if (!response.ok) throw new Error('Opslaan mislukt');
+
+			data.project.version++;
+			saveMessage = '✅ Opgeslagen!';
+
+			setTimeout(() => {
+				saveMessage = '';
+			}, 3000);
+		} catch (err) {
+			saveMessage = '❌ Fout bij opslaan';
+			console.error('Save error:', err);
+		} finally {
+			saving = false;
+		}
+	}
+
 	// ✅ Initialiseer libraries na mount
 	onMount(async () => {
 		const Sortable = (await import('sortablejs')).default;
@@ -130,9 +167,22 @@
 		</div>
 		<div class="header-right">
 			<span class="gist-id">ID: {data.gistId.substring(0, 8)}...</span>
-			<button class="btn-save">💾 Opslaan</button>
-			<button class="btn-preview">👁️ Preview</button>
-			<button class="btn-publish">🚀 Publiceren</button>
+
+			{#if saveMessage}
+				<span
+					class="save-message"
+					class:success={saveMessage.includes('✅')}
+					class:error={saveMessage.includes('❌')}
+				>
+					{saveMessage}
+				</span>
+			{/if}
+
+			<button class="btn-save" onclick={saveProject} disabled={saving}>
+				{saving ? '💾 Bezig...' : '💾 Opslaan'}
+			</button>
+			<button class="btn-preview" disabled>👁️ Preview</button>
+			<button class="btn-publish" disabled>🚀 Publiceren</button>
 		</div>
 	</header>
 
@@ -363,6 +413,13 @@
 		opacity: 0.9;
 	}
 
+	.btn-save:disabled,
+	.btn-preview:disabled,
+	.btn-publish:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
 	.editor-layout {
 		display: flex;
 		flex: 1;
@@ -559,5 +616,34 @@
 	.sortable-ghost {
 		opacity: 0.4;
 		background: #e9ecef;
+	}
+
+	.save-message {
+		font-size: 0.875rem;
+		font-weight: 600;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		animation: fadeIn 0.3s;
+	}
+
+	.save-message.success {
+		background: rgba(40, 167, 69, 0.1);
+		color: #28a745;
+	}
+
+	.save-message.error {
+		background: rgba(220, 53, 69, 0.1);
+		color: #dc3545;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 </style>
