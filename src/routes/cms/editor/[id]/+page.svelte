@@ -431,8 +431,8 @@
 
 	<div class="editor-layout">
 		<!-- ===== FIXED TOOLBOX ===== -->
-		<aside class="toolbox" bind:this={toolboxEl}>
-			<div class="toolbox-content">
+		<aside class="toolbox">
+			<div class="toolbox-content" bind:this={toolboxEl}>
 				<h3>Blokken</h3>
 
 				<div class="block" data-type="heroVideo">
