@@ -1,7 +1,11 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
+
+	// ✅ Check of we op een editor pagina zijn
+	$: isEditorPage = $page.url.pathname.includes('/editor/');
 </script>
 
 <svelte:head>
@@ -9,7 +13,8 @@
 </svelte:head>
 
 <div class="cms-layout">
-	{#if data.user}
+	{#if data.user && !isEditorPage}
+		<!-- ✅ Toon alleen header op dashboard, NIET op editor -->
 		<header class="cms-header">
 			<div class="cms-header-content">
 				<h1>Topverhalen CMS</h1>
@@ -23,7 +28,7 @@
 		</header>
 	{/if}
 
-	<main class="cms-main">
+	<main class="cms-main" class:editor-mode={isEditorPage}>
 		{@render children()}
 	</main>
 </div>
@@ -91,5 +96,13 @@
 		max-width: 1400px;
 		margin: 0 auto;
 		padding: 20px;
+	}
+
+	/* ✅ Editor modus: geen padding/max-width */
+	.cms-main.editor-mode {
+		max-width: none;
+		padding: 0;
+		margin: 0;
+		background: #f4f4f9;
 	}
 </style>
