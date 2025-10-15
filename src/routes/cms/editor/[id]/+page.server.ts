@@ -1,15 +1,21 @@
 // src/routes/cms/editor/[id]/+page.server.ts
 
+// =================================================================
+// DE ONTBREKENDE IMPORTS STAAN HIER
+// =================================================================
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { getGist } from '$lib/server/gist';
-import { verifySession } from '$lib/server/auth';
-
 import fs from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
+// =================================================================
 
-// --- Jouw bestaande load functie (ongewijzigd) ---
+import { getGist } from '$lib/server/gist';
+import { verifySession } from '$lib/server/auth';
+import buildInfo from '$lib/server/build-info.json';
+
+
+// Jouw werkende `load` functie
 export const load: PageServerLoad = async ({ params, cookies }) => {
     const sessionToken = cookies.get('session');
     const session = await verifySession(sessionToken);
@@ -24,7 +30,29 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
     }
 };
 
-// --- Definitieve, robuuste publicatie-actie ---
+// Deze functie bouwt de HTML op zonder bestanden te lezen.
+function generateStaticHtml(contentJson: string) {
+    const storyData = JSON.parse(contentJson);
+    const cssLinks = buildInfo.css.map((file) => `<link rel="stylesheet" href="/_app/${file}">`).join('\n\t');
+    const entryScript = `<script type="module" src="/_app/${buildInfo.entry}"></script>`;
+
+    return `<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${storyData.storyName || 'Topverhaal'}</title>
+    ${cssLinks}
+    ${entryScript}
+    <script id="story-data" type="application/json">${contentJson}</script>
+</head>
+<body>
+    <div id="svelte-app"></div>
+</body>
+</html>`;
+}
+
+// De definitieve, correcte "Publiceren" actie
 export const actions: Actions = {
     publish: async ({ request }) => {
         const formData = await request.formData();
@@ -35,26 +63,17 @@ export const actions: Actions = {
             return fail(400, { error: 'Geen content ontvangen.' });
         }
 
-        // Pad naar het kant-en-klare HTML-bestand dat SvelteKit voor ons heeft gemaakt
-        const prerenderedHtmlPath = path.resolve('.svelte-kit/output/prerendered/pages/publish-template.html');
         const tempDir = path.join('/tmp', `publish-${Date.now()}`);
 
         try {
-            // 1. Lees de door SvelteKit gegenereerde HTML
-            let htmlContent = await fs.readFile(prerenderedHtmlPath, 'utf-8');
+            const htmlContent = generateStaticHtml(contentJson);
 
-            // 2. Injecteer de gebruikerscontent met een simpele string-vervanging
-            const injectionScript = `<script id="story-data" type="application/json">${contentJson}</script>`;
-            htmlContent = htmlContent.replace('</body>', `${injectionScript}</body>`);
-
-            await fs.mkdir(tempDir, { recursive: true });
+            await fs.mkdir(path.join(tempDir, '_app'), { recursive: true });
             await fs.writeFile(path.join(tempDir, 'index.html'), htmlContent);
 
-            // 3. Kopieer de benodigde assets
-            const sourceAssetDir = path.resolve('.svelte-kit/output/client');
-            await fs.cp(sourceAssetDir, tempDir, { recursive: true });
+            const sourceAssetDir = path.resolve('.svelte-kit/output/client/_app');
+            await fs.cp(sourceAssetDir, path.join(tempDir, '_app'), { recursive: true });
 
-            // 4. Maak het ZIP-bestand
             const zipStream = archiver('zip', { zlib: { level: 9 } });
             zipStream.directory(tempDir, false);
             await zipStream.finalize();
@@ -69,13 +88,8 @@ export const actions: Actions = {
                 }
             });
         } catch (err: any) {
-            // Verbeterde error logging voor Vercel
-            if (err.code === 'ENOENT') {
-                console.error("Publicatie Mislukt: Kon het prerendered bestand niet vinden.", prerenderedHtmlPath);
-                return fail(500, { error: 'Publicatie-fout: Zorg dat `export const prerender = true;` in `src/routes/+page.ts` staat.' });
-            }
-            console.error('Onverwachte publicatie-fout:', err);
-            return fail(500, { error: 'Publiceren is mislukt.' });
+            console.error('FATALE PUBLICATIE-FOUT:', err);
+            return fail(500, { error: 'Publiceren is mislukt door een serverfout.' });
         } finally {
             await fs.rm(tempDir, { recursive: true, force: true }).catch(console.error);
         }
