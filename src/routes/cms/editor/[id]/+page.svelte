@@ -291,6 +291,7 @@
 		}
 	});
 
+	let publishing = $state(false);
 	let saving = $state(false);
 	let saveMessage = $state('');
 
@@ -455,7 +456,30 @@
 			>
 				{previewing ? '🔄 Preview...' : '👁️ Preview'}
 			</button>
-			<button class="btn-header btn-publish" disabled>🚀 Publiceren</button>
+			<form
+				method="POST"
+				action="?/publish"
+				onsubmit={() => (publishing = true)}
+				style="display: contents;"
+			>
+				<input
+					type="hidden"
+					name="contentData"
+					value={JSON.stringify({
+						storyName: data.project.storyName,
+						theme: data.project.theme,
+						data: canvasBlocks
+					})}
+				/>
+				<input type="hidden" name="storyName" value={data.project.storyName} />
+				<button
+					type="submit"
+					class="btn-header btn-publish"
+					disabled={publishing || saving || canvasBlocks.length === 0}
+				>
+					{publishing ? '📦 Inpakken...' : '🚀 Publiceren'}
+				</button>
+			</form>
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
 		</div>
 	</header>

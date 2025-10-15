@@ -1,22 +1,30 @@
 <script lang="ts">
-	import BlockRenderer from '$lib/components/BlockRenderer.svelte';
-	import type { PageData } from './$types';
-	import type { ContentBlock } from '$lib/types';
+	import { onMount } from 'svelte';
+	import BlockRenderer from '$lib/components/BlockRenderer.svelte'; // Aangenomen dat je zoiets hebt
 
-	let { data } = $props<{ data: PageData }>();
+	let storyData = $state<{ storyName: string; data: any[] } | null>(null);
 
-	const contentBlocks = $derived<ContentBlock[]>(data.content.data);
-
-	const heroBlock = $derived(contentBlocks.find((block) => block.type === 'heroVideo'));
-	const otherBlocks = $derived(contentBlocks.filter((block) => block.type !== 'heroVideo'));
+	onMount(() => {
+		// Lees de data uit het <script> tag dat we in de server action hebben geïnjecteerd
+		const dataElement = document.getElementById('story-data');
+		if (dataElement) {
+			storyData = JSON.parse(dataElement.textContent || '{}');
+		}
+	});
 </script>
 
-{#if heroBlock}
-	<BlockRenderer block={heroBlock} />
-{/if}
+<svelte:head>
+	{#if storyData?.storyName}
+		<title>{storyData.storyName}</title>
+	{/if}
+</svelte:head>
 
-<main id="content-start">
-	{#each otherBlocks as block}
-		<BlockRenderer {block} />
-	{/each}
+<main>
+	{#if storyData}
+		{#each storyData.data as block (block.id)}
+			<BlockRenderer {block} />
+		{/each}
+	{:else}
+		<p>Verhaal wordt geladen...</p>
+	{/if}
 </main>
