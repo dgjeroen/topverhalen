@@ -1,9 +1,16 @@
 // src/routes/+page.server.ts
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
+import { building } from '$app/environment'; // <-- CORRECTE IMPORT
 
 export const load: PageServerLoad = async ({ url }) => {
-    // ✅ Gebruik ?gist= parameter, fallback naar SECRET_INDEX_GIST_ID
+    // TIJDENS DE BUILD: Sla de netwerk-call over en gebruik direct de lokale fallback.
+    if (building) { // <-- CORRECTE VARIABELE
+        const content = await import('$lib/data/content.json');
+        return { content: content.default };
+    }
+
+    // TIJDENS NORMAAL GEBRUIK (door een bezoeker): Voer je bestaande logica uit.
     const gistId = url.searchParams.get('gist') || env.SECRET_INDEX_GIST_ID;
 
     if (!gistId) {
@@ -11,15 +18,12 @@ export const load: PageServerLoad = async ({ url }) => {
     }
 
     try {
-        const response = await fetch(
-            `https://api.github.com/gists/${gistId}`,
-            {
-                headers: {
-                    'Authorization': `token ${env.SECRET_GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: {
+                Authorization: `token ${env.SECRET_GITHUB_TOKEN}`,
+                Accept: 'application/vnd.github.v3+json'
             }
-        );
+        });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -30,7 +34,7 @@ export const load: PageServerLoad = async ({ url }) => {
         return { content };
     } catch (error) {
         console.error('Fout bij laden Gist:', error);
-        // Fallback naar statische content
+        // Je bestaande fallback voor als de Gist niet gevonden wordt.
         const content = await import('$lib/data/content.json');
         return { content: content.default };
     }
