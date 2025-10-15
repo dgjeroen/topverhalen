@@ -6,6 +6,11 @@
 
 	// ✅ Svelte 5 runes syntax
 	let isEditorPage = $derived($page.url.pathname.includes('/editor/'));
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.body.style.overflow = isEditorPage ? 'hidden' : 'auto';
+		}
+	});
 </script>
 
 <svelte:head>

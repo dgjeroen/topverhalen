@@ -326,6 +326,39 @@
 		}
 	}
 
+	let previewing = $state(false);
+
+	async function handlePreview() {
+		if (!data.gistId) {
+			alert('⚠️ Sla eerst je project op voordat je een preview maakt!');
+			return;
+		}
+
+		const confirmed = confirm('Wil je een preview-versie bouwen?');
+		if (!confirmed) return;
+
+		previewing = true;
+
+		try {
+			await saveProject();
+
+			const response = await fetch('/cms/api/preview', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ gistId: data.gistId })
+			});
+
+			if (!response.ok) throw new Error('Preview trigger mislukt');
+
+			window.open('https://vercel.com/dgjeroen/topverhalen/deployments', '_blank');
+			alert('🔍 Preview wordt gebouwd! Check het nieuwe tabblad.');
+		} catch (err) {
+			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
+		} finally {
+			previewing = false;
+		}
+	}
+
 	onMount(async () => {
 		const Sortable = (await import('sortablejs')).default;
 
@@ -423,7 +456,13 @@
 			<button class="btn-header btn-save" onclick={saveProject} disabled={saving}>
 				{saving ? '💾 Bezig...' : '💾 Opslaan'}
 			</button>
-			<button class="btn-header btn-preview" disabled>👁️ Preview</button>
+			<button
+				class="btn-header btn-preview"
+				onclick={handlePreview}
+				disabled={previewing || saving}
+			>
+				{previewing ? '🔄 Preview...' : '👁️ Preview'}
+			</button>
 			<button class="btn-header btn-publish" disabled>🚀 Publiceren</button>
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
 		</div>
