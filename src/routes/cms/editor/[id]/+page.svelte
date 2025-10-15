@@ -612,7 +612,7 @@
 									<div class="hero-video-editor">
 										<div class="input-row">
 											<div class="input-col">
-												<label>Video URL (.m3u8)</label>
+												<span class="input-label">Video URL (.m3u8)</span>
 												<input
 													type="url"
 													placeholder="https://..."
@@ -620,7 +620,7 @@
 												/>
 											</div>
 											<div class="input-col">
-												<label>Poster Afbeelding</label>
+												<span class="input-label">Poster Afbeelding</span>
 												<input
 													type="url"
 													placeholder="https://..."
@@ -640,7 +640,9 @@
 															muted
 															loop
 															class="media-preview"
-														></video>
+														>
+															<track kind="captions" />
+														</video>
 													</div>
 												{/if}
 												{#if block.content.poster}
@@ -654,7 +656,7 @@
 										<div class="input-row-split">
 											<div class="input-col-left">
 												<div class="input-group">
-													<label>Label (optioneel)</label>
+													<span class="input-label">Label (optioneel)</span>
 													<input
 														type="text"
 														placeholder="SPECIAL"
@@ -662,7 +664,7 @@
 													/>
 												</div>
 												<div class="input-group">
-													<label>Titel</label>
+													<span class="input-label">Titel</span>
 													<input
 														type="text"
 														placeholder="Hoofdtitel"
@@ -670,13 +672,13 @@
 													/>
 												</div>
 												<div class="input-group">
-													<label>Bron (verplicht)</label>
+													<span class="input-label">Bron (verplicht)</span>
 													<input type="text" placeholder="ANP" bind:value={block.content.source} />
 												</div>
 											</div>
 
 											<div class="input-col-right">
-												<label>Tekstpositie</label>
+												<span class="input-label">Tekstpositie</span>
 												<div class="hero-align-picker">
 													<label class:active={block.content.textAlign === 'top'}>
 														<input type="radio" bind:group={block.content.textAlign} value="top" />
@@ -803,7 +805,7 @@
 									<div class="video-editor">
 										<div class="input-row">
 											<div class="input-col">
-												<label>Video URL (YouTube of .m3u8)</label>
+												<span class="input-label">Video URL (YouTube of .m3u8)</span>
 												<input
 													type="url"
 													placeholder="https://..."
@@ -811,7 +813,7 @@
 												/>
 											</div>
 											<div class="input-col">
-												<label>Poster (optioneel)</label>
+												<span class="input-label">Poster (optioneel)</span>
 												<input
 													type="url"
 													placeholder="https://..."
@@ -916,7 +918,7 @@
 									<div class="gallery-editor">
 										<div class="gallery-controls">
 											<div class="layout-picker">
-												<label>Layout:</label>
+												<span class="input-label">Layout:</span>
 												<div class="layout-options">
 													<label class:active={block.content.columns === 2}>
 														<input type="radio" bind:group={block.content.columns} value={2} />
@@ -1133,7 +1135,7 @@
 											</button>
 
 											<div class="valign-picker">
-												<label>Uitlijning:</label>
+												<span class="input-label">Uitlijning:</span>
 												<div class="valign-options">
 													<label class:active={block.content.verticalAlign === 'top'}>
 														<input
@@ -1240,7 +1242,9 @@
 																	muted
 																	loop
 																	class="media-preview-small"
-																></video>
+																>
+																	<track kind="captions" />
+																</video>
 															{/if}
 														</div>
 													{/if}
@@ -2347,5 +2351,21 @@
 
 	.add-colofon-btn:hover {
 		background: #b00909;
+	}
+	/* ✅ Fix voor SortableJS ghost class */
+	:global(.sortable-ghost) {
+		opacity: 0.4;
+		background: #f3f4f6;
+	}
+
+	/* ✅ Styling voor input labels */
+	.input-label {
+		font-weight: 600;
+		font-size: 0.6875rem;
+		color: #6b7280;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		display: block;
+		margin-bottom: 0.25rem;
 	}
 </style>

@@ -4,8 +4,8 @@
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
-	// ✅ Check of we op een editor pagina zijn
-	$: isEditorPage = $page.url.pathname.includes('/editor/');
+	// ✅ Svelte 5 runes syntax
+	let isEditorPage = $derived($page.url.pathname.includes('/editor/'));
 </script>
 
 <svelte:head>
