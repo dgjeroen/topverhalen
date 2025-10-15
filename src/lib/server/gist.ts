@@ -174,13 +174,17 @@ export async function triggerDeployHook(gistId: string): Promise<void> {
 }
 
 // ✅ Trigger preview webhook
+// src/lib/server/gist.ts - triggerPreviewHook()
 export async function triggerPreviewHook(gistId: string): Promise<void> {
     const webhookUrl = env.VERCEL_PREVIEW_WEBHOOK;
+
     if (!webhookUrl) {
-        console.warn('⚠️ Preview webhook niet ingesteld');
-        return;
+        throw new Error('VERCEL_PREVIEW_WEBHOOK niet ingesteld');
     }
 
+    console.log('📤 Triggering preview met Gist ID:', gistId);
+
+    // ✅ Stuur Gist ID mee in webhook body
     const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,6 +195,10 @@ export async function triggerPreviewHook(gistId: string): Promise<void> {
     });
 
     if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Webhook error:', errorText);
         throw new Error(`Preview trigger mislukt: ${response.status}`);
     }
+
+    console.log('✅ Preview webhook getriggerd voor Gist:', gistId);
 }
