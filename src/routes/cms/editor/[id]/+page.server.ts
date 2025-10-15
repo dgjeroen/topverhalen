@@ -36,7 +36,7 @@ export const actions: Actions = {
         }
 
         // Pad naar het kant-en-klare HTML-bestand dat SvelteKit voor ons heeft gemaakt
-        const prerenderedHtmlPath = path.resolve('.svelte-kit/output/prerendered/pages/index.html');
+        const prerenderedHtmlPath = path.resolve('.svelte-kit/output/prerendered/pages/publish-template.html');
         const tempDir = path.join('/tmp', `publish-${Date.now()}`);
 
         try {
