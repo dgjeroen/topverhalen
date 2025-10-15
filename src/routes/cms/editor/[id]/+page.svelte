@@ -328,30 +328,22 @@
 
 	let previewing = $state(false);
 
+	// In editor +page.svelte - vervang handlePreview()
 	async function handlePreview() {
 		if (!data.gistId) {
-			alert('⚠️ Sla eerst je project op voordat je een preview maakt!');
+			alert('⚠️ Sla eerst op!');
 			return;
 		}
-
-		const confirmed = confirm('Wil je een preview-versie bouwen?');
-		if (!confirmed) return;
 
 		previewing = true;
 
 		try {
 			await saveProject();
 
-			const response = await fetch('/cms/api/preview', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ gistId: data.gistId })
-			});
+			// ✅ Open preview URL met Gist ID
+			window.open(`https://topverhaal.nl/?gist=${data.gistId}`, '_blank');
 
-			if (!response.ok) throw new Error('Preview trigger mislukt');
-
-			window.open('https://vercel.com/dgjeroen/topverhalen/deployments', '_blank');
-			alert('🔍 Preview wordt gebouwd! Check het nieuwe tabblad.');
+			alert('🔍 Preview geopend!');
 		} catch (err) {
 			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
 		} finally {
