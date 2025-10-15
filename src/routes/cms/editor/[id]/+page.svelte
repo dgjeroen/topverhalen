@@ -831,7 +831,9 @@
 															poster={block.content.poster || ''}
 															controls
 															class="media-preview"
-														></video>
+														>
+															<track kind="captions" />
+														</video>
 													</div>
 												{/if}
 												{#if block.content.poster}
@@ -1656,11 +1658,6 @@
 		margin-left: 30px;
 	}
 
-	.sortable-ghost {
-		opacity: 0.4;
-		background: #f3f4f6;
-	}
-
 	/* ===== BLOCK INPUTS ===== */
 	.block-input,
 	.block-textarea {
@@ -1768,8 +1765,7 @@
 		background: #000;
 	}
 
-	.hero-video-editor label,
-	.video-editor label {
+	.hero-video-editor label {
 		font-weight: 600;
 		font-size: 0.6875rem;
 		color: #6b7280;
@@ -2018,12 +2014,6 @@
 		gap: 10px;
 	}
 
-	.layout-picker > label {
-		font-weight: 600;
-		font-size: 0.8125rem;
-		color: #6b7280;
-	}
-
 	.layout-options {
 		display: flex;
 		gap: 6px;
@@ -2133,12 +2123,6 @@
 		display: flex;
 		align-items: center;
 		gap: 10px;
-	}
-
-	.valign-picker > label {
-		font-weight: 600;
-		font-size: 0.8125rem;
-		color: #6b7280;
 	}
 
 	.valign-options {
@@ -2352,13 +2336,11 @@
 	.add-colofon-btn:hover {
 		background: #b00909;
 	}
-	/* ✅ Fix voor SortableJS ghost class */
 	:global(.sortable-ghost) {
 		opacity: 0.4;
 		background: #f3f4f6;
 	}
 
-	/* ✅ Styling voor input labels */
 	.input-label {
 		font-weight: 600;
 		font-size: 0.6875rem;

@@ -13,10 +13,9 @@
 	let projects: Project[] = $state([]);
 	let loading = $state(true);
 	let error = $state('');
-	let showNewProjectModal = $state(false);
 	let newProjectName = $state('');
+	let dialogEl: HTMLDialogElement;
 
-	// ✅ Haal projecten op
 	async function loadProjects() {
 		try {
 			const response = await fetch('/cms/api/projects');
@@ -31,7 +30,6 @@
 		}
 	}
 
-	// ✅ Maak nieuw project
 	async function createProject() {
 		if (!newProjectName.trim()) return;
 
@@ -51,9 +49,17 @@
 		}
 	}
 
-	// ✅ Open bestaand project
 	function openProject(id: string) {
 		goto(`/cms/editor/${id}`);
+	}
+
+	function showModal() {
+		dialogEl?.showModal();
+	}
+
+	function closeModal() {
+		dialogEl?.close();
+		newProjectName = '';
 	}
 
 	onMount(loadProjects);
@@ -65,17 +71,19 @@
 
 <div class="dashboard">
 	<div class="welcome">
-		<h1>Welkom, {data.user.name}! 👋</h1>
-		<p>Je bent succesvol ingelogd in het Topverhalen CMS.</p>
-		<p class="email">{data.user.email}</p>
+		{#if data.user}
+			<h1>Welkom, {data.user.name}! 👋</h1>
+			<p>Je bent succesvol ingelogd in het Topverhalen CMS.</p>
+			<p class="email">{data.user.email}</p>
+		{:else}
+			<p>Laden...</p>
+		{/if}
 	</div>
 
 	<div class="projects-section">
 		<div class="section-header">
 			<h2>📝 Mijn Projecten</h2>
-			<button class="btn-primary" onclick={() => (showNewProjectModal = true)}>
-				+ Nieuw Project
-			</button>
+			<button class="btn-primary" onclick={showModal}> + Nieuw Project </button>
 		</div>
 
 		{#if loading}
@@ -85,9 +93,7 @@
 		{:else if projects.length === 0}
 			<div class="empty-state">
 				<p>Nog geen projecten.</p>
-				<button class="btn-primary" onclick={() => (showNewProjectModal = true)}>
-					Maak je eerste project
-				</button>
+				<button class="btn-primary" onclick={showModal}> Maak je eerste project </button>
 			</div>
 		{:else}
 			<div class="projects-grid">
@@ -117,25 +123,20 @@
 	</div>
 </div>
 
-{#if showNewProjectModal}
-	<div class="modal-overlay" onclick={() => (showNewProjectModal = false)}>
-		<div class="modal" onclick={(e) => e.stopPropagation()}>
-			<h2>Nieuw Project</h2>
-			<input
-				type="text"
-				placeholder="Projectnaam..."
-				bind:value={newProjectName}
-				onkeydown={(e) => e.key === 'Enter' && createProject()}
-			/>
-			<div class="modal-buttons">
-				<button class="btn-secondary" onclick={() => (showNewProjectModal = false)}>
-					Annuleren
-				</button>
-				<button class="btn-primary" onclick={createProject}> Aanmaken </button>
-			</div>
-		</div>
+<!-- ✅ Native <dialog> element -->
+<dialog bind:this={dialogEl} class="modal">
+	<h2>Nieuw Project</h2>
+	<input
+		type="text"
+		placeholder="Projectnaam..."
+		bind:value={newProjectName}
+		onkeydown={(e) => e.key === 'Enter' && createProject()}
+	/>
+	<div class="modal-buttons">
+		<button class="btn-secondary" onclick={closeModal}> Annuleren </button>
+		<button class="btn-primary" onclick={createProject}> Aanmaken </button>
 	</div>
-{/if}
+</dialog>
 
 <style>
 	.dashboard {
@@ -269,25 +270,18 @@
 		font-size: 14px;
 	}
 
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.5);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-	}
-
-	.modal {
-		background: white;
-		padding: 2rem;
+	/* ✅ Native dialog styling */
+	dialog.modal {
+		border: none;
 		border-radius: 8px;
+		padding: 2rem;
 		width: 90%;
 		max-width: 400px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	dialog.modal::backdrop {
+		background: rgba(0, 0, 0, 0.5);
 	}
 
 	.modal h2 {

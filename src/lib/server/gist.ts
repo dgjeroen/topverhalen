@@ -1,4 +1,10 @@
 // src/lib/server/gist.ts
+
+// ✅ SSL bypass voor development
+if (process.env.NODE_ENV === 'development') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 import { env } from '$env/dynamic/private';
 
 const GITHUB_TOKEN = env.SECRET_GITHUB_TOKEN!;
@@ -38,7 +44,9 @@ export async function getProjectsIndex(): Promise<ProjectIndex> {
     }
 
     const gist = await response.json();
-    return JSON.parse(Object.values(gist.files)[0].content);
+    // ✅ FIX REGEL 47: Type assertion
+    const fileContent = Object.values(gist.files)[0] as { content: string };
+    return JSON.parse(fileContent.content);
 }
 
 // ✅ Update project index
@@ -84,7 +92,9 @@ export async function getGist(id: string): Promise<ProjectContent> {
     }
 
     const gist = await response.json();
-    return JSON.parse(Object.values(gist.files)[0].content);
+    // ✅ FIX REGEL 93: Type assertion
+    const fileContent = Object.values(gist.files)[0] as { content: string };
+    return JSON.parse(fileContent.content);
 }
 
 // ✅ Maak nieuwe Gist
