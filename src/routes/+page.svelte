@@ -1,23 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
-	// Zorg ervoor dat je een component hebt dat een 'block' object kan renderen
-	// De naam 'BlockRenderer' is een aanname.
-	import BlockRenderer from '$lib/components/BlockRenderer.svelte';
+	import BlockRenderer from '$lib/components/BlockRenderer.svelte'; // Pas dit pad eventueel aan
 
 	let { data } = $props<{ data: PageData }>();
 
-	// Start met de data die van de server komt (voor live preview & de build-placeholder)
+	// Initialiseer de state direct met de server data.
+	// `data.content` bevat nu altijd `{ storyName, data: [...] }`
 	let storyData = $state(data.content);
 
 	onMount(() => {
-		// Voor de GEPUBLICEERDE pagina: controleer of er een geïnjecteerd script is.
-		// Zo ja, overschrijf de placeholder-data met de echte content.
+		// Voor de GEPUBLICEERDE pagina: overschrijf de state met de geïnjecteerde data.
 		const dataElement = document.getElementById('story-data');
 		if (dataElement) {
 			try {
 				const injectedData = JSON.parse(dataElement.textContent || '{}');
-				// Alleen updaten als de geïnjecteerde data ook echt content heeft.
 				if (injectedData && injectedData.data) {
 					storyData = injectedData;
 				}
@@ -40,6 +37,6 @@
 			<BlockRenderer {block} />
 		{/each}
 	{:else}
-		<p>Verhaal wordt geladen of is leeg...</p>
+		<p>{storyData?.storyName || 'Verhaal wordt geladen...'}</p>
 	{/if}
 </main>

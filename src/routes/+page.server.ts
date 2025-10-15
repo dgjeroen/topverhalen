@@ -1,20 +1,32 @@
 // src/routes/+page.server.ts
 import type { PageServerLoad } from './$types';
 import { env } from '$env/dynamic/private';
-import { building } from '$app/environment'; // <-- CORRECTE IMPORT
+import { building } from '$app/environment';
 
 export const load: PageServerLoad = async ({ url }) => {
-    // TIJDENS DE BUILD: Sla de netwerk-call over en gebruik direct de lokale fallback.
-    if (building) { // <-- CORRECTE VARIABELE
-        const content = await import('$lib/data/content.json');
-        return { content: content.default };
+    // TIJDENS DE BUILD: Sla de netwerk-call over.
+    if (building) {
+        // Retourneer de correcte, lege structuur.
+        return {
+            content: {
+                storyName: 'Build Placeholder',
+                theme: {},
+                data: []
+            }
+        };
     }
 
-    // TIJDENS NORMAAL GEBRUIK (door een bezoeker): Voer je bestaande logica uit.
     const gistId = url.searchParams.get('gist') || env.SECRET_INDEX_GIST_ID;
 
     if (!gistId) {
-        throw new Error('Geen Gist ID beschikbaar');
+        // Fallback naar een lege, maar correct gestructureerde staat.
+        return {
+            content: {
+                storyName: 'Geen project geselecteerd',
+                theme: {},
+                data: []
+            }
+        };
     }
 
     try {
@@ -31,11 +43,17 @@ export const load: PageServerLoad = async ({ url }) => {
         const fileContent = Object.values(gist.files)[0] as { content: string };
         const content = JSON.parse(fileContent.content);
 
+        // Retourneer de data in de `{ content: ... }` wrapper.
         return { content };
     } catch (error) {
         console.error('Fout bij laden Gist:', error);
-        // Je bestaande fallback voor als de Gist niet gevonden wordt.
-        const content = await import('$lib/data/content.json');
-        return { content: content.default };
+        // Zorg dat de fallback ook de juiste structuur heeft.
+        return {
+            content: {
+                storyName: 'Project niet gevonden (fallback)',
+                theme: {},
+                data: []
+            }
+        };
     }
 };
