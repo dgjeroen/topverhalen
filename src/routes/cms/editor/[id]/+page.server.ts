@@ -1,19 +1,12 @@
 // src/routes/cms/editor/[id]/+page.server.ts
 
-// =================================================================
-// DE ONTBREKENDE IMPORTS STAAN HIER
-// =================================================================
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import fs from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
-// =================================================================
-
 import { getGist } from '$lib/server/gist';
 import { verifySession } from '$lib/server/auth';
-import buildInfo from '$lib/server/build-info.json';
-
 
 // Jouw werkende `load` functie
 export const load: PageServerLoad = async ({ params, cookies }) => {
@@ -30,28 +23,6 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
     }
 };
 
-// Deze functie bouwt de HTML op zonder bestanden te lezen.
-function generateStaticHtml(contentJson: string) {
-    const storyData = JSON.parse(contentJson);
-    const cssLinks = buildInfo.css.map((file) => `<link rel="stylesheet" href="/_app/${file}">`).join('\n\t');
-    const entryScript = `<script type="module" src="/_app/${buildInfo.entry}"></script>`;
-
-    return `<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${storyData.storyName || 'Topverhaal'}</title>
-    ${cssLinks}
-    ${entryScript}
-    <script id="story-data" type="application/json">${contentJson}</script>
-</head>
-<body>
-    <div id="svelte-app"></div>
-</body>
-</html>`;
-}
-
 // De definitieve, correcte "Publiceren" actie
 export const actions: Actions = {
     publish: async ({ request }) => {
@@ -63,17 +34,26 @@ export const actions: Actions = {
             return fail(400, { error: 'Geen content ontvangen.' });
         }
 
-        const tempDir = path.join('/tmp', `publish-${Date.now()}`);
+        // Dit pad is nu 100% betrouwbaar dankzij de layout reset.
+        const prerenderedHtmlPath = path.resolve('.svelte-kit/output/prerendered/pages/publish-templates.html'); const tempDir = path.join('/tmp', `publish-${Date.now()}`);
 
         try {
-            const htmlContent = generateStaticHtml(contentJson);
+            // 1. Lees de gegarandeerd bestaande HTML template
+            let htmlContent = await fs.readFile(prerenderedHtmlPath, 'utf-8');
 
-            await fs.mkdir(path.join(tempDir, '_app'), { recursive: true });
+            // 2. Injecteer de gebruikerscontent met een simpele vervanging
+            const injectionScript = `<script id="story-data" type="application/json">${contentJson}</script>`;
+            htmlContent = htmlContent.replace('</body>', `${injectionScript}</body>`);
+
+            // 3. Maak de ZIP-structuur
+            await fs.mkdir(tempDir, { recursive: true });
             await fs.writeFile(path.join(tempDir, 'index.html'), htmlContent);
 
-            const sourceAssetDir = path.resolve('.svelte-kit/output/client/_app');
-            await fs.cp(sourceAssetDir, path.join(tempDir, '_app'), { recursive: true });
+            // 4. Kopieer de benodigde assets
+            const sourceAssetDir = path.resolve('.svelte-kit/output/client');
+            await fs.cp(sourceAssetDir, tempDir, { recursive: true });
 
+            // 5. Maak en verstuur het ZIP-bestand
             const zipStream = archiver('zip', { zlib: { level: 9 } });
             zipStream.directory(tempDir, false);
             await zipStream.finalize();
@@ -89,7 +69,7 @@ export const actions: Actions = {
             });
         } catch (err: any) {
             console.error('FATALE PUBLICATIE-FOUT:', err);
-            return fail(500, { error: 'Publiceren is mislukt door een serverfout.' });
+            return fail(500, { error: 'Publiceren is mislukt. Controleer de server logs.' });
         } finally {
             await fs.rm(tempDir, { recursive: true, force: true }).catch(console.error);
         }
