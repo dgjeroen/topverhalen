@@ -341,7 +341,7 @@
 			await saveProject();
 
 			// ✅ Open preview URL met Gist ID
-			window.open(`https://topverhaal.nl/?gist=${data.gistId}`, '_blank');
+			window.open(`https://cms.topverhaal.nl/?gist=${data.gistId}`, '_blank');
 
 			alert('🔍 Preview geopend!');
 		} catch (err) {
