@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"dev:local": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 vite dev",
-		"build": "vite build",
+		"build": "vite build && node scripts/generate-build-info.js",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
