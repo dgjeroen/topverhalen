@@ -4,7 +4,7 @@ import { triggerPreviewHook } from '$lib/server/gist';
 
 export async function POST({ request, cookies }: RequestEvent) {
     // Check authenticatie
-    const session = cookies.get('cms_session');
+    const session = cookies.get('session');
     if (!session) {
         return json({ error: 'Unauthorized' }, { status: 401 });
     }
