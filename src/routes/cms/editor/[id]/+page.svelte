@@ -330,11 +330,11 @@
 
 	async function handlePreview() {
 		if (!data.gistId) {
-			alert('⚠️ Sla eerst je project op voordat je een preview maakt!');
+			alert('⚠️ Sla eerst je project op voordat je een voorbeeld maakt!');
 			return;
 		}
 
-		const confirmed = confirm('Wil je een preview-versie bouwen?');
+		const confirmed = confirm('Wil je een voorbeeld-versie bouwen?');
 		if (!confirmed) return;
 
 		previewing = true;
@@ -461,7 +461,7 @@
 				onclick={handlePreview}
 				disabled={previewing || saving}
 			>
-				{previewing ? '🔄 Preview...' : '👁️ Preview'}
+				{previewing ? '🔄 Preview...' : '👁️ Voorbeeld'}
 			</button>
 			<button class="btn-header btn-publish" disabled>🚀 Publiceren</button>
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
