@@ -1,0 +1,90 @@
+{
+  "version": 71,
+  "storyName": "Zaterdag 3",
+  "gistId": "f71e354799067feca6ec5246ce7f063c",
+  "theme": {},
+  "data": [
+    {
+      "id": "block-1760535077997-20ce4n3g5",
+      "type": "heading",
+      "content": {
+        "text": "Dit is een kopje voor zaterdagkrantje",
+        "level": 2
+      }
+    },
+    {
+      "id": "block-1760196581462-u2y8dbpj2",
+      "type": "heroVideo",
+      "content": {
+        "url": "https://sf-video.dpgmedia.net/6fa0de5e-daf5-4e44-972c-12badfe52447-version-1752067428522/6fa0de5e-daf5-4e44-972c-12badfe52447.m3u8",
+        "poster": "https://images.mychannels.video/imgix/productions/2025/7/169fea3e-0d8a-4cdc-8e01-9e9d030d2eca/C1875.00_00_38_38.Still004.jpg",
+        "title": "Zo leer je elkaar wel kennen",
+        "source": "Judobikkels",
+        "textAlign": "bottom",
+        "label": "Label"
+      }
+    },
+    {
+      "id": "block-1760208633869-znglo7mbg",
+      "type": "subheading",
+      "content": {
+        "text": "Dit is een tussenkopje",
+        "level": 4
+      }
+    },
+    {
+      "id": "block-1760195703629-jictz0qly",
+      "type": "heading",
+      "content": {
+        "text": "Hoe elf Nijmeegse mannen en hun Japanse judomeester vrienden voor altijd werden",
+        "level": 2
+      }
+    },
+    {
+      "id": "block-1760195709625-4tlvkhavw",
+      "type": "image",
+      "content": {
+        "url": "https://images.gelderlander.nl/YmM3ZTA1ZDNiYWZlY2RkYzU5MWUvZGlvLzI2MzczNjYwNi9mb2N1cy1hbmQtZmlsbC8wLjUwLzAuNTAvNDYwLzM0NQ/dg20251009-5563-nijmegen-10-10-2025-de-judobikkels-elf-mannen-uit-nijmegen-vieren-de-broederschap-in-fotolijst-meester-seiji-morioka-foto-bert-beelen-dgfoto",
+        "caption": "",
+        "source": "",
+        "parallax": false
+      }
+    },
+    {
+      "id": "block-1760209619142-39dpufkcs",
+      "type": "video",
+      "content": {
+        "url": "https://sf-video.dpgmedia.net/6fa0de5e-daf5-4e44-972c-12badfe52447-version-1752067428522/6fa0de5e-daf5-4e44-972c-12badfe52447.m3u8",
+        "poster": "https://images.mychannels.video/imgix/productions/2025/7/169fea3e-0d8a-4cdc-8e01-9e9d030d2eca/C1875.00_00_38_38.Still004.jpg"
+      }
+    },
+    {
+      "id": "block-1760195756489-icx54b11z",
+      "type": "textblock",
+      "content": {
+        "text": [
+          "Dit is een tekstblok"
+        ],
+        "isLead": false
+      }
+    },
+    {
+      "id": "block-1760195777668-0te3w3wfq",
+      "type": "textblock",
+      "content": {
+        "text": [
+          ""
+        ],
+        "isLead": false
+      }
+    },
+    {
+      "id": "block-1760195781254-mpmhdibyv",
+      "type": "quote",
+      "content": {
+        "text": "Doorgaan waar anderen stoppen.",
+        "author": ""
+      }
+    }
+  ]
+}

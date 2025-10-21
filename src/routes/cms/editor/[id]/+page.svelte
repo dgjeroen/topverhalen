@@ -1,6 +1,8 @@
+<!-- +page.svelte-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import { page } from '$app/state';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -327,6 +329,8 @@
 	}
 
 	let previewing = $state(false);
+	let publishing = $state(false);
+	let publishProgress = $state('');
 
 	async function handlePreview() {
 		if (!data.gistId) {
@@ -334,14 +338,20 @@
 			return;
 		}
 
-		const confirmed = confirm('Wil je een voorbeeld-versie bouwen?');
+		const confirmed = confirm(
+			'🔍 Wil je een preview maken?\n\n' +
+				'Dit triggert een nieuwe Vercel deployment met de huidige content.'
+		);
+
 		if (!confirmed) return;
 
 		previewing = true;
 
 		try {
+			// ✅ 1. Eerst opslaan
 			await saveProject();
 
+			// ✅ 2. Trigger preview build
 			const response = await fetch('/cms/api/preview', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -350,12 +360,141 @@
 
 			if (!response.ok) throw new Error('Preview trigger mislukt');
 
-			window.open('https://vercel.com/dgjeroen/topverhalen/deployments', '_blank');
-			alert('🔍 Preview wordt gebouwd! Check het nieuwe tabblad.');
+			// ✅ 3. Toon preview URL met Gist parameter
+			//const previewUrl = `https://cms.topverhaal.nl/?gist=${data.gistId}`;
+			const previewBaseUrl = import.meta.env.VITE_PREVIEW_URL || 'https://cms.topverhaal.nl';
+			const previewUrl = `${previewBaseUrl}/?gist=${data.gistId}`;
+			// Open Vercel deployments pagina
+			// ✅ Beste oplossing: gebruik environment variable
+			const vercelUrl =
+				import.meta.env.VITE_VERCEL_DASHBOARD_URL ||
+				'https://vercel.com/jeroens-projects-cf3c5f13/topverhalen/deployments';
+
+			window.open(vercelUrl, '_blank');
+
+			// Toon alert met preview URL
+			alert(
+				'🔍 Preview wordt gebouwd!\n\n' +
+					`Preview URL (na deployment):\n${previewUrl}\n\n` +
+					'⏱️ Check het Vercel tabblad voor de build status.\n' +
+					'💡 Het kan 1-2 minuten duren voordat de preview live is.'
+			);
+
+			// ✅ 4. Kopieer URL naar clipboard
+			try {
+				await navigator.clipboard.writeText(previewUrl);
+				console.log('✅ Preview URL gekopieerd naar clipboard');
+			} catch (clipboardErr) {
+				console.warn('⚠️ Kon URL niet kopiëren:', clipboardErr);
+			}
 		} catch (err) {
-			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
+			alert(`❌ ${err instanceof Error ? err.message : 'Fout bij preview'}`);
 		} finally {
 			previewing = false;
+		}
+	}
+
+	async function handlePublish() {
+		if (!data.gistId) {
+			alert('⚠️ Sla eerst op!');
+			return;
+		}
+
+		// ✅ Vraag base path
+		const basePath = prompt(
+			'📁 In welke folder komt de site op je server?\n\n' +
+				'Voorbeelden:\n' +
+				'• Root: /\n' +
+				'• Subfolder: /mijn-verhaal/\n' +
+				'• Diep: /redactie/2025/verhaal/\n\n' +
+				'⚠️ Begin en eindig met een /',
+			'/'
+		);
+
+		if (basePath === null) return; // Gebruiker annuleerde
+
+		// Valideer base path
+		if (!basePath.startsWith('/') || !basePath.endsWith('/')) {
+			alert('❌ Base path moet beginnen en eindigen met /\n\nVoorbeeld: /mijn-folder/');
+			return;
+		}
+
+		const confirmed = confirm(`📦 ZIP bouwen voor:\n${basePath}\n\n⏱️ Dit duurt 30-60 seconden.`);
+
+		if (!confirmed) return;
+
+		publishing = true;
+		publishProgress = 'Opslaan...';
+
+		try {
+			console.log('💾 Opslaan project...');
+			await saveProject();
+
+			publishProgress = 'Bouwen (30-60 sec)...';
+			console.log('🚀 Start build via XHR voor Gist:', data.gistId);
+
+			// ✅ Gebruik XMLHttpRequest
+			const blob = await new Promise<Blob>((resolve, reject) => {
+				const xhr = new XMLHttpRequest();
+
+				xhr.open('POST', '/cms/api/build', true);
+				xhr.setRequestHeader('Content-Type', 'application/json');
+				xhr.responseType = 'blob';
+				xhr.timeout = 120000;
+
+				xhr.onload = () => {
+					console.log('📡 XHR Response:', xhr.status);
+					if (xhr.status === 200) {
+						resolve(xhr.response);
+					} else {
+						reject(new Error(`Build mislukt (${xhr.status})`));
+					}
+				};
+
+				xhr.onerror = () => reject(new Error('Network error'));
+				xhr.ontimeout = () => reject(new Error('Timeout'));
+
+				// ✅ Stuur base path mee
+				xhr.send(
+					JSON.stringify({
+						gistId: data.gistId,
+						basePath: basePath
+					})
+				);
+			});
+
+			console.log('📦 Blob ontvangen:', blob.size, 'bytes');
+
+			publishProgress = 'Downloaden...';
+
+			const url = URL.createObjectURL(blob);
+			const filename = `${data.project.storyName.replace(/\s+/g, '-')}-export.zip`;
+
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = filename;
+			a.style.display = 'none';
+			document.body.appendChild(a);
+			a.click();
+
+			setTimeout(() => {
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}, 1000);
+
+			publishProgress = '';
+			alert(
+				`✅ Download gestart!\n\n` +
+					`📁 Upload naar: ${basePath}\n` +
+					`📖 Zie README.txt voor instructies.`
+			);
+		} catch (err) {
+			console.error('❌ Publish error:', err);
+			publishProgress = '';
+			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
+		} finally {
+			publishing = false;
+			publishProgress = '';
 		}
 	}
 
@@ -453,6 +592,11 @@
 					{saveMessage}
 				</span>
 			{/if}
+			{#if publishProgress}
+				<span class="publish-progress">
+					{publishProgress}
+				</span>
+			{/if}
 			<button class="btn-header btn-save" onclick={saveProject} disabled={saving}>
 				{saving ? '💾 Bezig...' : '💾 Opslaan'}
 			</button>
@@ -463,7 +607,13 @@
 			>
 				{previewing ? '🔄 Preview...' : '👁️ Voorbeeld'}
 			</button>
-			<button class="btn-header btn-publish" disabled>🚀 Publiceren</button>
+			<button
+				class="btn-header btn-publish"
+				onclick={handlePublish}
+				disabled={publishing || saving || previewing}
+			>
+				{publishing ? `⏳ ${publishProgress}` : '🚀 Publiceren'}
+			</button>
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
 		</div>
 	</header>
@@ -2388,5 +2538,30 @@
 		letter-spacing: 0.05em;
 		display: block;
 		margin-bottom: 0.25rem;
+	}
+	.publish-progress {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		background: #fef3c7;
+		color: #92400e;
+		animation: pulse 1.5s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.6;
+		}
+	}
+
+	.btn-publish:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		background: #f3f4f6;
 	}
 </style>

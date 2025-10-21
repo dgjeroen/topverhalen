@@ -1,7 +1,11 @@
 // src/lib/server/gist.ts
 
 // ✅ SSL bypass voor development
-if (process.env.NODE_ENV === 'development') {
+// ✅ SSL bypass voor lokale testing
+const isLocal = process.env.VERCEL !== '1'; // Vercel set deze env var automatisch
+
+if (isLocal) {
+    console.log('⚠️ Lokale omgeving: SSL verificatie uitgeschakeld');
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
