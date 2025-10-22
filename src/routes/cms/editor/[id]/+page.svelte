@@ -351,8 +351,20 @@
 
 			if (!response.ok) throw new Error('Preview trigger mislukt');
 
-			window.open('https://vercel.com/dgjeroen/topverhalen/deployments', '_blank');
-			alert('🔍 Preview wordt gebouwd! Check het nieuwe tabblad.');
+			const previewUrl = new URL('/test-env', window.location.origin);
+
+			// Voeg een unieke parameter toe om de browser-cache te omzeilen
+			previewUrl.searchParams.set('t', Date.now().toString());
+
+			// Open de *juiste* pagina
+			window.open(previewUrl.toString(), '_blank');
+
+			// Geef de gebruiker duidelijke instructies
+			alert(
+				'🔍 Preview wordt gebouwd! \n\n' +
+					'Het nieuwe tabblad is geopend. Het kan 1-2 minuten duren voordat de site is gebouwd.\n\n' +
+					'Refresh het nieuwe tabblad als je de wijzigingen niet meteen ziet.'
+			);
 		} catch (err) {
 			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
 		} finally {
