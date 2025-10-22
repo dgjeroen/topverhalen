@@ -1,3 +1,4 @@
+<!-- src/lib/components/BlockRenderer.svelte-->
 <script lang="ts">
 	import TextBlock from './TextBlock.svelte';
 	import Heading from './Heading.svelte';
