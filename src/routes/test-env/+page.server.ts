@@ -1,44 +1,40 @@
 // src/routes/test-env/+page.server.ts
 
-// [ SENSEI'S FIX V2 ]: We importeren nu van 'public'
-import { env } from '$env/dynamic/public';
+import { env } from '$env/dynamic/private'; // <-- [FIX] Terug naar private
 import { getGist } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
+import type { ProjectContent } from '$lib/server/gist';
 
-// Zorg dat dit pad nog steeds klopt (je vorige aanpassing)
-import fallbackContent from '$lib/data/content.json';
+// [FIX] We importeren de fallback en typen het.
+import fallbackJson from '$lib/data/content.json';
+const fallbackContent: ProjectContent = fallbackJson as ProjectContent;
 
 export const load: PageServerLoad = async () => {
-    // [ SENSEI'S FIX V2 ]: We lezen de PUBLIC_ variabele
-    const previewGistId = env.PUBLIC_PREVIEW_GIST_ID;
-
-    let projectData;
+    // [FIX] We lezen de private variabele
+    const previewGistId = env.PREVIEW_GIST_ID;
     let isPreview = false;
+    let project: ProjectContent; // <-- [FIX] We gebruiken één object
 
     if (previewGistId) {
         // ✅ PREVIEW-MODUS
-        // We hebben een Gist ID! Haal de data uit die specifieke Gist.
-        // De 'getGist' functie zelf blijft server-side en geheim.
         console.log(`[Preview Build] Loading Gist ID: ${previewGistId}`);
         try {
-            const project = await getGist(previewGistId);
-            projectData = project.data;
+            // We halen de *volledige* gist op
+            project = await getGist(previewGistId);
             isPreview = true;
         } catch (error) {
             console.error(`[Preview Build] Fout bij laden Gist ${previewGistId}:`, error);
-            projectData = fallbackContent.data;
+            // Fallback als de Gist faalt
+            project = fallbackContent;
         }
     } else {
         // ❌ NORMALE MODUS
-        // Geen Gist ID gevonden.
         console.log('[Preview Build] No Gist ID found, loading fallback content.json');
-        projectData = fallbackContent.data;
+        project = fallbackContent;
     }
 
     return {
-        project: {
-            data: projectData
-        },
+        project: project, // Stuur het hele object
         isPreview: isPreview
     };
 };
