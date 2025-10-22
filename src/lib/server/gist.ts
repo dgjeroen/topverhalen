@@ -181,13 +181,10 @@ export async function triggerPreviewHook(gistId: string): Promise<void> {
         return;
     }
 
-    const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            gistId,
-            timestamp: new Date().toISOString()
-        })
+    const urlWithEnv = `${webhookUrl}?env_PREVIEW_GIST_ID=${gistId}`;
+
+    const response = await fetch(urlWithEnv, {
+        method: 'POST'
     });
 
     if (!response.ok) {

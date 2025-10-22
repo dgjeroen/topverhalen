@@ -1,3 +1,5 @@
+// src/routes/cms/editor/[id]/+page.server.ts
+
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getGist } from '$lib/server/gist';

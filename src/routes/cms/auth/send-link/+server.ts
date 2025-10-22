@@ -26,10 +26,11 @@ export const POST: RequestHandler = async ({ request, url }) => {
         // Maak magic token aan
         const token = await createMagicToken(email);
 
-        // ✅ FIX: Gebruik custom domain in productie, origin in dev
-        const baseUrl = dev
-            ? url.origin
-            : 'https://cms.topverhaal.nl';
+        const baseUrl = url.origin;
+
+        await sendMagicLink(email, token, baseUrl);
+
+        return json({ success: true });
 
         await sendMagicLink(email, token, baseUrl);
 

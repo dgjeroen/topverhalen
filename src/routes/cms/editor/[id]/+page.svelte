@@ -1,3 +1,5 @@
+<!--src/routes/cms/editor/[id]/+page.svelte-->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
@@ -334,28 +336,22 @@
 			return;
 		}
 
-		const confirmed = confirm('Wil je een preview-versie bouwen?');
-		if (!confirmed) return;
-
 		previewing = true;
 
 		try {
 			await saveProject();
 
-			const response = await fetch('/cms/api/preview', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ gistId: data.gistId })
-			});
+			const previewUrl = new URL('/test-env', window.location.origin);
+			previewUrl.searchParams.set('id', data.gistId);
+			previewUrl.searchParams.set('t', Date.now().toString()); // Cache buster
 
-			if (!response.ok) throw new Error('Preview trigger mislukt');
+			window.open(previewUrl.toString(), '_blank');
 
-			window.open('https://vercel.com/dgjeroen/topverhalen/deployments', '_blank');
-			alert('🔍 Preview wordt gebouwd! Check het nieuwe tabblad.');
+			// We hebben geen alert meer nodig, de gebruiker ziet het resultaat.
 		} catch (err) {
 			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
 		} finally {
-			previewing = false;
+			previewing = false; // Zet de knop terug
 		}
 	}
 
