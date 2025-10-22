@@ -1,4 +1,5 @@
 <!--src/routes/cms/editor/[id]/+page.svelte-->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
