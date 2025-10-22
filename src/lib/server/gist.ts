@@ -173,7 +173,6 @@ export async function triggerDeployHook(gistId: string): Promise<void> {
     }
 }
 
-
 // ✅ Trigger preview webhook
 export async function triggerPreviewHook(gistId: string): Promise<void> {
     const webhookUrl = env.VERCEL_PREVIEW_WEBHOOK;
@@ -182,11 +181,10 @@ export async function triggerPreviewHook(gistId: string): Promise<void> {
         return;
     }
 
-    const urlWithEnv = `${webhookUrl}?env_PREVIEW_GIST_ID=${gistId}`;
+    const urlWithEnv = `${webhookUrl}?env_PUBLIC_PREVIEW_GIST_ID=${gistId}`;
 
     const response = await fetch(urlWithEnv, {
         method: 'POST'
-
     });
 
     if (!response.ok) {

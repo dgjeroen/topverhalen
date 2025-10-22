@@ -1,43 +1,41 @@
 // src/routes/test-env/+page.server.ts
 
-import { env } from '$env/dynamic/private';
+// [ SENSEI'S FIX V2 ]: We importeren nu van 'public'
+import { env } from '$env/dynamic/public';
 import { getGist } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
 
-
+// Zorg dat dit pad nog steeds klopt (je vorige aanpassing)
 import fallbackContent from '$lib/data/content.json';
 
 export const load: PageServerLoad = async () => {
-
-    const previewGistId = env.PREVIEW_GIST_ID;
+    // [ SENSEI'S FIX V2 ]: We lezen de PUBLIC_ variabele
+    const previewGistId = env.PUBLIC_PREVIEW_GIST_ID;
 
     let projectData;
     let isPreview = false;
 
     if (previewGistId) {
         // ✅ PREVIEW-MODUS
-
+        // We hebben een Gist ID! Haal de data uit die specifieke Gist.
+        // De 'getGist' functie zelf blijft server-side en geheim.
         console.log(`[Preview Build] Loading Gist ID: ${previewGistId}`);
         try {
-            // We gebruiken de getGist functie die al bestaat
             const project = await getGist(previewGistId);
-            projectData = project.data; // We sturen alleen de 'data' array door
+            projectData = project.data;
             isPreview = true;
         } catch (error) {
             console.error(`[Preview Build] Fout bij laden Gist ${previewGistId}:`, error);
-            // Fallback naar standaard content als de Gist faalt
             projectData = fallbackContent.data;
         }
     } else {
         // ❌ NORMALE MODUS
-        // Geen Gist ID gevonden. Dit is een normale build (of de hook is fout).
-        // Laad de standaard 'content.json'.
+        // Geen Gist ID gevonden.
         console.log('[Preview Build] No Gist ID found, loading fallback content.json');
         projectData = fallbackContent.data;
     }
 
     return {
-        // Dit 'project' object wordt de 'data' prop in je +page.svelte
         project: {
             data: projectData
         },
