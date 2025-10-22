@@ -2,7 +2,7 @@
 
 import { getGist, type ProjectContent } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
-import { error }M from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 
 // -----------------------------------------------------------------
 // [ SENSEI'S V6 FIX ]
