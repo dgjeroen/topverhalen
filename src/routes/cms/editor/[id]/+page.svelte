@@ -330,6 +330,9 @@
 
 	let previewing = $state(false);
 
+	// src/routes/cms/editor/[id]/+page.svelte
+
+	// ... (in je <script>, de functie zelf)
 	async function handlePreview() {
 		if (!data.gistId) {
 			alert('⚠️ Sla eerst je project op voordat je een preview maakt!');
@@ -342,8 +345,10 @@
 		previewing = true;
 
 		try {
+			// 1. Sla het project op
 			await saveProject();
 
+			// 2. Trigger de Vercel build hook (de "ping")
 			const response = await fetch('/cms/api/preview', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -352,15 +357,19 @@
 
 			if (!response.ok) throw new Error('Preview trigger mislukt');
 
+			// -----------------------------------------------------------------
+			// [ SENSEI'S V6 FIX ]
+			// We gebruiken de architectuur die jij je herinnerde (?id=)
+			// en bouwen de URL op de *huidige origin*.
+			// Dit is 100% robuust en heeft geen Vercel env vars nodig.
+			// -----------------------------------------------------------------
+
 			const previewUrl = new URL('/test-env', window.location.origin);
+			previewUrl.searchParams.set('id', data.gistId);
+			previewUrl.searchParams.set('t', Date.now().toString()); // Cache buster
 
-			// Voeg een unieke parameter toe om de browser-cache te omzeilen
-			previewUrl.searchParams.set('t', Date.now().toString());
-
-			// Open de *juiste* pagina
 			window.open(previewUrl.toString(), '_blank');
 
-			// Geef de gebruiker duidelijke instructies
 			alert(
 				'🔍 Preview wordt gebouwd! \n\n' +
 					'Het nieuwe tabblad is geopend. Het kan 1-2 minuten duren voordat de site is gebouwd.\n\n' +
