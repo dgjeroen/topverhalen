@@ -1,7 +1,7 @@
 <!--src/routes/cms/editor/[id]/+page.svelte-->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
@@ -329,6 +329,12 @@
 	}
 
 	let previewing = $state(false);
+	// ✅ Publish state management
+	let publishStatus = $state<'idle' | 'pending' | 'building' | 'completed' | 'failed'>('idle');
+	let jobId = $state<string | null>(null);
+	let downloadUrl = $state<string | null>(null);
+	let publishError = $state<string | null>(null);
+	let pollInterval: ReturnType<typeof setInterval> | null = null;
 
 	async function handlePreview() {
 		if (!data.gistId) {
@@ -353,6 +359,93 @@
 		} finally {
 			previewing = false; // Zet de knop terug
 		}
+	}
+
+	/**
+	 * Start async publish job
+	 */
+	async function handlePublish() {
+		publishStatus = 'pending';
+		publishError = null;
+
+		try {
+			// Sla eerst op
+			await saveProject();
+
+			const response = await fetch('/api/publish/start', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ gistId: data.gistId })
+			});
+
+			if (!response.ok) {
+				throw new Error('Kon publish niet starten');
+			}
+
+			const result = await response.json();
+			jobId = result.jobId;
+
+			// Start polling
+			startPolling();
+		} catch (err) {
+			publishStatus = 'failed';
+			publishError = err instanceof Error ? err.message : 'Onbekende fout';
+		}
+	}
+
+	/**
+	 * Poll job status elke 3 seconden
+	 */
+	function startPolling() {
+		pollInterval = setInterval(checkStatus, 3000);
+	}
+
+	/**
+	 * Check huidige job status
+	 */
+	async function checkStatus() {
+		if (!jobId) return;
+
+		try {
+			const response = await fetch(`/api/publish/status/${jobId}`);
+
+			if (!response.ok) {
+				throw new Error('Kon status niet ophalen');
+			}
+
+			const job = await response.json();
+			publishStatus = job.status;
+
+			if (job.status === 'completed') {
+				downloadUrl = job.downloadUrl;
+				stopPolling();
+			} else if (job.status === 'failed') {
+				publishError = job.error || 'Build gefaald';
+				stopPolling();
+			}
+		} catch (err) {
+			console.error('Status check fout:', err);
+		}
+	}
+
+	/**
+	 * Stop polling interval
+	 */
+	function stopPolling() {
+		if (pollInterval) {
+			clearInterval(pollInterval);
+			pollInterval = null;
+		}
+	}
+
+	/**
+	 * Reset publish state
+	 */
+	function resetPublish() {
+		publishStatus = 'idle';
+		jobId = null;
+		downloadUrl = null;
+		publishError = null;
 	}
 
 	onMount(async () => {
@@ -416,6 +509,8 @@
 			}
 		});
 	});
+	// Cleanup polling on component destroy
+	onDestroy(stopPolling);
 </script>
 
 <svelte:head>
@@ -459,7 +554,16 @@
 			>
 				{previewing ? '🔄 Preview...' : '👁️ Preview'}
 			</button>
-			<button class="btn-header btn-publish" disabled>🚀 Publiceren</button>
+			{#if publishStatus === 'idle'}
+				<button class="btn-header btn-publish" onclick={handlePublish}> 🚀 Publiceren </button>
+			{:else if publishStatus === 'pending' || publishStatus === 'building'}
+				<button class="btn-header btn-publish" disabled> ⏳ Build bezig... </button>
+			{:else if publishStatus === 'completed'}
+				<a href={downloadUrl} download class="btn-header btn-download"> ⬇️ Download </a>
+				<button class="btn-header btn-reset" onclick={resetPublish}> 🔄 Nieuw </button>
+			{:else if publishStatus === 'failed'}
+				<button class="btn-header btn-publish" onclick={resetPublish}> ❌ Opnieuw </button>
+			{/if}
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
 		</div>
 	</header>
@@ -2384,5 +2488,32 @@
 		letter-spacing: 0.05em;
 		display: block;
 		margin-bottom: 0.25rem;
+	}
+	/* Publish button states */
+	.btn-download {
+		background: #28a745 !important;
+		color: white;
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.btn-download:hover {
+		background: #218838 !important;
+	}
+
+	.btn-reset {
+		background: #6c757d;
+		color: white;
+	}
+
+	.btn-reset:hover {
+		background: #5a6268;
+	}
+
+	.btn-publish:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 </style>
