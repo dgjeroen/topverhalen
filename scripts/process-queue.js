@@ -48,7 +48,8 @@ async function uploadToGitHub(jobId, zipPath) {
     });
 
     const fileContent = fs.readFileSync(zipPath);
-    await octokit.repos.uploadReleaseAsset({
+
+    const asset = await octokit.repos.uploadReleaseAsset({
         owner,
         repo,
         release_id: release.data.id,
@@ -56,7 +57,7 @@ async function uploadToGitHub(jobId, zipPath) {
         data: fileContent
     });
 
-    return release.data.assets[0].browser_download_url;
+    return asset.data.browser_download_url;
 }
 
 async function processJob(job) {
