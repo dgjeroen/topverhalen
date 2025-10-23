@@ -65,10 +65,14 @@ async function processJob(job) {
     try {
         await updateJob(job.id, { status: 'building' });
 
-        execSync('cross-env ADAPTER=static npm run build', {
+        execSync('npm run build', {
             cwd: rootDir,
             stdio: 'inherit',
-            env: { ...process.env, GIST_ID: job.gistId }
+            env: {
+                ...process.env,
+                ADAPTER: 'static',  // ✅ Direct via env
+                GIST_ID: job.gistId
+            }
         });
 
         const zipPath = path.join(rootDir, `${job.id}.zip`);
