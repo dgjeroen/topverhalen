@@ -27,4 +27,5 @@ jobs:
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PUBLIC_GTM_ID: ${{ secrets.PUBLIC_GTM_ID }}
         run: node scripts/process-queue.js
