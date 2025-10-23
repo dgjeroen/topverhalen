@@ -75,7 +75,11 @@ async function processJob(job) {
                 GIST_ID: job.gistId
             }
         });
+        console.log('📂 Root directory contents:');
+        execSync('ls -la', { cwd: rootDir, stdio: 'inherit' });
 
+        console.log('📂 Checking for build output...');
+        execSync('find . -name "index.html" -type f', { cwd: rootDir, stdio: 'inherit' });
         const zipPath = path.join(rootDir, `${job.id}.zip`);
 
         // ✅ Adapter-static output is altijd /build
