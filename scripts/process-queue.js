@@ -77,16 +77,15 @@ async function processJob(job) {
         });
 
         const zipPath = path.join(rootDir, `${job.id}.zip`);
-        const buildDir = path.join(rootDir, '.svelte-kit', 'output', 'client');
 
-        // Check welke folder bestaat
-        let outputDir = buildDir;
+        // ✅ Adapter-static output is altijd /build
+        const buildDir = path.join(rootDir, 'build');
+
         if (!fs.existsSync(buildDir)) {
-            // Fallback naar build folder
-            outputDir = path.join(rootDir, 'build');
+            throw new Error('Build folder not found. Static build failed?');
         }
 
-        execSync(`zip -r "${zipPath}" .`, { cwd: outputDir });
+        execSync(`zip -r "${zipPath}" .`, { cwd: buildDir });
 
         const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
