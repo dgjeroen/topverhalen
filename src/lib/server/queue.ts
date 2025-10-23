@@ -18,14 +18,16 @@ export interface PublishJob {
 const devJobs = new Map<string, PublishJob>();
 const devQueue: string[] = [];
 
-// Prod: Upstash Redis (lazy loaded)
+// Prod: Upstash Redis
 let redis: Redis | null = null;
 
 async function getRedis() {
     if (!redis && !dev) {
         redis = new Redis({
             url: process.env.UPSTASH_REDIS_REST_URL!,
-            token: process.env.UPSTASH_REDIS_REST_TOKEN!
+            token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+            // ✅ Disable automatic JSON deserialization
+            automaticDeserialization: false
         });
     }
     return redis;
@@ -46,6 +48,7 @@ export async function createJob(gistId: string): Promise<string> {
         console.log(`[DEV] Job ${jobId} aangemaakt`);
     } else {
         const r = await getRedis();
+        // ✅ Store as JSON string
         await r!.set(`job:${jobId}`, JSON.stringify(job));
         await r!.lpush('job:queue', jobId);
     }
@@ -59,7 +62,10 @@ export async function getJob(jobId: string): Promise<PublishJob | null> {
     } else {
         const r = await getRedis();
         const data = await r!.get(`job:${jobId}`);
-        return data ? JSON.parse(data as string) : null;
+
+        // ✅ Parse JSON string
+        if (!data) return null;
+        return JSON.parse(data as string);
     }
 }
 
@@ -74,6 +80,7 @@ export async function updateJob(jobId: string, updates: Partial<PublishJob>): Pr
         console.log(`[DEV] Job ${jobId} updated:`, updates);
     } else {
         const r = await getRedis();
+        // ✅ Store as JSON string
         await r!.set(`job:${jobId}`, JSON.stringify(updated));
     }
 }

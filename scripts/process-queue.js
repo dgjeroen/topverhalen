@@ -20,7 +20,21 @@ async function getNextJob() {
     const jobId = await redis.rpop('job:queue');
     if (!jobId) return null;
     const data = await redis.get(`job:${jobId}`);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    // ✅ Parse als string
+    return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
+async function updateJob(jobId, updates) {
+    const data = await redis.get(`job:${jobId}`);
+    if (!data) throw new Error(`Job ${jobId} not found`);
+
+    // ✅ Parse als string
+    const job = typeof data === 'string' ? JSON.parse(data) : data;
+    const updated = { ...job, ...updates };
+
+    // ✅ Store als string
+    await redis.set(`job:${jobId}`, JSON.stringify(updated));
 }
 
 async function updateJob(jobId, updates) {
