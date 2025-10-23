@@ -1,14 +1,9 @@
 // src/lib/server/queue.ts
 import { dev } from '$app/environment';
+import { Redis } from '@upstash/redis';
 
-/**
- * Job statussen voor async build process
- */
 export type JobStatus = 'pending' | 'building' | 'completed' | 'failed';
 
-/**
- * Publish job data structure
- */
 export interface PublishJob {
     id: string;
     gistId: string;
@@ -19,29 +14,25 @@ export interface PublishJob {
     error?: string;
 }
 
-// ✅ Development: In-memory store
+// Dev: In-memory
 const devJobs = new Map<string, PublishJob>();
 const devQueue: string[] = [];
 
-// ✅ Production: Vercel KV (lazy loaded)
-let kv: any = null;
+// Prod: Upstash Redis (lazy loaded)
+let redis: Redis | null = null;
 
-async function getKV() {
-    if (!kv && !dev) {
-        const { kv: vercelKV } = await import('@vercel/kv');
-        kv = vercelKV;
+async function getRedis() {
+    if (!redis && !dev) {
+        redis = new Redis({
+            url: process.env.UPSTASH_REDIS_REST_URL!,
+            token: process.env.UPSTASH_REDIS_REST_TOKEN!
+        });
     }
-    return kv;
+    return redis;
 }
 
-/**
- * Maak een nieuwe publish job aan
- * @param gistId - ID van de Gist die gepubliceerd moet worden
- * @returns Job ID voor tracking
- */
 export async function createJob(gistId: string): Promise<string> {
     const jobId = crypto.randomUUID();
-
     const job: PublishJob = {
         id: jobId,
         gistId,
@@ -50,85 +41,55 @@ export async function createJob(gistId: string): Promise<string> {
     };
 
     if (dev) {
-        // ✅ Development: In-memory
         devJobs.set(jobId, job);
         devQueue.push(jobId);
-        console.log(`[DEV] Job ${jobId} aangemaakt voor Gist ${gistId}`);
+        console.log(`[DEV] Job ${jobId} aangemaakt`);
     } else {
-        // ✅ Production: Vercel KV
-        const kvStore = await getKV();
-        await kvStore.set(`job:${jobId}`, job);
-        await kvStore.lpush('job:queue', jobId);
+        const r = await getRedis();
+        await r!.set(`job:${jobId}`, JSON.stringify(job));
+        await r!.lpush('job:queue', jobId);
     }
 
     return jobId;
 }
 
-/**
- * Haal job details op
- * @param jobId - Unieke job identifier
- */
 export async function getJob(jobId: string): Promise<PublishJob | null> {
     if (dev) {
-        // ✅ Development: In-memory
         return devJobs.get(jobId) || null;
     } else {
-        // ✅ Production: Vercel KV
-        const kvStore = await getKV();
-        return await kvStore.get(`job:${jobId}`);
+        const r = await getRedis();
+        const data = await r!.get(`job:${jobId}`);
+        return data ? JSON.parse(data as string) : null;
     }
 }
 
-/**
- * Update job status en metadata
- * @param jobId - Job om te updaten
- * @param updates - Partial updates (status, downloadUrl, etc.)
- */
 export async function updateJob(jobId: string, updates: Partial<PublishJob>): Promise<void> {
     const job = await getJob(jobId);
+    if (!job) throw new Error(`Job ${jobId} niet gevonden`);
 
-    if (!job) {
-        throw new Error(`Job ${jobId} niet gevonden`);
-    }
-
-    const updated: PublishJob = {
-        ...job,
-        ...updates
-    };
+    const updated = { ...job, ...updates };
 
     if (dev) {
-        // ✅ Development: In-memory
         devJobs.set(jobId, updated);
         console.log(`[DEV] Job ${jobId} updated:`, updates);
     } else {
-        // ✅ Production: Vercel KV
-        const kvStore = await getKV();
-        await kvStore.set(`job:${jobId}`, updated);
+        const r = await getRedis();
+        await r!.set(`job:${jobId}`, JSON.stringify(updated));
     }
 }
 
-/**
- * Haal volgende job uit wachtrij (voor worker)
- * @returns Job ID of null als wachtrij leeg is
- */
 export async function getNextJob(): Promise<string | null> {
     if (dev) {
-        // ✅ Development: In-memory
         return devQueue.shift() || null;
     } else {
-        // ✅ Production: Vercel KV
-        const kvStore = await getKV();
-        return await kvStore.rpop('job:queue');
+        const r = await getRedis();
+        return (await r!.rpop('job:queue')) as string | null;
     }
 }
 
-/**
- * [DEV ONLY] Simuleer job completion (voor testen)
- */
 export async function simulateJobCompletion(jobId: string, success: boolean = true) {
     if (!dev) return;
-
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // 5s delay
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     if (success) {
         await updateJob(jobId, {
@@ -136,12 +97,11 @@ export async function simulateJobCompletion(jobId: string, success: boolean = tr
             completedAt: Date.now(),
             downloadUrl: 'https://example.com/mock-download.zip'
         });
-        console.log(`[DEV] Job ${jobId} gesimuleerd als completed`);
+        console.log(`[DEV] Job ${jobId} completed`);
     } else {
         await updateJob(jobId, {
             status: 'failed',
-            error: 'Gesimuleerde fout voor testing'
+            error: 'Gesimuleerde fout'
         });
-        console.log(`[DEV] Job ${jobId} gesimuleerd als failed`);
     }
 }

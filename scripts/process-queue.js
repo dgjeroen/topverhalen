@@ -1,24 +1,61 @@
 // scripts/process-queue.js
-import { kv } from '@vercel/kv';
-import { put } from '@vercel/blob';
+import { Redis } from '@upstash/redis';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Octokit } from '@octokit/rest';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 
+const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN
+});
+
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
 async function getNextJob() {
-    const jobId = await kv.rpop('job:queue');
+    const jobId = await redis.rpop('job:queue');
     if (!jobId) return null;
-    return await kv.get(`job:${jobId}`);
+    const data = await redis.get(`job:${jobId}`);
+    return data ? JSON.parse(data) : null;
 }
 
 async function updateJob(jobId, updates) {
-    const job = await kv.get(`job:${jobId}`);
+    const data = await redis.get(`job:${jobId}`);
+    const job = JSON.parse(data);
     const updated = { ...job, ...updates };
-    await kv.set(`job:${jobId}`, updated);
+    await redis.set(`job:${jobId}`, JSON.stringify(updated));
+}
+
+async function uploadToGitHub(jobId, zipPath) {
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+    const tag = `build-${jobId}`;
+
+    // Maak release
+    const release = await octokit.repos.createRelease({
+        owner,
+        repo,
+        tag_name: tag,
+        name: `Build ${jobId.substring(0, 8)}`,
+        body: 'Automated build',
+        draft: false,
+        prerelease: false
+    });
+
+    // Upload asset
+    const fileContent = fs.readFileSync(zipPath);
+    await octokit.repos.uploadReleaseAsset({
+        owner,
+        repo,
+        release_id: release.data.id,
+        name: `${jobId}.zip`,
+        data: fileContent
+    });
+
+    return release.data.assets[0].browser_download_url;
 }
 
 async function processJob(job) {
@@ -36,25 +73,19 @@ async function processJob(job) {
 
         // Zip
         const zipPath = path.join(rootDir, `${job.id}.zip`);
-        if (process.platform === 'win32') {
-            execSync(
-                `powershell Compress-Archive -Path "build\\*" -DestinationPath "${zipPath}" -Force`
-            );
-        } else {
-            execSync(`cd build && zip -r "${zipPath}" .`);
-        }
+        execSync(`cd build && zip -r "${zipPath}" .`, { cwd: rootDir });
 
-        // Upload
-        const blob = await put(`${job.id}.zip`, fs.createReadStream(zipPath), { access: 'public' });
+        // Upload naar GitHub Release
+        const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
 
         await updateJob(job.id, {
             status: 'completed',
             completedAt: Date.now(),
-            downloadUrl: blob.url
+            downloadUrl
         });
 
-        console.log(`✅ Done: ${blob.url}`);
+        console.log(`✅ Done: ${downloadUrl}`);
     } catch (err) {
         await updateJob(job.id, { status: 'failed', error: err.message });
         console.error(`❌ Failed:`, err);
@@ -62,11 +93,13 @@ async function processJob(job) {
 }
 
 async function main() {
+    console.log('🚀 Worker started');
     while (true) {
         const job = await getNextJob();
         if (!job) break;
         await processJob(job);
     }
+    console.log('✅ Queue empty');
 }
 
 main();
