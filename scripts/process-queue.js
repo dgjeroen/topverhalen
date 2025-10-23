@@ -76,7 +76,16 @@ async function processJob(job) {
         });
 
         const zipPath = path.join(rootDir, `${job.id}.zip`);
-        execSync(`cd build && zip -r "${zipPath}" .`, { cwd: rootDir });
+        const buildDir = path.join(rootDir, '.svelte-kit', 'output', 'client');
+
+        // Check welke folder bestaat
+        let outputDir = buildDir;
+        if (!fs.existsSync(buildDir)) {
+            // Fallback naar build folder
+            outputDir = path.join(rootDir, 'build');
+        }
+
+        execSync(`zip -r "${zipPath}" .`, { cwd: outputDir });
 
         const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
