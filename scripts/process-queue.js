@@ -11,7 +11,8 @@ const rootDir = path.resolve(__dirname, '..');
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    automaticDeserialization: false
 });
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -21,25 +22,13 @@ async function getNextJob() {
     if (!jobId) return null;
     const data = await redis.get(`job:${jobId}`);
     if (!data) return null;
-    // ✅ Parse als string
     return typeof data === 'string' ? JSON.parse(data) : data;
 }
 
 async function updateJob(jobId, updates) {
     const data = await redis.get(`job:${jobId}`);
     if (!data) throw new Error(`Job ${jobId} not found`);
-
-    // ✅ Parse als string
     const job = typeof data === 'string' ? JSON.parse(data) : data;
-    const updated = { ...job, ...updates };
-
-    // ✅ Store als string
-    await redis.set(`job:${jobId}`, JSON.stringify(updated));
-}
-
-async function updateJob(jobId, updates) {
-    const data = await redis.get(`job:${jobId}`);
-    const job = JSON.parse(data);
     const updated = { ...job, ...updates };
     await redis.set(`job:${jobId}`, JSON.stringify(updated));
 }
@@ -48,7 +37,6 @@ async function uploadToGitHub(jobId, zipPath) {
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     const tag = `build-${jobId}`;
 
-    // Maak release
     const release = await octokit.repos.createRelease({
         owner,
         repo,
@@ -59,7 +47,6 @@ async function uploadToGitHub(jobId, zipPath) {
         prerelease: false
     });
 
-    // Upload asset
     const fileContent = fs.readFileSync(zipPath);
     await octokit.repos.uploadReleaseAsset({
         owner,
@@ -78,18 +65,15 @@ async function processJob(job) {
     try {
         await updateJob(job.id, { status: 'building' });
 
-        // Build
         execSync('cross-env ADAPTER=static npm run build', {
             cwd: rootDir,
             stdio: 'inherit',
             env: { ...process.env, GIST_ID: job.gistId }
         });
 
-        // Zip
         const zipPath = path.join(rootDir, `${job.id}.zip`);
         execSync(`cd build && zip -r "${zipPath}" .`, { cwd: rootDir });
 
-        // Upload naar GitHub Release
         const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
 
