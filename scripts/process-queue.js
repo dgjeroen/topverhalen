@@ -66,12 +66,11 @@ async function processJob(job) {
     try {
         await updateJob(job.id, { status: 'building' });
 
-        execSync('npm run build', {
+        execSync('npm run build -- --config svelte.config.static.js', {
             cwd: rootDir,
             stdio: 'inherit',
             env: {
                 ...process.env,
-                ADAPTER: 'static',  // ✅ Direct via env
                 GIST_ID: job.gistId
             }
         });
