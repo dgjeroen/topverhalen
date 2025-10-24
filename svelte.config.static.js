@@ -7,7 +7,7 @@ export default {
         adapter: adapter({
             pages: 'build',
             assets: 'build',
-            fallback: null,  // ✅ WIJZIGING 1: was 'index.html'
+            fallback: null,
             precompress: false,
             strict: false
         }),
@@ -15,10 +15,17 @@ export default {
             '$lib': 'src/lib'
         },
         prerender: {
-            entries: ['/']
+            entries: ['/test-env'],  // ✅ Prerender deze specifieke route
+            handleHttpError: ({ path, referrer, message }) => {
+                // Ignore errors voor andere routes
+                if (path.startsWith('/api/') || path.startsWith('/cms/')) {
+                    return;
+                }
+                console.warn(`Prerender warning for ${path}: ${message}`);
+            }
         },
         paths: {
-            relative: true  // ✅ WIJZIGING 2: NIEUWE regel
+            relative: true
         }
     }
 };

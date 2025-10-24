@@ -4,6 +4,9 @@ import { getGist, type ProjectContent } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
+// ✅ NIEUW: Enable prerendering voor static builds
+export const prerender = true;
+
 // -----------------------------------------------------------------
 // [ SENSEI'S V6 FIX ]
 // We maken een "bulletproof" fallback die NIET afhankelijk is
@@ -17,15 +20,18 @@ const safeFallback: ProjectContent = {
 };
 
 export const load: PageServerLoad = async ({ url }) => {
-    // We lezen de 'id' parameter uit de URL (jouw inzicht)
-    const previewGistId = url.searchParams.get('id');
+    // ✅ NIEUW: Check voor GIST_ID env var (gebruikt door worker)
+    // Prioriteit: URL param > ENV var > fallback
+    const previewGistId = url.searchParams.get('id') || process.env.GIST_ID;
 
     let isPreview = false;
     let projectData: ProjectContent;
 
     if (previewGistId) {
-        // ✅ PREVIEW-MODUS (Gist ID is in de URL)
-        console.log(`[Preview Build] Loading Gist ID from URL: ${previewGistId}`);
+        // ✅ PREVIEW/PUBLISH MODUS (Gist ID in URL of ENV)
+        const source = url.searchParams.get('id') ? 'URL' : 'ENV';
+        console.log(`[Preview Build] Loading Gist ID from ${source}: ${previewGistId}`);
+
         try {
             projectData = await getGist(previewGistId);
             isPreview = true;
@@ -35,8 +41,8 @@ export const load: PageServerLoad = async ({ url }) => {
             throw error(404, `Project (Gist) ${previewGistId} niet gevonden.`);
         }
     } else {
-        // ❌ NORMALE MODUS (Geen Gist ID in de URL)
-        console.log('[Preview Build] No Gist ID in URL, loading safe fallback.');
+        // ❌ FALLBACK MODUS (Geen Gist ID beschikbaar)
+        console.log('[Preview Build] No Gist ID in URL or ENV, loading safe fallback.');
         projectData = safeFallback;
     }
 
