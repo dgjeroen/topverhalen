@@ -67,15 +67,26 @@ async function processJob(job) {
     try {
         await updateJob(job.id, { status: 'building' });
 
-        execSync('npx svelte-kit build', {
-            cwd: rootDir,
-            stdio: 'inherit',
-            env: {
-                ...process.env,
-                SVELTE_CONFIG: 'svelte.config.static.js',
-                GIST_ID: job.gistId
-            }
-        });
+        // Backup originele config
+        const originalConfig = path.join(rootDir, 'svelte.config.js');
+        const staticConfig = path.join(rootDir, 'svelte.config.static.js');
+        const backupConfig = path.join(rootDir, 'svelte.config.backup.js');
+
+        // Swap configs
+        fs.renameSync(originalConfig, backupConfig);
+        fs.copyFileSync(staticConfig, originalConfig);
+
+        try {
+            // Build met static config
+            execSync('npm run build', {
+                cwd: rootDir,
+                stdio: 'inherit',
+                env: { ...process.env, GIST_ID: job.gistId }
+            });
+        } finally {
+            // Restore originele config
+            fs.renameSync(backupConfig, originalConfig);
+        }
         console.log('📂 Root directory contents:');
         execSync('ls -la', { cwd: rootDir, stdio: 'inherit' });
 
