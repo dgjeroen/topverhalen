@@ -15,13 +15,11 @@ export default {
             '$lib': 'src/lib'
         },
         prerender: {
-            entries: ['/test-env'],  // ✅ Prerender deze specifieke route
-            handleHttpError: ({ path, referrer, message }) => {
-                // Ignore errors voor andere routes
-                if (path.startsWith('/api/') || path.startsWith('/cms/')) {
+            entries: ['/story'],
+            handleHttpError: ({ path }) => {
+                if (path.startsWith('/api/') || path.startsWith('/cms/') || path.startsWith('/test-env')) {
                     return;
                 }
-                console.warn(`Prerender warning for ${path}: ${message}`);
             }
         },
         paths: {

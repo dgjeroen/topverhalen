@@ -94,17 +94,66 @@ async function processJob(job) {
         execSync('ls -la', { cwd: rootDir, stdio: 'inherit' });
 
         console.log('📂 Checking for build output...');
-        execSync('find . -name "index.html" -type f', { cwd: rootDir, stdio: 'inherit' });
-        const zipPath = path.join(rootDir, `${job.id}.zip`);
 
-        // ✅ Adapter-static output is altijd /build
         const buildDir = path.join(rootDir, 'build');
 
         if (!fs.existsSync(buildDir)) {
             throw new Error('Build folder not found. Static build failed?');
         }
 
-        execSync(`zip -r "${zipPath}" .`, { cwd: buildDir });
+        // Check of story/index.html bestaat
+        const storyDir = path.join(buildDir, 'story');
+        const storyIndexPath = path.join(storyDir, 'index.html');
+
+        if (!fs.existsSync(storyIndexPath)) {
+            console.error('❌ story/index.html not found!');
+            console.log('📂 Build structure:');
+            execSync('find build -type f -name "*.html"', { cwd: rootDir, stdio: 'inherit' });
+            throw new Error('Prerendered story/index.html not found');
+        }
+
+        console.log('✅ Found story/index.html');
+
+        // ✅ FIX PATHS: Maak alle paths relatief
+        console.log('🔧 Fixing absolute paths to relative...');
+        let html = fs.readFileSync(storyIndexPath, 'utf-8');
+
+        // Replace alle absolute paths naar parent folder
+        html = html.replace(/href="\/_app\//g, 'href="../_app/');
+        html = html.replace(/src="\/_app\//g, 'src="../_app/');
+        html = html.replace(/href='\/_app\//g, "href='../_app/");
+        html = html.replace(/src='\/_app\//g, "src='../_app/");
+
+        fs.writeFileSync(storyIndexPath, html);
+        console.log('✅ Paths fixed to relative (parent folder)');
+
+        // Copy _app folder naar story folder (voor standalone zip)
+        const appDir = path.join(buildDir, '_app');
+        const targetAppDir = path.join(storyDir, '_app');
+
+        if (fs.existsSync(appDir) && !fs.existsSync(targetAppDir)) {
+            console.log('📦 Copying _app assets to story folder...');
+            execSync(`cp -r "${appDir}" "${targetAppDir}"`, { cwd: rootDir, stdio: 'inherit' });
+            console.log('✅ Copied _app assets');
+
+            // Nu paths opnieuw fixen naar lokale _app (niet ../_app)
+            html = fs.readFileSync(storyIndexPath, 'utf-8');
+            html = html.replace(/\.\.\/_app\//g, './_app/');
+            fs.writeFileSync(storyIndexPath, html);
+            console.log('✅ Updated paths to local _app folder');
+        }
+
+        // Zip vanaf story folder (zodat index.html in root van zip staat)
+        const zipPath = path.join(rootDir, `${job.id}.zip`);
+        console.log(`📦 Creating zip from story folder...`);
+        execSync(`zip -r "${zipPath}" .`, { cwd: storyDir, stdio: 'inherit' });
+
+        if (!fs.existsSync(zipPath)) {
+            throw new Error('Zip file was not created!');
+        }
+
+        const zipStats = fs.statSync(zipPath);
+        console.log(`✅ Zip created: ${(zipStats.size / 1024 / 1024).toFixed(2)} MB`);
 
         const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
