@@ -16,10 +16,16 @@ export default {
         },
         prerender: {
             entries: ['/story'],
-            handleHttpError: ({ path }) => {
-                if (path.startsWith('/api/') || path.startsWith('/cms/') || path.startsWith('/test-env')) {
+            handleHttpError: ({ path, message }) => {
+                // Ignore errors voor routes die we niet willen prerenderen
+                if (path.startsWith('/api/') ||
+                    path.startsWith('/cms/') ||
+                    path.startsWith('/test-env') ||
+                    path === '/story') {  // ✅ Ignore /story errors in normale builds
+                    console.warn(`Skipping prerender for ${path}: ${message}`);
                     return;
                 }
+                throw new Error(message);
             }
         },
         paths: {

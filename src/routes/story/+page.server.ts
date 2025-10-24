@@ -1,15 +1,17 @@
-//src/routes/story/+page.server.ts
 import { getGist, type ProjectContent } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
-export const prerender = true;
+// ✅ Alleen prerenderen als GIST_ID aanwezig is (worker context)
+export const prerender = !!process.env.GIST_ID;
 
 export const load: PageServerLoad = async () => {
     const gistId = process.env.GIST_ID;
 
     if (!gistId) {
-        throw error(500, 'GIST_ID environment variable required');
+        // In normale Vercel deployment (zonder GIST_ID), return fallback
+        console.log('[Story Route] No GIST_ID, skipping prerender');
+        throw error(404, 'This route is only available during static builds');
     }
 
     console.log(`[Static Build] Loading Gist: ${gistId}`);
