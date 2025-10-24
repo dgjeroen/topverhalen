@@ -77,11 +77,14 @@ async function processJob(job) {
         fs.copyFileSync(staticConfig, originalConfig);
 
         try {
-            // Build met static config
+            // Build met static config EN specifieke route voor prerendering
             execSync('npm run build', {
                 cwd: rootDir,
                 stdio: 'inherit',
-                env: { ...process.env, GIST_ID: job.gistId }
+                env: {
+                    ...process.env,
+                    GIST_ID: job.gistId,
+                }
             });
         } finally {
             // Restore originele config
