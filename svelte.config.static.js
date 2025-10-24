@@ -7,7 +7,7 @@ export default {
         adapter: adapter({
             pages: 'build',
             assets: 'build',
-            fallback: 'index.html',
+            fallback: null,  // ✅ WIJZIGING 1: was 'index.html'
             precompress: false,
             strict: false
         }),
@@ -16,6 +16,9 @@ export default {
         },
         prerender: {
             entries: ['/']
+        },
+        paths: {
+            relative: true  // ✅ WIJZIGING 2: NIEUWE regel
         }
     }
 };
