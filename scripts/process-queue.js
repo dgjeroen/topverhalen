@@ -101,52 +101,81 @@ async function processJob(job) {
             throw new Error('Build folder not found. Static build failed?');
         }
 
-        // Check of story/index.html bestaat
-        const storyDir = path.join(buildDir, 'story');
-        const storyIndexPath = path.join(storyDir, 'index.html');
+        // ✅ Check beide mogelijke locaties
+        const storyHtmlPath = path.join(buildDir, 'story.html');
+        const storyFolderPath = path.join(buildDir, 'story', 'index.html');
 
-        if (!fs.existsSync(storyIndexPath)) {
-            console.error('❌ story/index.html not found!');
+        let htmlPath;
+
+        if (fs.existsSync(storyHtmlPath)) {
+            console.log('✅ Found build/story.html');
+            htmlPath = storyHtmlPath;
+        } else if (fs.existsSync(storyFolderPath)) {
+            console.log('✅ Found build/story/index.html');
+            htmlPath = storyFolderPath;
+        } else {
+            console.error('❌ No story HTML found!');
             console.log('📂 Build structure:');
             execSync('find build -type f -name "*.html"', { cwd: rootDir, stdio: 'inherit' });
-            throw new Error('Prerendered story/index.html not found');
+            throw new Error('Prerendered story HTML not found');
         }
 
-        console.log('✅ Found story/index.html');
+        console.log(`📄 Using HTML: ${htmlPath}`);
 
-        // ✅ FIX PATHS: Maak alle paths relatief
+        // ✅ FIX PATHS in HTML
         console.log('🔧 Fixing absolute paths to relative...');
-        let html = fs.readFileSync(storyIndexPath, 'utf-8');
+        let html = fs.readFileSync(htmlPath, 'utf-8');
 
-        // Replace alle absolute paths naar parent folder
-        html = html.replace(/href="\/_app\//g, 'href="../_app/');
-        html = html.replace(/src="\/_app\//g, 'src="../_app/');
-        html = html.replace(/href='\/_app\//g, "href='../_app/");
-        html = html.replace(/src='\/_app\//g, "src='../_app/");
+        html = html.replace(/href="\/_app\//g, 'href="./_app/');
+        html = html.replace(/src="\/_app\//g, 'src="./_app/');
+        html = html.replace(/href='\/_app\//g, "href='./_app/");
+        html = html.replace(/src='\/_app\//g, "src='./_app/");
 
-        fs.writeFileSync(storyIndexPath, html);
-        console.log('✅ Paths fixed to relative (parent folder)');
+        fs.writeFileSync(htmlPath, html);
+        console.log('✅ Paths fixed to relative');
 
-        // Copy _app folder naar story folder (voor standalone zip)
+        // ✅ Maak temp folder voor standalone zip
+        const tempDir = path.join(rootDir, 'temp-publish');
+        if (fs.existsSync(tempDir)) {
+            fs.rmSync(tempDir, { recursive: true });
+        }
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        // Copy HTML als index.html (zodat het in root van zip staat)
+        const targetHtmlPath = path.join(tempDir, 'index.html');
+        fs.copyFileSync(htmlPath, targetHtmlPath);
+        console.log('✅ Copied story.html → index.html');
+
+        // Copy _app folder
         const appDir = path.join(buildDir, '_app');
-        const targetAppDir = path.join(storyDir, '_app');
+        const targetAppDir = path.join(tempDir, '_app');
 
-        if (fs.existsSync(appDir) && !fs.existsSync(targetAppDir)) {
-            console.log('📦 Copying _app assets to story folder...');
+        if (fs.existsSync(appDir)) {
+            console.log('📦 Copying _app assets...');
             execSync(`cp -r "${appDir}" "${targetAppDir}"`, { cwd: rootDir, stdio: 'inherit' });
             console.log('✅ Copied _app assets');
-
-            // Nu paths opnieuw fixen naar lokale _app (niet ../_app)
-            html = fs.readFileSync(storyIndexPath, 'utf-8');
-            html = html.replace(/\.\.\/_app\//g, './_app/');
-            fs.writeFileSync(storyIndexPath, html);
-            console.log('✅ Updated paths to local _app folder');
+        } else {
+            console.warn('⚠️ No _app folder found!');
         }
 
-        // Zip vanaf story folder (zodat index.html in root van zip staat)
+        // Copy static assets (favicon, robots.txt, etc.)
+        const staticFiles = ['robots.txt', 'favicon.svg', 'favicon.png', 'favicon.ico'];
+        staticFiles.forEach(file => {
+            const srcPath = path.join(buildDir, file);
+            const destPath = path.join(tempDir, file);
+            if (fs.existsSync(srcPath)) {
+                fs.copyFileSync(srcPath, destPath);
+                console.log(`  ✓ Copied ${file}`);
+            }
+        });
+
+        // ✅ Zip vanaf temp folder
         const zipPath = path.join(rootDir, `${job.id}.zip`);
-        console.log(`📦 Creating zip from story folder...`);
-        execSync(`zip -r "${zipPath}" .`, { cwd: storyDir, stdio: 'inherit' });
+        console.log(`📦 Creating zip from temp folder...`);
+        execSync(`zip -r "${zipPath}" .`, { cwd: tempDir, stdio: 'inherit' });
+
+        // Cleanup
+        fs.rmSync(tempDir, { recursive: true });
 
         if (!fs.existsSync(zipPath)) {
             throw new Error('Zip file was not created!');
