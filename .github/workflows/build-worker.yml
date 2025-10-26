@@ -31,6 +31,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PUBLIC_GTM_ID: ${{ secrets.PUBLIC_GTM_ID }}
-          SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}  # ✅ NIEUW: Voor Gist API
-          SECRET_INDEX_GIST_ID: ${{ secrets.SECRET_INDEX_GIST_ID }}  # ✅ NIEUW: Index Gist ID
+          SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+          SECRET_INDEX_GIST_ID: ${{ secrets.SECRET_INDEX_GIST_ID }}
         run: node scripts/process-queue.js

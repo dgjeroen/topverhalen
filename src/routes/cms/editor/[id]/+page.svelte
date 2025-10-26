@@ -3,6 +3,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
+	import TextFrameIcons from '$lib/assets/icons/TextFrameIcons.svelte';
+	import IconButton from '../../IconButton.svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -49,6 +51,13 @@
 				};
 			case 'audio':
 				return { url: '', title: '', description: '', image: '' };
+			case 'textframe':
+				return {
+					width: 'narrow',
+					heading: '',
+					text: '',
+					image: null
+				};
 			case 'colofon':
 				return { items: [{ functie: '', namen: '' }] };
 			default:
@@ -513,6 +522,7 @@
 	onDestroy(stopPolling);
 </script>
 
+<TextFrameIcons />
 <svelte:head>
 	<title>Editor - {data.project.storyName}</title>
 	<link
@@ -695,6 +705,18 @@
 				</div>
 
 				<hr />
+
+				<div class="block" data-type="textframe">
+					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						></path>
+					</svg>
+					<span>Tekstkader</span>
+				</div>
 
 				<div class="block" data-type="timeline">
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1164,6 +1186,242 @@
 										>
 											Voeg afbeelding toe
 										</button>
+									</div>
+								{:else if block.type === 'textframe'}
+									<div class="textframe-editor">
+										<!-- Heading Input -->
+										<div class="control-group">
+											<label class="control-label" for="textframe-heading-{block.id}">
+												Koptekst (optioneel)
+											</label>
+											<input
+												id="textframe-heading-{block.id}"
+												type="text"
+												bind:value={block.content.heading}
+												onchange={saveProject}
+												placeholder="Voer een koptekst in..."
+											/>
+										</div>
+
+										<!-- Text Content -->
+										<div class="control-group">
+											<label class="control-label" for="textframe-text-{block.id}">
+												Tekst
+												<span class="label-hint"
+													>(ondersteunt Markdown: **vet**, *cursief*, etc.)</span
+												>
+											</label>
+											<textarea
+												id="textframe-text-{block.id}"
+												bind:value={block.content.text}
+												onchange={saveProject}
+												rows="8"
+												placeholder="Voer tekst in..."
+											></textarea>
+										</div>
+
+										<!-- Image Toggle -->
+										<div class="control-group">
+											<label class="checkbox-label">
+												<input
+													type="checkbox"
+													checked={!!block.content.image}
+													onchange={(e) => {
+														if (e.currentTarget.checked) {
+															block.content.image = {
+																url: '',
+																alt: '',
+																caption: '',
+																source: '',
+																layout: 'top-rect',
+																rounded: false
+															};
+														} else {
+															block.content.image = null;
+														}
+														saveProject();
+													}}
+												/>
+												<span>Afbeelding toevoegen</span>
+											</label>
+										</div>
+
+										<!-- Image Controls (conditional) -->
+										{#if block.content.image}
+											<div class="image-controls">
+												<!-- Image URL -->
+												<div class="control-group">
+													<label class="control-label" for="textframe-image-url-{block.id}">
+														Afbeelding URL
+													</label>
+													<input
+														id="textframe-image-url-{block.id}"
+														type="url"
+														bind:value={block.content.image.url}
+														onchange={saveProject}
+														placeholder="https://example.com/image.jpg"
+													/>
+												</div>
+
+												<!-- Image Alt Text -->
+												<div class="control-group">
+													<label class="control-label" for="textframe-image-alt-{block.id}">
+														Alt-tekst
+														<span class="label-hint">(beschrijving voor screenreaders)</span>
+													</label>
+													<input
+														id="textframe-image-alt-{block.id}"
+														type="text"
+														bind:value={block.content.image.alt}
+														onchange={saveProject}
+														placeholder="Beschrijving van de afbeelding"
+													/>
+												</div>
+
+												<!-- Width + Layout (single row) -->
+												<div class="control-group">
+													<label class="control-label">Breedte + Layout</label>
+													<div class="width-layout-row">
+														<!-- Width Controls -->
+														<div class="width-controls">
+															<IconButton
+																icon="icon-width-narrow"
+																label="Smalle layout (700px)"
+																active={block.content.width === 'narrow'}
+																onclick={() => {
+																	block.content.width = 'narrow';
+																	saveProject();
+																}}
+															/>
+															<IconButton
+																icon="icon-width-wide"
+																label="Brede layout (1200px)"
+																active={block.content.width === 'wide'}
+																onclick={() => {
+																	block.content.width = 'wide';
+																	saveProject();
+																}}
+															/>
+														</div>
+
+														<!-- Divider -->
+														<div class="divider"></div>
+
+														<!-- Layout Controls -->
+														<div class="layout-controls">
+															<IconButton
+																icon="icon-layout-top-rect"
+																label="Foto boven, kop + tekst onder"
+																active={block.content.image?.layout === 'top-rect'}
+																onclick={() => {
+																	if (block.content.image) {
+																		block.content.image.layout = 'top-rect';
+																		saveProject();
+																	}
+																}}
+															/>
+															<IconButton
+																icon="icon-layout-top-rect-bottom"
+																label="Kop + tekst boven, foto onderaan"
+																active={block.content.image?.layout === 'top-rect-bottom'}
+																onclick={() => {
+																	if (block.content.image) {
+																		block.content.image.layout = 'top-rect-bottom';
+																		saveProject();
+																	}
+																}}
+															/>
+															<IconButton
+																icon="icon-layout-inline-left"
+																label="Kop boven, foto links (50%)"
+																active={block.content.image?.layout === 'inline-square-left'}
+																onclick={() => {
+																	if (block.content.image) {
+																		block.content.image.layout = 'inline-square-left';
+																		saveProject();
+																	}
+																}}
+															/>
+															<IconButton
+																icon="icon-layout-inline-right"
+																label="Kop boven, foto rechts (50%)"
+																active={block.content.image?.layout === 'inline-square-right'}
+																onclick={() => {
+																	if (block.content.image) {
+																		block.content.image.layout = 'inline-square-right';
+																		saveProject();
+																	}
+																}}
+															/>
+														</div>
+													</div>
+												</div>
+
+												<!-- Rounded Toggle -->
+												<div class="control-group">
+													<label class="checkbox-label">
+														<input
+															type="checkbox"
+															bind:checked={block.content.image.rounded}
+															onchange={saveProject}
+														/>
+														<span>Toon afbeelding rond</span>
+													</label>
+												</div>
+
+												<!-- Image Caption (disabled bij inline + rounded) -->
+												<div class="control-group">
+													<label
+														class="control-label"
+														for="textframe-image-caption-{block.id}"
+														class:disabled={block.content.image.layout.startsWith('inline') &&
+															block.content.image.rounded}
+													>
+														Onderschrift (optioneel)
+														{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
+															<span class="label-hint disabled-hint"
+																>(niet zichtbaar bij ronde inline afbeelding)</span
+															>
+														{/if}
+													</label>
+													<input
+														id="textframe-image-caption-{block.id}"
+														type="text"
+														bind:value={block.content.image.caption}
+														onchange={saveProject}
+														placeholder="Onderschrift bij de afbeelding"
+														disabled={block.content.image.layout.startsWith('inline') &&
+															block.content.image.rounded}
+													/>
+												</div>
+
+												<!-- Image Source (disabled bij inline + rounded) -->
+												<div class="control-group">
+													<label
+														class="control-label"
+														for="textframe-image-source-{block.id}"
+														class:disabled={block.content.image.layout.startsWith('inline') &&
+															block.content.image.rounded}
+													>
+														Bron (optioneel)
+														{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
+															<span class="label-hint disabled-hint"
+																>(niet zichtbaar bij ronde inline afbeelding)</span
+															>
+														{/if}
+													</label>
+													<input
+														id="textframe-image-source-{block.id}"
+														type="text"
+														bind:value={block.content.image.source}
+														onchange={saveProject}
+														placeholder="Foto: Naam Fotograaf"
+														disabled={block.content.image.layout.startsWith('inline') &&
+															block.content.image.rounded}
+													/>
+												</div>
+											</div>
+										{/if}
 									</div>
 								{:else if block.type === 'timeline'}
 									<div class="timeline-editor">
@@ -2515,5 +2773,154 @@
 	.btn-publish:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+	/* TextFrame Editor */
+	.textframe-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.control-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.control-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text, #374151);
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+	}
+
+	.label-hint {
+		font-size: 0.75rem;
+		font-weight: 400;
+		color: var(--color-text-secondary, #6b7280);
+	}
+
+	/* Textarea: Zelfde font als input fields */
+	.textframe-editor textarea {
+		font-family: inherit;
+		font-size: inherit;
+		line-height: 1.5;
+	}
+
+	/* Width + Layout Row */
+	.width-layout-row {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.width-controls {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.divider {
+		width: 1px;
+		height: 44px;
+		background: var(--color-border, #e5e7eb);
+		flex-shrink: 0;
+	}
+
+	.layout-controls {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		flex: 1;
+	}
+
+	/* Responsive: Stack width + layout op mobiel */
+	@media (max-width: 768px) {
+		.width-layout-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.divider {
+			width: 100%;
+			height: 1px;
+		}
+
+		.layout-controls {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	/* Checkbox Label */
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		user-select: none;
+		font-size: 0.875rem;
+		color: var(--color-text, #374151);
+		padding: 0.5rem 0;
+		transition: color 0.15s ease;
+	}
+
+	.checkbox-label:hover {
+		color: var(--color-text-dark, #111827);
+	}
+
+	.checkbox-label input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+		margin: 0;
+		cursor: pointer;
+		accent-color: var(--color-primary, #d10a10);
+	}
+
+	/* Image Controls Container */
+	.image-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding: 1.5rem;
+		background: var(--color-bg-secondary, #f9fafb);
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 8px;
+		margin-top: 0.25rem;
+	}
+
+	/* Input Fields Focus States */
+	.textframe-editor input[type='text'],
+	.textframe-editor input[type='url'],
+	.textframe-editor textarea {
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.textframe-editor input[type='text']:focus,
+	.textframe-editor input[type='url']:focus,
+	.textframe-editor textarea:focus {
+		border-color: var(--color-primary, #d10a10);
+		box-shadow: 0 0 0 3px rgba(209, 10, 16, 0.1);
+		outline: none;
+	}
+	.control-label.disabled {
+		color: var(--color-text-disabled, #9ca3af);
+	}
+
+	.disabled-hint {
+		color: var(--color-text-disabled, #9ca3af);
+		font-style: italic;
+	}
+
+	/* Disabled input styling */
+	.textframe-editor input:disabled {
+		background-color: var(--color-bg-disabled, #f3f4f6);
+		color: var(--color-text-disabled, #9ca3af);
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 </style>
