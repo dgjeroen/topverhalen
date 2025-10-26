@@ -1,3 +1,4 @@
+<!-- HeroVideo.svelte -->
 <script lang="ts">
 	import SwitchLogo from './SwitchLogo.svelte';
 	import type { HeroVideoContent } from '$lib/types';

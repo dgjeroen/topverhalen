@@ -107,6 +107,25 @@ export interface MediaPairContent {
     items: [MediaItem, MediaItem];
 }
 
+// src/lib/types.ts (update TextFrameContent interface)
+export interface TextFrameContent {
+    width: 'narrow' | 'wide';
+    heading?: string;
+    text: string;
+    image?: {
+        url: string;
+        alt: string;
+        caption?: string;
+        source?: string;
+        layout:
+        | 'top-rect'                // Foto boven, kop + tekst onder
+        | 'top-rect-bottom'         // Kop + tekst boven, foto onderaan
+        | 'inline-square-left'      // Kop boven, foto links (50% width)
+        | 'inline-square-right';    // Kop boven, foto rechts (50% width)
+        rounded: boolean;
+    } | null;
+}
+
 export interface TimelineContent {
     timelines: TimelineItem[];
 }
@@ -127,7 +146,8 @@ export type ContentBlock =
     | { type: 'slider'; content: SliderContent }
     | { type: 'colofon'; content: ColofonContent }
     | { type: 'timeline'; content: TimelineContent }
-    | { type: 'mediaPair'; content: MediaPairContent };
+    | { type: 'mediaPair'; content: MediaPairContent }
+    | { type: 'textframe'; content: TextFrameContent };
 
 // =================================================================
 // 4. HET HOOFDTYPE DAT DE VOLLEDIGE STRUCTUUR VAN content.json BESCHRIJFT

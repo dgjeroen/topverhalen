@@ -24,6 +24,7 @@
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"@types/hls.js": "^0.13.3",
 		"@types/jsonwebtoken": "^9.0.10",
+		"@types/marked": "^5.0.2",
 		"@types/node": "^24.7.0",
 		"@types/sortablejs": "^1.15.8",
 		"cross-env": "^10.1.0",
@@ -48,6 +49,7 @@
 		"@vercel/client": "^17.0.3",
 		"hls.js": "^1.6.13",
 		"jsonwebtoken": "^9.0.2",
+		"marked": "^16.4.1",
 		"nanoid": "^5.1.6",
 		"resend": "^6.1.2",
 		"sortablejs": "^1.15.6"
