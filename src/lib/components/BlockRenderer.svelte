@@ -12,6 +12,7 @@
 	import HeroVideo from './HeroVideo.svelte';
 	import Timeline from './Timeline.svelte';
 	import MediaPair from './MediaPair.svelte';
+	import TextFrame from './TextFrame.svelte'; // ✅ NIEUW
 	import Unsupported from './Unsupported.svelte';
 	import type { ContentBlock } from '$lib/types';
 
@@ -32,15 +33,12 @@
 		slider: ImageSlider,
 		gallery: ImageGrid,
 		timeline: Timeline,
-		mediaPair: MediaPair
+		mediaPair: MediaPair,
+		textframe: TextFrame // ✅ NIEUW
 	};
 	const ComponentToRender = componentMap[block.type] || Unsupported;
 
-	// FIX: 'timeline' uit de noWrapperBlocks array halen
-	const noWrapperBlocks = ['heroVideo'];
-	// FIX: 'timeline' uit de noWrapperBlocks array halen
-	//	const wideBlocks = ['quote', 'video', 'slider', 'gallery', 'image'];
-
+	const noWrapperBlocks = ['heroVideo', 'textframe']; // ✅ TextFrame heeft eigen wrapper
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 </script>
 

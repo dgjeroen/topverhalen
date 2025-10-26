@@ -1,3 +1,4 @@
+<!-- Image.svelte-->
 <script lang="ts">
 	import type { ImageContent } from '$lib/types';
 	import ImageStandard from './ImageStandard.svelte';

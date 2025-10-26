@@ -1,3 +1,4 @@
+<!-- TextBlock.svelte -->
 <script lang="ts">
 	// We maken de interface wat algemener, passend bij de nieuwe componentnaam.
 	import type { TextBlockContent } from '$lib/types'; // Je moet wellicht ParagraphsContent hernoemen in je types.ts
