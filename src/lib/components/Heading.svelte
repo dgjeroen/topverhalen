@@ -5,7 +5,7 @@
 	let { text, level = 2 }: HeadingContent = $props();
 </script>
 
-<svelte:element this={`h${level}`} class="heading">
+<svelte:element this={`h${level}`} class="heading heading-{level}">
 	{text}
 </svelte:element>
 
@@ -14,7 +14,4 @@
 		margin: 0;
 		line-height: 1.3;
 	}
-
-	/* H2 styling wordt overgenomen van app.css via CSS variabelen */
-	/* H4 styling wordt overgenomen van app.css via CSS variabelen */
 </style>

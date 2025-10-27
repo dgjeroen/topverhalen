@@ -52,12 +52,18 @@
 
 	const config = $derived(configs[level as 'h2' | 'h4']);
 
-	// ✅ FIX: Local state voor checkbox (force reactivity)
 	let showBackground = $state(theme[`${level}-background-enabled`] === 'true');
 
-	// ✅ Sync local state met theme
+	// ✅ Sync + cleanup
 	$effect(() => {
-		showBackground = theme[`${level}-background-enabled`] === 'true';
+		const enabled = theme[`${level}-background-enabled`] === 'true';
+		showBackground = enabled;
+
+		if (!enabled && level === 'h4') {
+			delete theme[`${level}-background-color`];
+			delete theme[`${level}-background-text-color`];
+			delete theme[`${level}-background-padding`];
+		}
 	});
 </script>
 
@@ -139,9 +145,24 @@
 					<input
 						type="checkbox"
 						bind:checked={showBackground}
-						onchange={(e) => {
-							theme[`${level}-background-enabled`] = e.currentTarget.checked ? 'true' : '';
-							onsave();
+						onchange={async (e) => {
+							const checked = e.currentTarget.checked;
+							theme[`${level}-background-enabled`] = checked ? 'true' : '';
+
+							if (!checked) {
+								delete theme[`${level}-background-color`];
+								delete theme[`${level}-background-text-color`];
+								delete theme[`${level}-background-padding`];
+							} else {
+								theme[`${level}-background-color`] =
+									theme[`${level}-background-color`] || '#000000';
+								theme[`${level}-background-text-color`] =
+									theme[`${level}-background-text-color`] || '#ffffff';
+								theme[`${level}-background-padding`] =
+									theme[`${level}-background-padding`] || '0.2rem 0.5rem';
+							}
+
+							await onsave();
 						}}
 					/>
 					<span>Achtergrondkleur Balkje</span>
@@ -203,6 +224,8 @@
 		{/if}
 	</div>
 </div>
+
+<!-- ... bestaande styles ... -->
 
 <style>
 	.style-editor {

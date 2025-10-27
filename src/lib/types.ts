@@ -220,6 +220,14 @@ export interface HeroVideoContent {
     textAlign?: 'top' | 'center' | 'bottom';
 }
 
+export interface ImageHeroContent {
+    url: string;
+    label?: string;
+    title: string;
+    source?: string;
+    textAlign?: 'top' | 'center' | 'bottom';
+}
+
 export interface GalleryContent {
     images: { url: string; caption: string; source: string }[];
     columns: number;
@@ -266,7 +274,6 @@ export interface MediaPairContent {
     items: [MediaItem, MediaItem];
 }
 
-// src/lib/types.ts (update TextFrameContent interface)
 export interface TextFrameContent {
     width: 'narrow' | 'wide';
     heading?: string;
@@ -302,6 +309,7 @@ export type ContentBlock =
     | { type: 'quote'; content: QuoteContent }
     | { type: 'audio'; content: AudioContent }
     | { type: 'heroVideo'; content: HeroVideoContent }
+    | { type: 'imageHero'; content: ImageHeroContent }
     | { type: 'gallery'; content: GalleryContent }
     | { type: 'video'; content: VideoContent }
     | { type: 'slider'; content: SliderContent }

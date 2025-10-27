@@ -161,15 +161,10 @@ h4 {
     font-style: var(--font-style-h4, normal);
     line-height: 1.3;
     margin: 0;
-    background-color: #000000;
-    color: #ffffff;
     width: fit-content;
-    padding: 0.2rem 0.5rem;
     background-color: var(--h4-background-color, transparent);
-    color: var(--h4-background-text-color, var(--color-text, #000000));
+    color: var(--h4-background-text-color, var(--color-subheading, #4b5563));
     padding: var(--h4-background-padding, 0);
-    width: fit-content;
-
 }
 
 /* ============================================= */

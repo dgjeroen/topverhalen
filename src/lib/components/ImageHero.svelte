@@ -1,44 +1,45 @@
+<!-- src/lib/components/ImageHero.svelte -->
 <script lang="ts">
 	import SwitchLogo from './SwitchLogo.svelte';
-	import type { HeroVideoContent } from '$lib/types';
-	import Hls from 'hls.js';
-	import { onMount, onDestroy } from 'svelte';
+	import type { ImageHeroContent } from '$lib/types';
 
-	let { url, label, title, source, textAlign = 'center' }: HeroVideoContent = $props();
+	let { url, label, title, source, textAlign = 'center' }: ImageHeroContent = $props();
 
 	let elementsVisible = $state(false);
-	let videoEl: HTMLVideoElement | undefined;
-	let hlsInstance: Hls | null = null;
-	const isHls = url.endsWith('.m3u8');
+	let y = $state(0);
+	let containerEl = $state<HTMLElement | undefined>(undefined);
+	let imgEl = $state<HTMLImageElement | undefined>(undefined);
+	let translateY = $state(0);
 
-	onMount(() => {
-		let timeout: ReturnType<typeof setTimeout> | undefined;
+	const startThreshold = 0.18;
+	const endThreshold = 0.82;
 
-		const showElements = () => {
-			elementsVisible = true;
-			if (timeout) clearTimeout(timeout);
-		};
+	$effect(() => {
+		const _ = y;
+		if (containerEl && imgEl) {
+			const { top, height: containerHeight } = containerEl.getBoundingClientRect();
+			const windowHeight = window.innerHeight;
+			const travelDistance = imgEl.clientHeight - containerHeight;
 
-		timeout = setTimeout(showElements, 1000);
-
-		const handlePlaying = () => {
-			showElements();
-		};
-		videoEl?.addEventListener('playing', handlePlaying);
-
-		if (isHls && Hls.isSupported()) {
-			hlsInstance = new Hls();
-			hlsInstance.loadSource(url);
-			if (videoEl) {
-				hlsInstance.attachMedia(videoEl);
+			if (travelDistance <= 0) {
+				translateY = 0;
+				return;
 			}
-		}
 
-		onDestroy(() => {
-			if (timeout) clearTimeout(timeout);
-			videoEl?.removeEventListener('playing', handlePlaying);
-			hlsInstance?.destroy();
-		});
+			const scrollProgress = (windowHeight - top) / (windowHeight + containerHeight);
+			const activeZoneProgress =
+				(scrollProgress - startThreshold) / (endThreshold - startThreshold);
+			const clampedProgress = Math.max(0, Math.min(1, activeZoneProgress));
+			translateY = clampedProgress * travelDistance * -1;
+		}
+	});
+
+	$effect(() => {
+		const timeout = setTimeout(() => {
+			elementsVisible = true;
+		}, 500);
+
+		return () => clearTimeout(timeout);
 	});
 
 	// ✅ FIX: Verbeterde scroll functie met fallback
@@ -49,11 +50,8 @@
 		let element = document.getElementById('content-start');
 
 		// Fallback: scroll naar volgende sibling van hero container
-		if (!element && videoEl) {
-			const heroContainer = videoEl.closest('.hero-container');
-			if (heroContainer) {
-				element = heroContainer.nextElementSibling as HTMLElement;
-			}
+		if (!element && containerEl) {
+			element = containerEl.nextElementSibling as HTMLElement;
 		}
 
 		// Fallback 2: scroll één viewport naar beneden
@@ -72,16 +70,19 @@
 	}
 </script>
 
-<div class="hero-container">
-	<video
-		bind:this={videoEl}
-		src={isHls ? undefined : url}
-		autoplay
-		muted
-		loop
-		playsinline
-		class="background-video"
-	></video>
+<svelte:window bind:scrollY={y} />
+
+<div class="hero-container" bind:this={containerEl}>
+	<div class="image-wrapper">
+		<img
+			bind:this={imgEl}
+			src={url}
+			alt={title}
+			class="background-image"
+			style:transform="translateY({translateY}px)"
+			loading="eager"
+		/>
+	</div>
 	<div class="overlay"></div>
 
 	<div class="hero-content" class:visible={elementsVisible} data-text-align={textAlign}>
@@ -124,16 +125,26 @@
 		position: relative;
 		display: flex;
 		color: var(--color-white);
+		overflow: hidden;
 	}
 
-	.background-video {
+	.image-wrapper {
 		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
 		z-index: -2;
+	}
+
+	.background-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 120%;
+		object-fit: cover;
+		will-change: transform;
 	}
 
 	.overlay {
@@ -158,16 +169,19 @@
 		text-align: left;
 	}
 
+	/* ✅ FIX: Centreer de title-container horizontaal */
 	.title-container {
 		flex-grow: 1;
 		display: flex;
 		flex-direction: column;
+		align-items: center; /* ✅ Horizontale centrering */
 		text-align: center;
 		opacity: 0;
 		transform: translateY(10px);
 		transition:
 			opacity 1.5s ease-out,
 			transform 1.5s ease-out;
+		width: 100%; /* ✅ Neem volledige breedte */
 	}
 
 	.title-container.visible {
@@ -175,7 +189,7 @@
 		transform: translateY(0);
 	}
 
-	/* Text alignment variants */
+	/* ✅ Text alignment variants */
 	[data-text-align='top'] .title-container {
 		justify-content: flex-start;
 		padding-top: var(--space-xl);
@@ -190,11 +204,13 @@
 		padding-bottom: var(--space-xl);
 	}
 
+	/* ✅ FIX: Zorg dat child elementen max-width respecteren */
 	.hero-title {
 		font-family: var(--font-family-quote);
 		font-weight: 700;
 		text-transform: uppercase;
 		max-width: 800px;
+		width: 100%; /* ✅ Neem beschikbare ruimte tot max-width */
 		line-height: 1.2;
 		margin-block: var(--space-m);
 	}
@@ -207,7 +223,7 @@
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
 		position: relative;
-		width: 100%;
+		width: 100%; /* ✅ Neem beschikbare ruimte */
 		max-width: 800px;
 	}
 
@@ -275,6 +291,17 @@
 		}
 		60% {
 			transform: translateY(-5px);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.hero-title {
+			font-size: var(--font-size-h2, 2rem);
+		}
+
+		.label,
+		.source {
+			font-size: 1rem;
 		}
 	}
 </style>
