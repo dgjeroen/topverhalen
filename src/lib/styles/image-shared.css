@@ -1,0 +1,39 @@
+/* src/lib/styles/image-shared.css */
+
+/* ============================================ */
+/* SHARED FIGCAPTION STYLING                   */
+/* ============================================ */
+figcaption {
+    padding-top: var(--image-caption-spacing, var(--space-s));
+    font-size: var(--image-caption-font-size, var(--font-size-s));
+    color: var(--image-caption-color, var(--color-text-muted));
+    display: block;
+    overflow: hidden;
+    text-align: var(--image-caption-align, left);
+}
+
+.caption {
+    display: inline;
+    font-weight: var(--image-caption-font-weight, 400);
+}
+
+.source {
+    font-style: var(--image-source-font-style, italic);
+    font-size: var(--image-source-font-size, var(--font-size-s));
+    color: var(--image-source-color, var(--color-text-muted));
+    font-weight: var(--image-source-font-weight, 400);
+    white-space: nowrap;
+    float: right;
+    margin-left: var(--space-xs, 0.5rem);
+}
+
+/* ============================================ */
+/* SHARED CONTAINER STYLING                    */
+/* ============================================ */
+.image-container,
+.image-button,
+.parallax-window {
+    border-radius: var(--image-border-radius, var(--border-radius-base, 8px));
+    overflow: hidden;
+    cursor: pointer;
+}

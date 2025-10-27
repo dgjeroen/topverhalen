@@ -12,7 +12,8 @@
 	import HeroVideo from './HeroVideo.svelte';
 	import Timeline from './Timeline.svelte';
 	import MediaPair from './MediaPair.svelte';
-	import TextFrame from './TextFrame.svelte'; // ✅ NIEUW
+	import TextFrame from './TextFrame.svelte';
+	import SubheadingSoccer from './SubheadingSoccer.svelte';
 	import Unsupported from './Unsupported.svelte';
 	import type { ContentBlock } from '$lib/types';
 
@@ -25,6 +26,7 @@
 		textblock: TextBlock,
 		heading: Heading,
 		subheading: Heading,
+		subheadingSoccer: SubheadingSoccer,
 		image: Image,
 		quote: Quote,
 		audio: Audio,
@@ -38,7 +40,7 @@
 	};
 	const ComponentToRender = componentMap[block.type] || Unsupported;
 
-	const noWrapperBlocks = ['heroVideo', 'textframe']; // ✅ TextFrame heeft eigen wrapper
+	const noWrapperBlocks = ['heroVideo', 'textframe'];
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 </script>
 
@@ -47,7 +49,7 @@
 {:else}
 	<div
 		class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}
-		class:is-linked-to-next={block.type === 'subheading'}
+		class:is-linked-to-next={block.type === 'subheading' || block.type === 'subheadingSoccer'}
 	>
 		<ComponentToRender {...block.content} />
 	</div>

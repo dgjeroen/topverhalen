@@ -1,3 +1,4 @@
+//src\routes\cms\api\projects\[id]\+server.ts
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getGist, updateGist } from '$lib/server/gist';
