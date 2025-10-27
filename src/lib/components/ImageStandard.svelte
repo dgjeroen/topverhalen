@@ -1,3 +1,4 @@
+<!-- src/lib/components/ImageStandard.svelte -->
 <script lang="ts">
 	import type { ImageContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
@@ -29,33 +30,27 @@
 </figure>
 
 <style>
+	@import '$lib/styles/image-shared.css';
+
 	figure {
 		margin: 0;
 	}
+
 	.image-container {
-		border-radius: var(--border-radius-base);
-		overflow: hidden;
 		line-height: 0;
-		cursor: pointer;
+		box-shadow: var(--image-box-shadow, none);
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease;
 	}
+
+	.image-container:hover {
+		transform: var(--image-hover-transform, translateY(-2px));
+		box-shadow: var(--image-hover-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+	}
+
 	img {
 		width: 100%;
 		display: block;
-	}
-	figcaption {
-		padding-top: var(--space-s);
-		font-size: var(--font-size-s);
-		color: var(--color-text-muted);
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-	}
-	.caption {
-		text-align: left;
-	}
-	.source {
-		text-align: right;
-		font-style: italic;
 	}
 </style>

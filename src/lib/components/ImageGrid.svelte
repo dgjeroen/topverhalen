@@ -1,3 +1,4 @@
+<!--src\lib\components\ImageGrid.svelte-->
 <script lang="ts">
 	import type { GalleryContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
@@ -36,7 +37,8 @@
 </div>
 
 <style>
-	/* --- DYNAMISCH BASIS GRID --- */
+	@import '$lib/styles/image-shared.css';
+
 	.gallery-grid {
 		display: grid;
 		gap: var(--space-m);
@@ -53,7 +55,6 @@
 		grid-row: 1 / -1;
 	}
 
-	/* --- GENERIEKE ITEM STIJLEN (ongewijzigd) --- */
 	.gallery-item {
 		margin: 0;
 		display: flex;
@@ -64,13 +65,18 @@
 		background: none;
 		border: none;
 		padding: 0;
-		cursor: pointer;
 		line-height: 0;
 		display: block;
 		width: 100%;
-		border-radius: var(--border-radius-base);
-		overflow: hidden;
 		flex-grow: 1;
+		box-shadow: var(--image-box-shadow, none);
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease;
+	}
+
+	.image-button:hover {
+		box-shadow: var(--image-hover-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
 	}
 
 	.image-button:focus-visible {
@@ -90,27 +96,6 @@
 		transform: scale(1.03);
 	}
 
-	/* AANGEPASTE CSS VOOR CAPTION EN SOURCE */
-	.caption-container {
-		padding-top: var(--space-s);
-		font-size: var(--font-size-s);
-		color: var(--color-text-muted);
-		display: block;
-		overflow: hidden; /* Belangrijk voor float-gedrag */
-	}
-
-	.caption {
-		display: inline;
-	}
-
-	.source {
-		font-style: italic;
-		white-space: nowrap;
-		float: right;
-		margin-left: var(--space-xs);
-	}
-
-	/* --- RESPONSIVITEIT --- */
 	@media (max-width: 768px) {
 		.gallery-grid {
 			grid-template-columns: 1fr;

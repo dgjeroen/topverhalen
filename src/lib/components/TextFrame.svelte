@@ -5,29 +5,41 @@
 
 	let { width, heading, text, image }: TextFrameContent = $props();
 
+	marked.use({
+		walkTokens(token) {
+			if (token.type === 'text' && typeof token.text === 'string') {
+				token.text = token.text.replace(/__([^_]+)__/g, '<u>$1</u>');
+			}
+		}
+	});
+
 	const parsedText = $derived(marked.parse(text, { breaks: true }));
 	const parsedHeading = $derived(heading ? marked.parseInline(heading) : '');
 
-	const imagePosition = $derived(image?.layout.startsWith('top') ? 'top' : 'inline');
+	// ✅ FIX: Check hidden property
+	const visibleImage = $derived(image && !image.hidden ? image : null);
 
-	const imageAlignment = $derived(image?.layout.includes('left') ? 'left' : 'right');
-
-	const photoFirst = $derived(image?.layout === 'top-rect');
-
-	// Toon caption/source NIET bij inline + rounded
-	const showCaption = $derived(image && (imagePosition === 'top' || !image.rounded));
+	const imagePosition = $derived(visibleImage?.layout.startsWith('top') ? 'top' : 'inline');
+	const imageAlignment = $derived(visibleImage?.layout.includes('left') ? 'left' : 'right');
+	const photoFirst = $derived(visibleImage?.layout === 'top-rect');
+	const showCaption = $derived(visibleImage && (imagePosition === 'top' || !visibleImage.rounded));
 </script>
 
 <div class="text-frame" class:wide={width === 'wide'}>
 	<div class="frame-content">
 		{#if imagePosition === 'top'}
-			{#if image && photoFirst}
+			{#if visibleImage && photoFirst}
 				<figure class="frame-image-top">
-					<img src={image.url} alt={image.alt} class:rounded={image.rounded} loading="lazy" />
-					{#if showCaption && (image.caption || image.source)}
+					<img
+						src={visibleImage.url}
+						alt={visibleImage.alt}
+						class:rounded={visibleImage.rounded}
+						loading="lazy"
+					/>
+					{#if showCaption && (visibleImage.caption || visibleImage.source)}
 						<figcaption>
-							<span class="caption">{image.caption}</span>
-							{#if image.source}<span class="source">{image.source}</span>{/if}
+							<span class="caption">{visibleImage.caption}</span>
+							{#if visibleImage.source}<span class="source">{visibleImage.source}</span>{/if}
 						</figcaption>
 					{/if}
 				</figure>
@@ -41,13 +53,18 @@
 				{@html parsedText}
 			</div>
 
-			{#if image && !photoFirst}
+			{#if visibleImage && !photoFirst}
 				<figure class="frame-image-top">
-					<img src={image.url} alt={image.alt} class:rounded={image.rounded} loading="lazy" />
-					{#if showCaption && (image.caption || image.source)}
+					<img
+						src={visibleImage.url}
+						alt={visibleImage.alt}
+						class:rounded={visibleImage.rounded}
+						loading="lazy"
+					/>
+					{#if showCaption && (visibleImage.caption || visibleImage.source)}
 						<figcaption>
-							<span class="caption">{image.caption}</span>
-							{#if image.source}<span class="source">{image.source}</span>{/if}
+							<span class="caption">{visibleImage.caption}</span>
+							{#if visibleImage.source}<span class="source">{visibleImage.source}</span>{/if}
 						</figcaption>
 					{/if}
 				</figure>
@@ -60,18 +77,23 @@
 					<h3 class="frame-heading">{@html parsedHeading}</h3>
 				{/if}
 
-				{#if image}
+				{#if visibleImage}
 					<figure
 						class="inline-image"
 						class:float-left={imageAlignment === 'left'}
 						class:float-right={imageAlignment === 'right'}
-						class:rounded={image.rounded}
+						class:rounded={visibleImage.rounded}
 					>
-						<img src={image.url} alt={image.alt} class:rounded={image.rounded} loading="lazy" />
-						{#if showCaption && (image.caption || image.source)}
+						<img
+							src={visibleImage.url}
+							alt={visibleImage.alt}
+							class:rounded={visibleImage.rounded}
+							loading="lazy"
+						/>
+						{#if showCaption && (visibleImage.caption || visibleImage.source)}
 							<figcaption>
-								<span class="caption">{image.caption}</span>
-								{#if image.source}<span class="source">{image.source}</span>{/if}
+								<span class="caption">{visibleImage.caption}</span>
+								{#if visibleImage.source}<span class="source">{visibleImage.source}</span>{/if}
 							</figcaption>
 						{/if}
 					</figure>
@@ -143,21 +165,26 @@
 
 	.frame-text :global(u),
 	.text-content :global(u) {
-		text-decoration: underline;
+		text-decoration: var(--text-underline-style, underline);
+		text-decoration-color: var(--text-underline-color, currentColor);
+		text-decoration-thickness: var(--text-underline-thickness, 1px);
+		text-underline-offset: var(--text-underline-offset, 2px);
 	}
 
 	.frame-text :global(a),
 	.text-content :global(a) {
-		color: var(--color-primary, #d10a10);
-		text-decoration: underline;
+		color: var(--text-link-color, var(--color-primary, #d10a10));
+		text-decoration: var(--text-link-decoration, underline);
+		text-decoration-thickness: var(--text-link-thickness, 1px);
+		text-underline-offset: var(--text-link-offset, 2px);
 		transition: color 0.15s ease;
 	}
 
 	.frame-text :global(a:hover),
 	.text-content :global(a:hover) {
-		color: var(--color-primary-dark, #a00808);
+		color: var(--text-link-hover-color, var(--color-primary-dark, #a00808));
+		text-decoration: var(--text-link-hover-decoration, none);
 	}
-
 	/* ========================================
 	   FIGURE & FIGCAPTION (zoals ImageStandard)
 	   ======================================== */

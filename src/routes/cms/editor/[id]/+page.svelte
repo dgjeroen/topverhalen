@@ -5,14 +5,134 @@
 	import type { PageData } from './$types';
 	import TextFrameIcons from '$lib/assets/icons/TextFrameIcons.svelte';
 	import IconButton from '../../IconButton.svelte';
+	import StyleComponentList from '$lib/components/cms/StyleComponentList.svelte';
+	import GeneralStyleEditor from '$lib/components/cms/editors/GeneralStyleEditor.svelte';
+	import HeadingStyleEditor from '$lib/components/cms/editors/HeadingStyleEditor.svelte';
+	import TextStyleEditor from '$lib/components/cms/editors/TextStyleEditor.svelte';
+	import QuoteStyleEditor from '$lib/components/cms/editors/QuoteStyleEditor.svelte';
+	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
+	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
+	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
+	import { tick } from 'svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
 	let canvasBlocks = $state<any[]>(data.project.data || []);
-	let toolboxEl: HTMLElement;
-	let canvasEl: HTMLElement;
+	let toolboxEl = $state<HTMLElement>();
+	let canvasEl = $state<HTMLElement>();
 	let canvasSortable: any;
+	let toolboxSortable: any;
 	let splideInstances = new Map<string, any>();
+	let activeTab = $state<'blocks' | 'styling'>('blocks');
+	let selectedStyleComponent = $state<string>('general');
+	let imageHidden = $state<Record<string, boolean>>({});
+
+	$effect(() => {
+		if (!data.project.theme) {
+			data.project.theme = {};
+		}
+	});
+	// ✅ NIEUW: Extract sortable init to function
+	async function initToolboxSortable() {
+		if (typeof window === 'undefined' || !toolboxEl) return;
+
+		const Sortable = (await import('sortablejs')).default;
+
+		if (toolboxSortable) {
+			try {
+				toolboxSortable.destroy();
+				toolboxSortable = null;
+			} catch (e) {
+				console.error('Toolbox sortable destroy failed:', e);
+			}
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		try {
+			toolboxSortable = new Sortable(toolboxEl, {
+				group: { name: 'shared', pull: 'clone', put: false },
+				animation: 150,
+				sort: false
+			});
+		} catch (e) {
+			console.error('Toolbox sortable init failed:', e);
+		}
+	}
+
+	async function initCanvasSortable() {
+		if (typeof window === 'undefined' || !canvasEl) return;
+
+		const Sortable = (await import('sortablejs')).default;
+
+		if (canvasSortable) {
+			try {
+				canvasSortable.destroy();
+				canvasSortable = null;
+			} catch (e) {
+				console.error('Canvas sortable destroy failed:', e);
+			}
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		try {
+			canvasSortable = new Sortable(canvasEl, {
+				group: { name: 'shared', pull: true, put: true },
+				animation: 150,
+				handle: '.drag-handle',
+				ghostClass: 'sortable-ghost',
+				onAdd: (evt) => {
+					const blockType = evt.item.dataset.type;
+					if (!blockType) {
+						evt.item.remove();
+						return;
+					}
+
+					const newBlock = createEditableBlock(blockType);
+					const newIndex = evt.newIndex ?? canvasBlocks.length;
+					canvasBlocks = [
+						...canvasBlocks.slice(0, newIndex),
+						newBlock,
+						...canvasBlocks.slice(newIndex)
+					];
+					evt.item.remove();
+
+					if (blockType === 'heroVideo' || blockType === 'video') {
+						setTimeout(() => initHlsPlayer(newBlock), 100);
+					}
+
+					if (['slider', 'gallery', 'timeline'].includes(blockType)) {
+						setTimeout(() => initSplideForBlock(newBlock.id, blockType), 150);
+					}
+				},
+				onUpdate: () => {
+					if (!canvasEl) return;
+
+					const newOrder: any[] = [];
+					Array.from(canvasEl.children).forEach((el) => {
+						const blockId = (el as HTMLElement).dataset.blockId;
+						const block = canvasBlocks.find((b) => b.id === blockId);
+						if (block) newOrder.push(block);
+					});
+					canvasBlocks = newOrder;
+				}
+			});
+		} catch (e) {
+			console.error('Canvas sortable init failed:', e);
+		}
+	}
+
+	async function switchToBlocksTab() {
+		activeTab = 'blocks';
+
+		await tick();
+		await tick();
+		await new Promise((resolve) => setTimeout(resolve, 200));
+
+		await initToolboxSortable();
+		await initCanvasSortable();
+	}
 
 	function createEditableBlock(type: string) {
 		const blockId = `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -26,6 +146,8 @@
 			case 'heading':
 				return { text: '', level: 2 };
 			case 'subheading':
+				return { text: '', level: 4 };
+			case 'subheadingSoccer':
 				return { text: '', level: 4 };
 			case 'textblock':
 				return { text: [''], isLead: false };
@@ -461,52 +583,11 @@
 		const Sortable = (await import('sortablejs')).default;
 
 		if (toolboxEl) {
-			new Sortable(toolboxEl, {
-				group: { name: 'shared', pull: 'clone', put: false },
-				animation: 150,
-				sort: false
-			});
+			await initToolboxSortable();
 		}
 
 		if (canvasEl) {
-			canvasSortable = new Sortable(canvasEl, {
-				group: { name: 'shared', pull: true, put: true },
-				animation: 150,
-				handle: '.drag-handle',
-				ghostClass: 'sortable-ghost',
-				onAdd: (evt) => {
-					const blockType = evt.item.dataset.type;
-					if (!blockType) {
-						evt.item.remove();
-						return;
-					}
-					const newBlock = createEditableBlock(blockType);
-					const newIndex = evt.newIndex ?? canvasBlocks.length;
-					canvasBlocks = [
-						...canvasBlocks.slice(0, newIndex),
-						newBlock,
-						...canvasBlocks.slice(newIndex)
-					];
-					evt.item.remove();
-
-					if (blockType === 'heroVideo' || blockType === 'video') {
-						setTimeout(() => initHlsPlayer(newBlock), 100);
-					}
-
-					if (['slider', 'gallery', 'timeline'].includes(blockType)) {
-						setTimeout(() => initSplideForBlock(newBlock.id, blockType), 150);
-					}
-				},
-				onUpdate: () => {
-					const newOrder: any[] = [];
-					Array.from(canvasEl.children).forEach((el) => {
-						const blockId = (el as HTMLElement).dataset.blockId;
-						const block = canvasBlocks.find((b) => b.id === blockId);
-						if (block) newOrder.push(block);
-					});
-					canvasBlocks = newOrder;
-				}
-			});
+			await initCanvasSortable();
 		}
 
 		canvasBlocks.forEach((block) => {
@@ -519,7 +600,23 @@
 		});
 	});
 	// Cleanup polling on component destroy
-	onDestroy(stopPolling);
+	onDestroy(() => {
+		stopPolling();
+		if (toolboxSortable) {
+			try {
+				toolboxSortable.destroy();
+			} catch (e) {
+				console.warn('Cleanup failed:', e);
+			}
+		}
+		if (canvasSortable) {
+			try {
+				canvasSortable.destroy();
+			} catch (e) {
+				console.warn('Cleanup failed:', e);
+			}
+		}
+	});
 </script>
 
 <TextFrameIcons />
@@ -581,1151 +678,1247 @@
 	<div class="editor-layout">
 		<!-- ===== FIXED TOOLBOX ===== -->
 		<aside class="toolbox">
-			<div class="toolbox-content" bind:this={toolboxEl}>
-				<h3>Blokken</h3>
+			<!-- ✅ TAB BUTTONS -->
+			<div class="toolbox-tabs">
+				<button class="tab-btn" class:active={activeTab === 'blocks'} onclick={switchToBlocksTab}>
+					Blokken
+				</button>
+				<button
+					class="tab-btn"
+					class:active={activeTab === 'styling'}
+					onclick={() => (activeTab = 'styling')}
+				>
+					Styling
+				</button>
+			</div>
 
-				<div class="block" data-type="heroVideo">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-						></path>
-					</svg>
-					<span>Hero Video</span>
-				</div>
+			<!-- ✅ TAB CONTENT -->
+			<div class="toolbox-content">
+				{#if activeTab === 'blocks'}
+					<!-- ✅ KEY BLOCK: Forceer DOM recreate -->
+					{#key activeTab}
+						<div bind:this={toolboxEl}>
+							<h3>Blokken</h3>
 
-				<hr />
+							<div class="block" data-type="heroVideo">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+									></path>
+								</svg>
+								<span>Hero Video</span>
+							</div>
 
-				<div class="block" data-type="heading">
-					<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor">H2</text>
-					</svg>
-					<span>Kop</span>
-				</div>
+							<hr />
 
-				<div class="block" data-type="subheading">
-					<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor">H4</text>
-					</svg>
-					<span>Tussenkop</span>
-				</div>
+							<div class="block" data-type="heading">
+								<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor"
+										>H2</text
+									>
+								</svg>
+								<span>Kop</span>
+							</div>
 
-				<div class="block" data-type="textblock">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						></path>
-					</svg>
-					<span>Tekstblok</span>
-				</div>
+							<div class="block" data-type="subheading">
+								<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor"
+										>H4</text
+									>
+								</svg>
+								<span>Tussenkop</span>
+							</div>
 
-				<div class="block" data-type="quote">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-						></path>
-					</svg>
-					<span>Citaat</span>
-				</div>
+							<div class="block" data-type="textblock">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4 6h16M4 12h16M4 18h16"
+									></path>
+								</svg>
+								<span>Tekstblok</span>
+							</div>
 
-				<hr />
+							<div class="block" data-type="quote">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+									></path>
+								</svg>
+								<span>Citaat</span>
+							</div>
 
-				<div class="block" data-type="image">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-						></path>
-					</svg>
-					<span>Afbeelding</span>
-				</div>
+							<hr />
 
-				<div class="block" data-type="video">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-						></path>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						></path>
-					</svg>
-					<span>Video</span>
-				</div>
+							<div class="block" data-type="image">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+									></path>
+								</svg>
+								<span>Afbeelding</span>
+							</div>
 
-				<div class="block" data-type="slider">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-						></path>
-					</svg>
-					<span>Fotoslider</span>
-				</div>
+							<div class="block" data-type="video">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+									></path>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									></path>
+								</svg>
+								<span>Video</span>
+							</div>
 
-				<div class="block" data-type="gallery">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"
-						></path>
-					</svg>
-					<span>Fotogrid</span>
-				</div>
+							<div class="block" data-type="slider">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+									></path>
+								</svg>
+								<span>Fotoslider</span>
+							</div>
 
-				<div class="block" data-type="mediaPaar">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-						></path>
-					</svg>
-					<span>Mediapaar</span>
-				</div>
+							<div class="block" data-type="gallery">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"
+									></path>
+								</svg>
+								<span>Fotogrid</span>
+							</div>
 
-				<hr />
+							<div class="block" data-type="mediaPaar">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+									></path>
+								</svg>
+								<span>Mediapaar</span>
+							</div>
 
-				<div class="block" data-type="textframe">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-						></path>
-					</svg>
-					<span>Tekstkader</span>
-				</div>
+							<hr />
 
-				<div class="block" data-type="timeline">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-						></path>
-					</svg>
-					<span>Tijdlijn</span>
-				</div>
+							<div class="block" data-type="textframe">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+									></path>
+								</svg>
+								<span>Tekstkader</span>
+							</div>
 
-				<div class="block" data-type="audio">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-						></path>
-					</svg>
-					<span>Audiospeler</span>
-				</div>
+							<div class="block" data-type="timeline">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+									></path>
+								</svg>
+								<span>Tijdlijn</span>
+							</div>
 
-				<div class="block" data-type="colofon">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						></path>
-					</svg>
-					<span>Colofon</span>
-				</div>
+							<div class="block" data-type="audio">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+									></path>
+								</svg>
+								<span>Audiospeler</span>
+							</div>
+
+							<div class="block" data-type="colofon">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									></path>
+								</svg>
+								<span>Colofon</span>
+							</div>
+							<hr />
+
+							<div class="block" data-type="subheadingSoccer">
+								<span style="font-size: 18px;">⚽</span>
+								<span>Tussenkop voetbal</span>
+							</div>
+						</div>
+					{/key}
+				{:else}
+					<!-- ✅ NIEUW: STYLING COMPONENT LIST -->
+					<StyleComponentList bind:selected={selectedStyleComponent} />
+				{/if}
 			</div>
 		</aside>
 
 		<!-- ===== SCROLLABLE CANVAS ===== -->
 		<main class="canvas">
-			<div class="canvas-wrapper" bind:this={canvasEl}>
-				{#if canvasBlocks.length === 0}
-					<div class="empty-canvas">
-						<p>Sleep hier je blokken om te beginnen...</p>
-					</div>
-				{:else}
-					{#each canvasBlocks as block (block.id)}
-						<div class="canvas-block" data-type={block.type} data-block-id={block.id}>
-							<div class="drag-handle">⋮⋮</div>
-							<button class="remove-btn" onclick={() => removeBlock(block.id)}>×</button>
-							<div class="content">
-								{#if block.type === 'heroVideo'}
-									<div class="hero-video-editor">
-										<div class="input-row">
-											<div class="input-col">
-												<span class="input-label">Video URL (.m3u8)</span>
-												<input
-													type="url"
-													placeholder="https://..."
-													bind:value={block.content.url}
-												/>
-											</div>
-											<div class="input-col">
-												<span class="input-label">Poster Afbeelding</span>
-												<input
-													type="url"
-													placeholder="https://..."
-													bind:value={block.content.poster}
-												/>
-											</div>
-										</div>
-
-										{#if block.content.url || block.content.poster}
+			{#if activeTab === 'blocks'}
+				<!-- BESTAANDE CANVAS -->
+				<div class="canvas-wrapper" bind:this={canvasEl}>
+					{#if canvasBlocks.length === 0}
+						<div class="empty-canvas">
+							<p>Sleep hier je blokken om te beginnen...</p>
+						</div>
+					{:else}
+						{#each canvasBlocks as block (block.id)}
+							<div class="canvas-block" data-type={block.type} data-block-id={block.id}>
+								<div class="drag-handle">⋮⋮</div>
+								<button class="remove-btn" onclick={() => removeBlock(block.id)}>×</button>
+								<div class="content">
+									{#if block.type === 'heroVideo'}
+										<div class="hero-video-editor">
 											<div class="input-row">
-												{#if block.content.url}
-													<div class="preview-col">
-														<video
-															id="hero-video-{block.id}"
-															poster={block.content.poster || ''}
-															controls
-															muted
-															loop
-															class="media-preview"
-														>
-															<track kind="captions" />
-														</video>
-													</div>
-												{/if}
-												{#if block.content.poster}
-													<div class="preview-col">
-														<img src={block.content.poster} alt="Poster" class="media-preview" />
-													</div>
-												{/if}
-											</div>
-										{/if}
-
-										<div class="input-row-split">
-											<div class="input-col-left">
-												<div class="input-group">
-													<span class="input-label">Label (optioneel)</span>
-													<input
-														type="text"
-														placeholder="SPECIAL"
-														bind:value={block.content.label}
-													/>
-												</div>
-												<div class="input-group">
-													<span class="input-label">Titel</span>
-													<input
-														type="text"
-														placeholder="Hoofdtitel"
-														bind:value={block.content.title}
-													/>
-												</div>
-												<div class="input-group">
-													<span class="input-label">Bron (verplicht)</span>
-													<input type="text" placeholder="ANP" bind:value={block.content.source} />
-												</div>
-											</div>
-
-											<div class="input-col-right">
-												<span class="input-label">Tekstpositie</span>
-												<div class="hero-align-picker">
-													<label class:active={block.content.textAlign === 'top'}>
-														<input type="radio" bind:group={block.content.textAlign} value="top" />
-														<div class="hero-align-icon">
-															<svg viewBox="0 0 24 24" fill="none">
-																<text
-																	x="12"
-																	y="8"
-																	text-anchor="middle"
-																	font-size="7"
-																	font-weight="600"
-																	fill="currentColor">TOP</text
-																>
-															</svg>
-														</div>
-													</label>
-													<label class:active={block.content.textAlign === 'center'}>
-														<input
-															type="radio"
-															bind:group={block.content.textAlign}
-															value="center"
-														/>
-														<div class="hero-align-icon">
-															<svg viewBox="0 0 24 24" fill="none">
-																<text
-																	x="12"
-																	y="14"
-																	text-anchor="middle"
-																	font-size="6"
-																	font-weight="600"
-																	fill="currentColor">CENTER</text
-																>
-															</svg>
-														</div>
-													</label>
-													<label class:active={block.content.textAlign === 'bottom'}>
-														<input
-															type="radio"
-															bind:group={block.content.textAlign}
-															value="bottom"
-														/>
-														<div class="hero-align-icon">
-															<svg viewBox="0 0 24 24" fill="none">
-																<text
-																	x="12"
-																	y="21"
-																	text-anchor="middle"
-																	font-size="6"
-																	font-weight="600"
-																	fill="currentColor">BOTTOM</text
-																>
-															</svg>
-														</div>
-													</label>
-												</div>
-											</div>
-										</div>
-									</div>
-								{:else if block.type === 'heading'}
-									<input
-										type="text"
-										placeholder="Tekst kop..."
-										bind:value={block.content.text}
-										class="block-input"
-									/>
-								{:else if block.type === 'subheading'}
-									<input
-										type="text"
-										placeholder="Tekst tussenkop..."
-										bind:value={block.content.text}
-										class="block-input block-input-subheading"
-									/>
-								{:else if block.type === 'textblock'}
-									<textarea
-										placeholder="Typ hier je tekst..."
-										bind:value={block.content.text[0]}
-										class="block-textarea"
-										rows="4"
-									></textarea>
-									<label class="lead-toggle">
-										<input type="checkbox" bind:checked={block.content.isLead} />
-										<span>Dit is een inleiding</span>
-									</label>
-								{:else if block.type === 'image'}
-									<input
-										type="url"
-										placeholder="Afbeeldings-URL..."
-										bind:value={block.content.url}
-										class="block-input"
-									/>
-									{#if block.content.url}
-										<img src={block.content.url} alt="" class="block-preview" />
-									{/if}
-									<textarea
-										placeholder="Bijschrift..."
-										bind:value={block.content.caption}
-										class="block-textarea"
-										rows="2"
-									></textarea>
-									<input
-										type="text"
-										placeholder="Bron..."
-										bind:value={block.content.source}
-										class="block-input"
-									/>
-									<label class="parallax-toggle">
-										<input type="checkbox" bind:checked={block.content.parallax} />
-										<span>Parallax-effect toepassen</span>
-									</label>
-								{:else if block.type === 'quote'}
-									<textarea
-										placeholder="Citaat tekst..."
-										bind:value={block.content.text}
-										class="block-textarea"
-										rows="3"
-									></textarea>
-									<input
-										type="text"
-										placeholder="Auteur..."
-										bind:value={block.content.author}
-										class="block-input"
-									/>
-								{:else if block.type === 'video'}
-									<div class="video-editor">
-										<div class="input-row">
-											<div class="input-col">
-												<span class="input-label">Video URL (YouTube of .m3u8)</span>
-												<input
-													type="url"
-													placeholder="https://..."
-													bind:value={block.content.url}
-												/>
-											</div>
-											<div class="input-col">
-												<span class="input-label">Poster (optioneel)</span>
-												<input
-													type="url"
-													placeholder="https://..."
-													bind:value={block.content.poster}
-												/>
-											</div>
-										</div>
-
-										{#if block.content.url || block.content.poster}
-											<div class="input-row">
-												{#if block.content.url}
-													<div class="preview-col">
-														<video
-															id="video-{block.id}"
-															poster={block.content.poster || ''}
-															controls
-															class="media-preview"
-														>
-															<track kind="captions" />
-														</video>
-													</div>
-												{/if}
-												{#if block.content.poster}
-													<div class="preview-col">
-														<img src={block.content.poster} alt="Poster" class="media-preview" />
-													</div>
-												{/if}
-											</div>
-										{/if}
-									</div>
-								{:else if block.type === 'slider'}
-									<div class="slider-editor">
-										<h4>Fotoslider ({block.content.images.length} foto's)</h4>
-										<div class="splide-container">
-											<div id="splide-{block.id}" class="splide">
-												<div class="splide__track">
-													<ul class="splide__list">
-														{#each block.content.images as slide, i (i)}
-															<li class="splide__slide">
-																<div class="slide-item">
-																	<div class="slide-header">
-																		<span class="editor-item-number">{i + 1}</span>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="prev"
-																			disabled={i === 0}
-																			onclick={() => moveSlide(block, i, 'prev')}
-																		>
-																			&lt;
-																		</button>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="next"
-																			disabled={i === block.content.images.length - 1}
-																			onclick={() => moveSlide(block, i, 'next')}
-																		>
-																			&gt;
-																		</button>
-																	</div>
-																	<button
-																		type="button"
-																		class="remove-slide-btn"
-																		onclick={() => removeSlide(block, i)}
-																	>
-																		×
-																	</button>
-																	<img
-																		src={slide.url || 'https://placehold.co/150x100'}
-																		alt=""
-																		class="slide-preview"
-																	/>
-																	<input
-																		type="url"
-																		placeholder="Afbeeldings-URL"
-																		bind:value={slide.url}
-																		class="slide-input"
-																	/>
-																	<textarea
-																		placeholder="Bijschrift (optioneel)"
-																		bind:value={slide.caption}
-																		class="slide-textarea"
-																		rows="2"
-																	></textarea>
-																	<input
-																		type="text"
-																		placeholder="Bron (verplicht)"
-																		bind:value={slide.source}
-																		class="slide-input"
-																	/>
-																</div>
-															</li>
-														{/each}
-													</ul>
-												</div>
-											</div>
-										</div>
-										<button type="button" class="add-slide-btn" onclick={() => addSlide(block)}>
-											Voeg slide toe
-										</button>
-									</div>
-								{:else if block.type === 'gallery'}
-									<div class="gallery-editor">
-										<div class="gallery-controls">
-											<div class="layout-picker">
-												<span class="input-label">Layout:</span>
-												<div class="layout-options">
-													<label class:active={block.content.columns === 2}>
-														<input type="radio" bind:group={block.content.columns} value={2} />
-														<div class="layout-icon cols-2">
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-													<label class:active={block.content.columns === 3}>
-														<input type="radio" bind:group={block.content.columns} value={3} />
-														<div class="layout-icon cols-3">
-															<div></div>
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-													<label class:active={block.content.columns === 4}>
-														<input type="radio" bind:group={block.content.columns} value={4} />
-														<div class="layout-icon cols-4">
-															<div></div>
-															<div></div>
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-												</div>
-											</div>
-											<span class="gallery-info">{getGalleryLayoutInfo(block)}</span>
-										</div>
-
-										<div class="splide-container">
-											<div id="splide-{block.id}" class="splide">
-												<div class="splide__track">
-													<ul class="splide__list">
-														{#each block.content.images as image, i (i)}
-															<li class="splide__slide">
-																<div class="slide-item">
-																	<div class="slide-header">
-																		<span class="editor-item-number">{i + 1}</span>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="prev"
-																			disabled={i === 0}
-																			onclick={() => moveSlide(block, i, 'prev')}
-																		>
-																			&lt;
-																		</button>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="next"
-																			disabled={i === block.content.images.length - 1}
-																			onclick={() => moveSlide(block, i, 'next')}
-																		>
-																			&gt;
-																		</button>
-																	</div>
-																	<button
-																		type="button"
-																		class="remove-slide-btn"
-																		onclick={() => removeSlide(block, i)}
-																	>
-																		×
-																	</button>
-																	<img
-																		src={image.url || 'https://placehold.co/150x100'}
-																		alt=""
-																		class="slide-preview"
-																	/>
-																	<input
-																		type="url"
-																		placeholder="Afbeeldings-URL"
-																		bind:value={image.url}
-																		class="slide-input"
-																	/>
-																	<textarea
-																		placeholder="Bijschrift (optioneel)"
-																		bind:value={image.caption}
-																		class="slide-textarea"
-																		rows="2"
-																	></textarea>
-																	<input
-																		type="text"
-																		placeholder="Bron (verplicht)"
-																		bind:value={image.source}
-																		class="slide-input"
-																	/>
-																</div>
-															</li>
-														{/each}
-													</ul>
-												</div>
-											</div>
-										</div>
-
-										<button
-											type="button"
-											class="add-slide-btn"
-											onclick={() => addSlide(block)}
-											disabled={isGalleryAddDisabled(block)}
-										>
-											Voeg afbeelding toe
-										</button>
-									</div>
-								{:else if block.type === 'textframe'}
-									<div class="textframe-editor">
-										<!-- Heading Input -->
-										<div class="control-group">
-											<label class="control-label" for="textframe-heading-{block.id}">
-												Koptekst (optioneel)
-											</label>
-											<input
-												id="textframe-heading-{block.id}"
-												type="text"
-												bind:value={block.content.heading}
-												onchange={saveProject}
-												placeholder="Voer een koptekst in..."
-											/>
-										</div>
-
-										<!-- Text Content -->
-										<div class="control-group">
-											<label class="control-label" for="textframe-text-{block.id}">
-												Tekst
-												<span class="label-hint"
-													>(ondersteunt Markdown: **vet**, *cursief*, etc.)</span
-												>
-											</label>
-											<textarea
-												id="textframe-text-{block.id}"
-												bind:value={block.content.text}
-												onchange={saveProject}
-												rows="8"
-												placeholder="Voer tekst in..."
-											></textarea>
-										</div>
-
-										<!-- Image Toggle -->
-										<div class="control-group">
-											<label class="checkbox-label">
-												<input
-													type="checkbox"
-													checked={!!block.content.image}
-													onchange={(e) => {
-														if (e.currentTarget.checked) {
-															block.content.image = {
-																url: '',
-																alt: '',
-																caption: '',
-																source: '',
-																layout: 'top-rect',
-																rounded: false
-															};
-														} else {
-															block.content.image = null;
-														}
-														saveProject();
-													}}
-												/>
-												<span>Afbeelding toevoegen</span>
-											</label>
-										</div>
-
-										<!-- Image Controls (conditional) -->
-										{#if block.content.image}
-											<div class="image-controls">
-												<!-- Image URL -->
-												<div class="control-group">
-													<label class="control-label" for="textframe-image-url-{block.id}">
-														Afbeelding URL
-													</label>
-													<input
-														id="textframe-image-url-{block.id}"
-														type="url"
-														bind:value={block.content.image.url}
-														onchange={saveProject}
-														placeholder="https://example.com/image.jpg"
-													/>
-												</div>
-
-												<!-- Image Alt Text -->
-												<div class="control-group">
-													<label class="control-label" for="textframe-image-alt-{block.id}">
-														Alt-tekst
-														<span class="label-hint">(beschrijving voor screenreaders)</span>
-													</label>
-													<input
-														id="textframe-image-alt-{block.id}"
-														type="text"
-														bind:value={block.content.image.alt}
-														onchange={saveProject}
-														placeholder="Beschrijving van de afbeelding"
-													/>
-												</div>
-
-												<!-- Width + Layout (single row) -->
-												<div class="control-group">
-													<label class="control-label">Breedte + Layout</label>
-													<div class="width-layout-row">
-														<!-- Width Controls -->
-														<div class="width-controls">
-															<IconButton
-																icon="icon-width-narrow"
-																label="Smalle layout (700px)"
-																active={block.content.width === 'narrow'}
-																onclick={() => {
-																	block.content.width = 'narrow';
-																	saveProject();
-																}}
-															/>
-															<IconButton
-																icon="icon-width-wide"
-																label="Brede layout (1200px)"
-																active={block.content.width === 'wide'}
-																onclick={() => {
-																	block.content.width = 'wide';
-																	saveProject();
-																}}
-															/>
-														</div>
-
-														<!-- Divider -->
-														<div class="divider"></div>
-
-														<!-- Layout Controls -->
-														<div class="layout-controls">
-															<IconButton
-																icon="icon-layout-top-rect"
-																label="Foto boven, kop + tekst onder"
-																active={block.content.image?.layout === 'top-rect'}
-																onclick={() => {
-																	if (block.content.image) {
-																		block.content.image.layout = 'top-rect';
-																		saveProject();
-																	}
-																}}
-															/>
-															<IconButton
-																icon="icon-layout-top-rect-bottom"
-																label="Kop + tekst boven, foto onderaan"
-																active={block.content.image?.layout === 'top-rect-bottom'}
-																onclick={() => {
-																	if (block.content.image) {
-																		block.content.image.layout = 'top-rect-bottom';
-																		saveProject();
-																	}
-																}}
-															/>
-															<IconButton
-																icon="icon-layout-inline-left"
-																label="Kop boven, foto links (50%)"
-																active={block.content.image?.layout === 'inline-square-left'}
-																onclick={() => {
-																	if (block.content.image) {
-																		block.content.image.layout = 'inline-square-left';
-																		saveProject();
-																	}
-																}}
-															/>
-															<IconButton
-																icon="icon-layout-inline-right"
-																label="Kop boven, foto rechts (50%)"
-																active={block.content.image?.layout === 'inline-square-right'}
-																onclick={() => {
-																	if (block.content.image) {
-																		block.content.image.layout = 'inline-square-right';
-																		saveProject();
-																	}
-																}}
-															/>
-														</div>
-													</div>
-												</div>
-
-												<!-- Rounded Toggle -->
-												<div class="control-group">
-													<label class="checkbox-label">
-														<input
-															type="checkbox"
-															bind:checked={block.content.image.rounded}
-															onchange={saveProject}
-														/>
-														<span>Toon afbeelding rond</span>
-													</label>
-												</div>
-
-												<!-- Image Caption (disabled bij inline + rounded) -->
-												<div class="control-group">
-													<label
-														class="control-label"
-														for="textframe-image-caption-{block.id}"
-														class:disabled={block.content.image.layout.startsWith('inline') &&
-															block.content.image.rounded}
-													>
-														Onderschrift (optioneel)
-														{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
-															<span class="label-hint disabled-hint"
-																>(niet zichtbaar bij ronde inline afbeelding)</span
-															>
-														{/if}
-													</label>
-													<input
-														id="textframe-image-caption-{block.id}"
-														type="text"
-														bind:value={block.content.image.caption}
-														onchange={saveProject}
-														placeholder="Onderschrift bij de afbeelding"
-														disabled={block.content.image.layout.startsWith('inline') &&
-															block.content.image.rounded}
-													/>
-												</div>
-
-												<!-- Image Source (disabled bij inline + rounded) -->
-												<div class="control-group">
-													<label
-														class="control-label"
-														for="textframe-image-source-{block.id}"
-														class:disabled={block.content.image.layout.startsWith('inline') &&
-															block.content.image.rounded}
-													>
-														Bron (optioneel)
-														{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
-															<span class="label-hint disabled-hint"
-																>(niet zichtbaar bij ronde inline afbeelding)</span
-															>
-														{/if}
-													</label>
-													<input
-														id="textframe-image-source-{block.id}"
-														type="text"
-														bind:value={block.content.image.source}
-														onchange={saveProject}
-														placeholder="Foto: Naam Fotograaf"
-														disabled={block.content.image.layout.startsWith('inline') &&
-															block.content.image.rounded}
-													/>
-												</div>
-											</div>
-										{/if}
-									</div>
-								{:else if block.type === 'timeline'}
-									<div class="timeline-editor">
-										<h4>Tijdlijn ({block.content.timelines.length} items)</h4>
-
-										<div class="splide-container">
-											<div id="splide-{block.id}" class="splide">
-												<div class="splide__track">
-													<ul class="splide__list">
-														{#each block.content.timelines as item, i (i)}
-															<li class="splide__slide">
-																<div class="slide-item">
-																	<div class="slide-header">
-																		<span class="editor-item-number">{i + 1}</span>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="prev"
-																			disabled={i === 0}
-																			onclick={() => moveSlide(block, i, 'prev')}
-																		>
-																			&lt;
-																		</button>
-																		<button
-																			type="button"
-																			class="move-btn"
-																			data-direction="next"
-																			disabled={i === block.content.timelines.length - 1}
-																			onclick={() => moveSlide(block, i, 'next')}
-																		>
-																			&gt;
-																		</button>
-																	</div>
-																	<button
-																		type="button"
-																		class="remove-slide-btn"
-																		onclick={() => removeSlide(block, i)}
-																	>
-																		×
-																	</button>
-																	<input
-																		type="text"
-																		placeholder="Jaar / Datum"
-																		bind:value={item.year}
-																		class="slide-input"
-																	/>
-																	<input
-																		type="text"
-																		placeholder="Titel (optioneel)"
-																		bind:value={item.title}
-																		class="slide-input"
-																	/>
-																	<textarea
-																		placeholder="Omschrijving"
-																		bind:value={item.description}
-																		class="slide-textarea"
-																		rows="3"
-																	></textarea>
-																	<input
-																		type="url"
-																		placeholder="Afbeelding URL (optioneel)"
-																		bind:value={item.imageSrc}
-																		class="slide-input"
-																	/>
-																	{#if item.imageSrc}
-																		<img
-																			src={item.imageSrc}
-																			alt=""
-																			class="slide-preview"
-																			style="margin-top: 0.5rem;"
-																		/>
-																	{/if}
-																	<input
-																		type="text"
-																		placeholder="ALT-tekst voor afbeelding"
-																		bind:value={item.imageAlt}
-																		class="slide-input"
-																	/>
-																</div>
-															</li>
-														{/each}
-													</ul>
-												</div>
-											</div>
-										</div>
-
-										<button type="button" class="add-slide-btn" onclick={() => addSlide(block)}>
-											Voeg tijdlijn-item toe
-										</button>
-									</div>
-								{:else if block.type === 'mediaPaar'}
-									<div class="mediapaar-editor">
-										<div class="mediapaar-controls">
-											<button
-												type="button"
-												class="swap-btn"
-												onclick={() => swapMediaPaarItems(block)}
-											>
-												<svg
-													width="20"
-													height="20"
-													viewBox="0 0 24 24"
-													fill="none"
-													stroke="currentColor"
-													stroke-width="2"
-												>
-													<path d="M8 7h12M8 7l4-4M8 7l4 4M16 17H4M16 17l-4 4M16 17l-4-4" />
-												</svg>
-												Wissel
-											</button>
-
-											<div class="valign-picker">
-												<span class="input-label">Uitlijning:</span>
-												<div class="valign-options">
-													<label class:active={block.content.verticalAlign === 'top'}>
-														<input
-															type="radio"
-															bind:group={block.content.verticalAlign}
-															value="top"
-														/>
-														<div class="valign-icon top">
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-													<label class:active={block.content.verticalAlign === 'center'}>
-														<input
-															type="radio"
-															bind:group={block.content.verticalAlign}
-															value="center"
-														/>
-														<div class="valign-icon center">
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-													<label class:active={block.content.verticalAlign === 'bottom'}>
-														<input
-															type="radio"
-															bind:group={block.content.verticalAlign}
-															value="bottom"
-														/>
-														<div class="valign-icon bottom">
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-													<label class:active={block.content.verticalAlign === 'bottom-alt'}>
-														<input
-															type="radio"
-															bind:group={block.content.verticalAlign}
-															value="bottom-alt"
-														/>
-														<div class="valign-icon bottom-alt">
-															<div></div>
-															<div></div>
-														</div>
-													</label>
-												</div>
-											</div>
-										</div>
-
-										<div class="mediapaar-items">
-											{#each block.content.items as item, idx}
-												<div class="mediapaar-item">
-													<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
-													<select
-														class="type-select"
-														value={item.type}
-														onchange={(e) => toggleMediaPaarType(block, idx)}
-													>
-														<option value="image">Afbeelding</option>
-														<option value="video">Video</option>
-													</select>
-
+												<div class="input-col">
+													<span class="input-label">Video URL (.m3u8)</span>
 													<input
 														type="url"
-														placeholder="URL"
-														bind:value={item.url}
-														class="slide-input"
+														placeholder="https://..."
+														bind:value={block.content.url}
 													/>
+												</div>
+												<div class="input-col">
+													<span class="input-label">Poster Afbeelding</span>
+													<input
+														type="url"
+														placeholder="https://..."
+														bind:value={block.content.poster}
+													/>
+												</div>
+											</div>
 
-													{#if item.type === 'video'}
-														<input
-															type="url"
-															placeholder="Poster URL (voor video)"
-															bind:value={item.poster}
-															class="slide-input"
-														/>
+											{#if block.content.url || block.content.poster}
+												<div class="input-row">
+													{#if block.content.url}
+														<div class="preview-col">
+															<video
+																id="hero-video-{block.id}"
+																poster={block.content.poster || ''}
+																controls
+																muted
+																loop
+																class="media-preview"
+															>
+																<track kind="captions" />
+															</video>
+														</div>
 													{/if}
+													{#if block.content.poster}
+														<div class="preview-col">
+															<img src={block.content.poster} alt="Poster" class="media-preview" />
+														</div>
+													{/if}
+												</div>
+											{/if}
 
-													<textarea
-														placeholder="Bijschrift"
-														bind:value={item.caption}
-														class="slide-textarea"
-														rows="2"
-													></textarea>
-
-													{#if item.type === 'image'}
+											<div class="input-row-split">
+												<div class="input-col-left">
+													<div class="input-group">
+														<span class="input-label">Label (optioneel)</span>
 														<input
 															type="text"
-															placeholder="Bron"
-															bind:value={item.source}
-															class="slide-input"
+															placeholder="SPECIAL"
+															bind:value={block.content.label}
 														/>
-													{/if}
-
-													{#if item.url}
-														<div class="media-preview-container">
-															{#if item.type === 'image'}
-																<img src={item.url} alt="" class="media-preview-small" />
-															{:else}
-																<video
-																	src={item.url}
-																	poster={item.poster || ''}
-																	autoplay
-																	muted
-																	loop
-																	class="media-preview-small"
-																>
-																	<track kind="captions" />
-																</video>
-															{/if}
-														</div>
-													{/if}
+													</div>
+													<div class="input-group">
+														<span class="input-label">Titel</span>
+														<input
+															type="text"
+															placeholder="Hoofdtitel"
+															bind:value={block.content.title}
+														/>
+													</div>
+													<div class="input-group">
+														<span class="input-label">Bron (verplicht)</span>
+														<input
+															type="text"
+															placeholder="ANP"
+															bind:value={block.content.source}
+														/>
+													</div>
 												</div>
-											{/each}
+
+												<div class="input-col-right">
+													<span class="input-label">Tekstpositie</span>
+													<div class="hero-align-picker">
+														<label class:active={block.content.textAlign === 'top'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="top"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="8"
+																		text-anchor="middle"
+																		font-size="7"
+																		font-weight="600"
+																		fill="currentColor">TOP</text
+																	>
+																</svg>
+															</div>
+														</label>
+														<label class:active={block.content.textAlign === 'center'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="center"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="14"
+																		text-anchor="middle"
+																		font-size="6"
+																		font-weight="600"
+																		fill="currentColor">CENTER</text
+																	>
+																</svg>
+															</div>
+														</label>
+														<label class:active={block.content.textAlign === 'bottom'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="bottom"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="21"
+																		text-anchor="middle"
+																		font-size="6"
+																		font-weight="600"
+																		fill="currentColor">BOTTOM</text
+																	>
+																</svg>
+															</div>
+														</label>
+													</div>
+												</div>
+											</div>
 										</div>
-									</div>
-								{:else if block.type === 'audio'}
-									<div class="audio-editor">
-										<input
-											type="url"
-											placeholder="Afbeelding URL (optioneel)"
-											bind:value={block.content.image}
-											class="block-input"
-										/>
-										{#if block.content.image}
-											<img src={block.content.image} alt="" class="audio-image-preview" />
-										{/if}
+									{:else if block.type === 'heading'}
 										<input
 											type="text"
-											placeholder="Titel van de audio"
-											bind:value={block.content.title}
+											placeholder="Tekst kop..."
+											bind:value={block.content.text}
 											class="block-input"
 										/>
-										<textarea
-											placeholder="Beschrijving (optioneel)"
-											bind:value={block.content.description}
-											class="block-textarea"
-											rows="2"
-										></textarea>
+									{:else if block.type === 'subheading'}
+										<input
+											type="text"
+											placeholder="Tekst tussenkop..."
+											bind:value={block.content.text}
+											class="block-input block-input-subheading"
+										/>
+									{:else if block.type === 'subheadingSoccer'}
+										<div class="subheading-soccer-editor">
+											<input
+												type="text"
+												placeholder="Tekst tussenkop voetbal..."
+												bind:value={block.content.text}
+												class="block-input block-input-subheading"
+											/>
+											<div class="style-preview">
+												<div
+													class="preview-box"
+													style:background-color={data.project.theme?.['subheading-soccer-bg'] ||
+														'#000000'}
+												>
+													<span
+														style:color={data.project.theme?.['subheading-soccer-color'] ||
+															'#ffffff'}
+													>
+														{block.content.text || 'VOORBEELD'}
+													</span>
+												</div>
+												<p class="preview-hint">
+													Preview van je tussenkop (pas aan via Styling tab)
+												</p>
+											</div>
+										</div>
+									{:else if block.type === 'textblock'}
+										<div class="textblock-editor">
+											<!-- ✅ NIEUW: Markdown Help -->
+											<details class="markdown-help">
+												<summary>📝 Markdown Opmaak</summary>
+												<div class="markdown-examples">
+													<code>**vet**</code> → <strong>vet</strong><br />
+													<code>*cursief*</code> → <em>cursief</em><br />
+													<code>[link](url)</code> → <a href="javascript:void(0)">link</a><br />
+													<code>- lijst</code> → Ongenummerde lijst<br />
+													<code>1. lijst</code> → Genummerde lijst<br />
+													<code>&gt; quote</code> → Blockquote<br />
+													<code>`code`</code> → <code>inline code</code>
+												</div>
+											</details>
+
+											<textarea
+												placeholder="Typ hier je tekst..."
+												bind:value={block.content.text[0]}
+												class="block-textarea"
+												rows="4"
+											></textarea>
+											<label class="lead-toggle">
+												<input type="checkbox" bind:checked={block.content.isLead} />
+												<span>Dit is een inleiding</span>
+											</label>
+										</div>
+									{:else if block.type === 'image'}
 										<input
 											type="url"
-											placeholder="Audio URL (.mp3)"
+											placeholder="Afbeeldings-URL..."
 											bind:value={block.content.url}
 											class="block-input"
 										/>
 										{#if block.content.url}
-											<audio controls src={block.content.url} class="audio-player"></audio>
+											<img src={block.content.url} alt="" class="block-preview" />
 										{/if}
-									</div>
-								{:else if block.type === 'colofon'}
-									<div class="colofon-editor">
-										<h4>Colofon</h4>
-										<div class="colofon-items">
-											{#each block.content.items as item, i}
-												<div class="colofon-item">
+										<textarea
+											placeholder="Bijschrift..."
+											bind:value={block.content.caption}
+											class="block-textarea"
+											rows="2"
+										></textarea>
+										<input
+											type="text"
+											placeholder="Bron..."
+											bind:value={block.content.source}
+											class="block-input"
+										/>
+										<label class="parallax-toggle">
+											<input type="checkbox" bind:checked={block.content.parallax} />
+											<span>Parallax-effect toepassen</span>
+										</label>
+									{:else if block.type === 'quote'}
+										<textarea
+											placeholder="Citaat tekst..."
+											bind:value={block.content.text}
+											class="block-textarea"
+											rows="3"
+										></textarea>
+										<input
+											type="text"
+											placeholder="Auteur..."
+											bind:value={block.content.author}
+											class="block-input"
+										/>
+									{:else if block.type === 'video'}
+										<div class="video-editor">
+											<div class="input-row">
+												<div class="input-col">
+													<span class="input-label">Video URL (YouTube of .m3u8)</span>
 													<input
-														type="text"
-														placeholder="Functie"
-														bind:value={item.functie}
-														class="colofon-input"
+														type="url"
+														placeholder="https://..."
+														bind:value={block.content.url}
 													/>
-													<input
-														type="text"
-														placeholder="Naam/Namen"
-														bind:value={item.namen}
-														class="colofon-input"
-													/>
-													<button
-														type="button"
-														class="remove-colofon-btn"
-														onclick={() => removeColofonItem(block, i)}
-													>
-														×
-													</button>
 												</div>
-											{/each}
+												<div class="input-col">
+													<span class="input-label">Poster (optioneel)</span>
+													<input
+														type="url"
+														placeholder="https://..."
+														bind:value={block.content.poster}
+													/>
+												</div>
+											</div>
+
+											{#if block.content.url || block.content.poster}
+												<div class="input-row">
+													{#if block.content.url}
+														<div class="preview-col">
+															<video
+																id="video-{block.id}"
+																poster={block.content.poster || ''}
+																controls
+																class="media-preview"
+															>
+																<track kind="captions" />
+															</video>
+														</div>
+													{/if}
+													{#if block.content.poster}
+														<div class="preview-col">
+															<img src={block.content.poster} alt="Poster" class="media-preview" />
+														</div>
+													{/if}
+												</div>
+											{/if}
 										</div>
-										<button
-											type="button"
-											class="add-colofon-btn"
-											onclick={() => addColofonItem(block)}
-										>
-											Voeg rij toe
-										</button>
-									</div>
-								{/if}
+									{:else if block.type === 'slider'}
+										<div class="slider-editor">
+											<h4>Fotoslider ({block.content.images.length} foto's)</h4>
+											<div class="splide-container">
+												<div id="splide-{block.id}" class="splide">
+													<div class="splide__track">
+														<ul class="splide__list">
+															{#each block.content.images as slide, i (i)}
+																<li class="splide__slide">
+																	<div class="slide-item">
+																		<div class="slide-header">
+																			<span class="editor-item-number">{i + 1}</span>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="prev"
+																				disabled={i === 0}
+																				onclick={() => moveSlide(block, i, 'prev')}
+																			>
+																				&lt;
+																			</button>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="next"
+																				disabled={i === block.content.images.length - 1}
+																				onclick={() => moveSlide(block, i, 'next')}
+																			>
+																				&gt;
+																			</button>
+																		</div>
+																		<button
+																			type="button"
+																			class="remove-slide-btn"
+																			onclick={() => removeSlide(block, i)}
+																		>
+																			×
+																		</button>
+																		<img
+																			src={slide.url || 'https://placehold.co/150x100'}
+																			alt=""
+																			class="slide-preview"
+																		/>
+																		<input
+																			type="url"
+																			placeholder="Afbeeldings-URL"
+																			bind:value={slide.url}
+																			class="slide-input"
+																		/>
+																		<textarea
+																			placeholder="Bijschrift (optioneel)"
+																			bind:value={slide.caption}
+																			class="slide-textarea"
+																			rows="2"
+																		></textarea>
+																		<input
+																			type="text"
+																			placeholder="Bron (verplicht)"
+																			bind:value={slide.source}
+																			class="slide-input"
+																		/>
+																	</div>
+																</li>
+															{/each}
+														</ul>
+													</div>
+												</div>
+											</div>
+											<button type="button" class="add-slide-btn" onclick={() => addSlide(block)}>
+												Voeg slide toe
+											</button>
+										</div>
+									{:else if block.type === 'gallery'}
+										<div class="gallery-editor">
+											<div class="gallery-controls">
+												<div class="layout-picker">
+													<span class="input-label">Layout:</span>
+													<div class="layout-options">
+														<label class:active={block.content.columns === 2}>
+															<input type="radio" bind:group={block.content.columns} value={2} />
+															<div class="layout-icon cols-2">
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+														<label class:active={block.content.columns === 3}>
+															<input type="radio" bind:group={block.content.columns} value={3} />
+															<div class="layout-icon cols-3">
+																<div></div>
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+														<label class:active={block.content.columns === 4}>
+															<input type="radio" bind:group={block.content.columns} value={4} />
+															<div class="layout-icon cols-4">
+																<div></div>
+																<div></div>
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+													</div>
+												</div>
+												<span class="gallery-info">{getGalleryLayoutInfo(block)}</span>
+											</div>
+
+											<div class="splide-container">
+												<div id="splide-{block.id}" class="splide">
+													<div class="splide__track">
+														<ul class="splide__list">
+															{#each block.content.images as image, i (i)}
+																<li class="splide__slide">
+																	<div class="slide-item">
+																		<div class="slide-header">
+																			<span class="editor-item-number">{i + 1}</span>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="prev"
+																				disabled={i === 0}
+																				onclick={() => moveSlide(block, i, 'prev')}
+																			>
+																				&lt;
+																			</button>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="next"
+																				disabled={i === block.content.images.length - 1}
+																				onclick={() => moveSlide(block, i, 'next')}
+																			>
+																				&gt;
+																			</button>
+																		</div>
+																		<button
+																			type="button"
+																			class="remove-slide-btn"
+																			onclick={() => removeSlide(block, i)}
+																		>
+																			×
+																		</button>
+																		<img
+																			src={image.url || 'https://placehold.co/150x100'}
+																			alt=""
+																			class="slide-preview"
+																		/>
+																		<input
+																			type="url"
+																			placeholder="Afbeeldings-URL"
+																			bind:value={image.url}
+																			class="slide-input"
+																		/>
+																		<textarea
+																			placeholder="Bijschrift (optioneel)"
+																			bind:value={image.caption}
+																			class="slide-textarea"
+																			rows="2"
+																		></textarea>
+																		<input
+																			type="text"
+																			placeholder="Bron (verplicht)"
+																			bind:value={image.source}
+																			class="slide-input"
+																		/>
+																	</div>
+																</li>
+															{/each}
+														</ul>
+													</div>
+												</div>
+											</div>
+
+											<button
+												type="button"
+												class="add-slide-btn"
+												onclick={() => addSlide(block)}
+												disabled={isGalleryAddDisabled(block)}
+											>
+												Voeg afbeelding toe
+											</button>
+										</div>
+									{:else if block.type === 'textframe'}
+										<div class="textframe-editor">
+											<!-- Heading Input -->
+											<div class="control-group">
+												<label class="checkbox-label">
+													<input
+														type="checkbox"
+														checked={!!block.content.image && !block.content.image.hidden}
+														onchange={(e) => {
+															if (e.currentTarget.checked) {
+																// Restore of maak nieuw
+																if (!block.content.image) {
+																	block.content.image = {
+																		url: '',
+																		alt: '',
+																		caption: '',
+																		source: '',
+																		layout: 'top-rect',
+																		rounded: false,
+																		hidden: false
+																	};
+																} else {
+																	// Unhide bestaande image
+																	block.content.image.hidden = false;
+																}
+															} else {
+																// Hide maar verwijder niet
+																if (block.content.image) {
+																	block.content.image.hidden = true;
+																}
+															}
+															canvasBlocks = [...canvasBlocks]; // Trigger reactivity
+															saveProject();
+														}}
+													/>
+													<span>Afbeelding toevoegen</span>
+												</label>
+
+												{#if block.content.image?.hidden}
+													<p class="warning-hint">
+														💡 Afbeelding verborgen (data bewaard). Vink opnieuw aan om te
+														herstellen.
+													</p>
+												{/if}
+											</div>
+
+											<!-- Image controls conditie -->
+											{#if block.content.image && !block.content.image.hidden}
+												<div class="image-controls">
+													<!-- Image URL -->
+													<div class="control-group">
+														<label class="control-label" for="textframe-image-url-{block.id}">
+															Afbeelding URL
+														</label>
+														<input
+															id="textframe-image-url-{block.id}"
+															type="url"
+															bind:value={block.content.image.url}
+															onchange={saveProject}
+															placeholder="https://example.com/image.jpg"
+														/>
+													</div>
+
+													<!-- Image Alt Text -->
+													<div class="control-group">
+														<label class="control-label" for="textframe-image-alt-{block.id}">
+															Alt-tekst
+															<span class="label-hint">(beschrijving voor screenreaders)</span>
+														</label>
+														<input
+															id="textframe-image-alt-{block.id}"
+															type="text"
+															bind:value={block.content.image.alt}
+															onchange={saveProject}
+															placeholder="Beschrijving van de afbeelding"
+														/>
+													</div>
+
+													<!-- Width + Layout (single row) -->
+													<div class="control-group">
+														<label class="control-label">Breedte + Layout</label>
+														<div class="width-layout-row">
+															<!-- Width Controls -->
+															<div class="width-controls">
+																<IconButton
+																	icon="icon-width-narrow"
+																	label="Smalle layout (700px)"
+																	active={block.content.width === 'narrow'}
+																	onclick={() => {
+																		block.content.width = 'narrow';
+																		saveProject();
+																	}}
+																/>
+																<IconButton
+																	icon="icon-width-wide"
+																	label="Brede layout (1200px)"
+																	active={block.content.width === 'wide'}
+																	onclick={() => {
+																		block.content.width = 'wide';
+																		saveProject();
+																	}}
+																/>
+															</div>
+
+															<!-- Divider -->
+															<div class="divider"></div>
+
+															<!-- Layout Controls -->
+															<div class="layout-controls">
+																<IconButton
+																	icon="icon-layout-top-rect"
+																	label="Foto boven, kop + tekst onder"
+																	active={block.content.image?.layout === 'top-rect'}
+																	onclick={() => {
+																		if (block.content.image) {
+																			block.content.image.layout = 'top-rect';
+																			saveProject();
+																		}
+																	}}
+																/>
+																<IconButton
+																	icon="icon-layout-top-rect-bottom"
+																	label="Kop + tekst boven, foto onderaan"
+																	active={block.content.image?.layout === 'top-rect-bottom'}
+																	onclick={() => {
+																		if (block.content.image) {
+																			block.content.image.layout = 'top-rect-bottom';
+																			saveProject();
+																		}
+																	}}
+																/>
+																<IconButton
+																	icon="icon-layout-inline-left"
+																	label="Kop boven, foto links (50%)"
+																	active={block.content.image?.layout === 'inline-square-left'}
+																	onclick={() => {
+																		if (block.content.image) {
+																			block.content.image.layout = 'inline-square-left';
+																			saveProject();
+																		}
+																	}}
+																/>
+																<IconButton
+																	icon="icon-layout-inline-right"
+																	label="Kop boven, foto rechts (50%)"
+																	active={block.content.image?.layout === 'inline-square-right'}
+																	onclick={() => {
+																		if (block.content.image) {
+																			block.content.image.layout = 'inline-square-right';
+																			saveProject();
+																		}
+																	}}
+																/>
+															</div>
+														</div>
+													</div>
+
+													<!-- Rounded Toggle -->
+													<div class="control-group">
+														<label class="checkbox-label">
+															<input
+																type="checkbox"
+																bind:checked={block.content.image.rounded}
+																onchange={saveProject}
+															/>
+															<span>Toon afbeelding rond</span>
+														</label>
+													</div>
+
+													<!-- Image Caption (disabled bij inline + rounded) -->
+													<div class="control-group">
+														<label
+															class="control-label"
+															for="textframe-image-caption-{block.id}"
+															class:disabled={block.content.image.layout.startsWith('inline') &&
+																block.content.image.rounded}
+														>
+															Onderschrift (optioneel)
+															{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
+																<span class="label-hint disabled-hint"
+																	>(niet zichtbaar bij ronde inline afbeelding)</span
+																>
+															{/if}
+														</label>
+														<input
+															id="textframe-image-caption-{block.id}"
+															type="text"
+															bind:value={block.content.image.caption}
+															onchange={saveProject}
+															placeholder="Onderschrift bij de afbeelding"
+															disabled={block.content.image.layout.startsWith('inline') &&
+																block.content.image.rounded}
+														/>
+													</div>
+
+													<!-- Image Source (disabled bij inline + rounded) -->
+													<div class="control-group">
+														<label
+															class="control-label"
+															for="textframe-image-source-{block.id}"
+															class:disabled={block.content.image.layout.startsWith('inline') &&
+																block.content.image.rounded}
+														>
+															Bron (optioneel)
+															{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
+																<span class="label-hint disabled-hint"
+																	>(niet zichtbaar bij ronde inline afbeelding)</span
+																>
+															{/if}
+														</label>
+														<input
+															id="textframe-image-source-{block.id}"
+															type="text"
+															bind:value={block.content.image.source}
+															onchange={saveProject}
+															placeholder="Foto: Naam Fotograaf"
+															disabled={block.content.image.layout.startsWith('inline') &&
+																block.content.image.rounded}
+														/>
+													</div>
+												</div>
+											{/if}
+										</div>
+									{:else if block.type === 'timeline'}
+										<div class="timeline-editor">
+											<h4>Tijdlijn ({block.content.timelines.length} items)</h4>
+
+											<div class="splide-container">
+												<div id="splide-{block.id}" class="splide">
+													<div class="splide__track">
+														<ul class="splide__list">
+															{#each block.content.timelines as item, i (i)}
+																<li class="splide__slide">
+																	<div class="slide-item">
+																		<div class="slide-header">
+																			<span class="editor-item-number">{i + 1}</span>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="prev"
+																				disabled={i === 0}
+																				onclick={() => moveSlide(block, i, 'prev')}
+																			>
+																				&lt;
+																			</button>
+																			<button
+																				type="button"
+																				class="move-btn"
+																				data-direction="next"
+																				disabled={i === block.content.timelines.length - 1}
+																				onclick={() => moveSlide(block, i, 'next')}
+																			>
+																				&gt;
+																			</button>
+																		</div>
+																		<button
+																			type="button"
+																			class="remove-slide-btn"
+																			onclick={() => removeSlide(block, i)}
+																		>
+																			×
+																		</button>
+																		<input
+																			type="text"
+																			placeholder="Jaar / Datum"
+																			bind:value={item.year}
+																			class="slide-input"
+																		/>
+																		<input
+																			type="text"
+																			placeholder="Titel (optioneel)"
+																			bind:value={item.title}
+																			class="slide-input"
+																		/>
+																		<textarea
+																			placeholder="Omschrijving"
+																			bind:value={item.description}
+																			class="slide-textarea"
+																			rows="3"
+																		></textarea>
+																		<input
+																			type="url"
+																			placeholder="Afbeelding URL (optioneel)"
+																			bind:value={item.imageSrc}
+																			class="slide-input"
+																		/>
+																		{#if item.imageSrc}
+																			<img
+																				src={item.imageSrc}
+																				alt=""
+																				class="slide-preview"
+																				style="margin-top: 0.5rem;"
+																			/>
+																		{/if}
+																		<input
+																			type="text"
+																			placeholder="ALT-tekst voor afbeelding"
+																			bind:value={item.imageAlt}
+																			class="slide-input"
+																		/>
+																	</div>
+																</li>
+															{/each}
+														</ul>
+													</div>
+												</div>
+											</div>
+
+											<button type="button" class="add-slide-btn" onclick={() => addSlide(block)}>
+												Voeg tijdlijn-item toe
+											</button>
+										</div>
+									{:else if block.type === 'mediaPaar'}
+										<div class="mediapaar-editor">
+											<div class="mediapaar-controls">
+												<button
+													type="button"
+													class="swap-btn"
+													onclick={() => swapMediaPaarItems(block)}
+												>
+													<svg
+														width="20"
+														height="20"
+														viewBox="0 0 24 24"
+														fill="none"
+														stroke="currentColor"
+														stroke-width="2"
+													>
+														<path d="M8 7h12M8 7l4-4M8 7l4 4M16 17H4M16 17l-4 4M16 17l-4-4" />
+													</svg>
+													Wissel
+												</button>
+
+												<div class="valign-picker">
+													<span class="input-label">Uitlijning:</span>
+													<div class="valign-options">
+														<label class:active={block.content.verticalAlign === 'top'}>
+															<input
+																type="radio"
+																bind:group={block.content.verticalAlign}
+																value="top"
+															/>
+															<div class="valign-icon top">
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+														<label class:active={block.content.verticalAlign === 'center'}>
+															<input
+																type="radio"
+																bind:group={block.content.verticalAlign}
+																value="center"
+															/>
+															<div class="valign-icon center">
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+														<label class:active={block.content.verticalAlign === 'bottom'}>
+															<input
+																type="radio"
+																bind:group={block.content.verticalAlign}
+																value="bottom"
+															/>
+															<div class="valign-icon bottom">
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+														<label class:active={block.content.verticalAlign === 'bottom-alt'}>
+															<input
+																type="radio"
+																bind:group={block.content.verticalAlign}
+																value="bottom-alt"
+															/>
+															<div class="valign-icon bottom-alt">
+																<div></div>
+																<div></div>
+															</div>
+														</label>
+													</div>
+												</div>
+											</div>
+
+											<div class="mediapaar-items">
+												{#each block.content.items as item, idx}
+													<div class="mediapaar-item">
+														<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
+														<select
+															class="type-select"
+															value={item.type}
+															onchange={(e) => toggleMediaPaarType(block, idx)}
+														>
+															<option value="image">Afbeelding</option>
+															<option value="video">Video</option>
+														</select>
+
+														<input
+															type="url"
+															placeholder="URL"
+															bind:value={item.url}
+															class="slide-input"
+														/>
+
+														{#if item.type === 'video'}
+															<input
+																type="url"
+																placeholder="Poster URL (voor video)"
+																bind:value={item.poster}
+																class="slide-input"
+															/>
+														{/if}
+
+														<textarea
+															placeholder="Bijschrift"
+															bind:value={item.caption}
+															class="slide-textarea"
+															rows="2"
+														></textarea>
+
+														{#if item.type === 'image'}
+															<input
+																type="text"
+																placeholder="Bron"
+																bind:value={item.source}
+																class="slide-input"
+															/>
+														{/if}
+
+														{#if item.url}
+															<div class="media-preview-container">
+																{#if item.type === 'image'}
+																	<img src={item.url} alt="" class="media-preview-small" />
+																{:else}
+																	<video
+																		src={item.url}
+																		poster={item.poster || ''}
+																		autoplay
+																		muted
+																		loop
+																		class="media-preview-small"
+																	>
+																		<track kind="captions" />
+																	</video>
+																{/if}
+															</div>
+														{/if}
+													</div>
+												{/each}
+											</div>
+										</div>
+									{:else if block.type === 'audio'}
+										<div class="audio-editor">
+											<input
+												type="url"
+												placeholder="Afbeelding URL (optioneel)"
+												bind:value={block.content.image}
+												class="block-input"
+											/>
+											{#if block.content.image}
+												<img src={block.content.image} alt="" class="audio-image-preview" />
+											{/if}
+											<input
+												type="text"
+												placeholder="Titel van de audio"
+												bind:value={block.content.title}
+												class="block-input"
+											/>
+											<textarea
+												placeholder="Beschrijving (optioneel)"
+												bind:value={block.content.description}
+												class="block-textarea"
+												rows="2"
+											></textarea>
+											<input
+												type="url"
+												placeholder="Audio URL (.mp3)"
+												bind:value={block.content.url}
+												class="block-input"
+											/>
+											{#if block.content.url}
+												<audio controls src={block.content.url} class="audio-player"></audio>
+											{/if}
+										</div>
+									{:else if block.type === 'colofon'}
+										<div class="colofon-editor">
+											<h4>Colofon</h4>
+											<div class="colofon-items">
+												{#each block.content.items as item, i}
+													<div class="colofon-item">
+														<input
+															type="text"
+															placeholder="Functie"
+															bind:value={item.functie}
+															class="colofon-input"
+														/>
+														<input
+															type="text"
+															placeholder="Naam/Namen"
+															bind:value={item.namen}
+															class="colofon-input"
+														/>
+														<button
+															type="button"
+															class="remove-colofon-btn"
+															onclick={() => removeColofonItem(block, i)}
+														>
+															×
+														</button>
+													</div>
+												{/each}
+											</div>
+											<button
+												type="button"
+												class="add-colofon-btn"
+												onclick={() => addColofonItem(block)}
+											>
+												Voeg rij toe
+											</button>
+										</div>
+									{/if}
+								</div>
 							</div>
-						</div>
-					{/each}
-				{/if}
-			</div>
+						{/each}
+					{/if}
+				</div>
+			{:else}
+				<!-- ✅ NIEUW: STYLING EDITOR -->
+				<div class="styling-canvas">
+					{#if selectedStyleComponent === 'general'}
+						<GeneralStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{:else if selectedStyleComponent === 'heading'}
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={saveProject} level="h2" />
+					{:else if selectedStyleComponent === 'subheading'}
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={saveProject} level="h4" />
+					{:else if selectedStyleComponent === 'subheadingSoccer'}
+						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{:else if selectedStyleComponent === 'text'}
+						<TextStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{:else if selectedStyleComponent === 'quote'}
+						<QuoteStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{:else if selectedStyleComponent === 'image'}
+						<ImageStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{:else if selectedStyleComponent === 'slider'}
+						<SliderStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+					{/if}
+				</div>
+			{/if}
 		</main>
 	</div>
 </div>
@@ -2922,5 +3115,160 @@
 		color: var(--color-text-disabled, #9ca3af);
 		cursor: not-allowed;
 		opacity: 0.6;
+	}
+	/* ===== TAB STYLING ===== */
+	.toolbox-tabs {
+		display: flex;
+		gap: 0;
+		padding: 12px 12px 0 12px;
+		background: white;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.tab-btn {
+		flex: 1;
+		padding: 10px 16px;
+		border: none;
+		background: transparent;
+		color: #6b7280;
+		font-weight: 600;
+		font-size: 0.875rem;
+		cursor: pointer;
+		border-bottom: 2px solid transparent;
+		transition: all 0.15s;
+		position: relative;
+		bottom: -1px;
+	}
+
+	.tab-btn:hover {
+		color: #374151;
+		background: #f9fafb;
+	}
+
+	.tab-btn.active {
+		color: #d10a10;
+		border-bottom-color: #d10a10;
+		background: white;
+	}
+
+	.toolbox-content {
+		padding: 20px;
+		overflow-y: auto;
+		height: calc(100% - 45px);
+	}
+
+	.styling-canvas {
+		background: white;
+		min-height: 100%;
+		border-radius: 8px;
+		margin: 20px;
+	}
+
+	.coming-soon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 400px;
+		color: #9ca3af;
+		font-size: 1.125rem;
+	}
+	/* ===== SUBHEADING SOCCER EDITOR ===== */
+	.subheading-soccer-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.style-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.preview-box {
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		width: fit-content;
+		font-size: 1rem;
+		font-weight: 600;
+		text-transform: uppercase;
+	}
+
+	.preview-hint {
+		margin: 0;
+		font-size: 0.75rem;
+		color: #6b7280;
+		font-style: italic;
+	}
+	/* ===== MARKDOWN HELP ===== */
+	.textblock-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.markdown-help {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		padding: 0.75rem;
+		font-size: 0.8125rem;
+	}
+
+	.markdown-help summary {
+		cursor: pointer;
+		font-weight: 600;
+		color: #374151;
+		user-select: none;
+		list-style: none;
+	}
+
+	.markdown-help summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.markdown-help[open] summary {
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.markdown-examples {
+		line-height: 1.8;
+		color: #6b7280;
+	}
+
+	.markdown-examples code {
+		background: white;
+		padding: 0.125rem 0.375rem;
+		border-radius: 3px;
+		font-family: 'SF Mono', Monaco, monospace;
+		color: #d10a10;
+		font-size: 0.75rem;
+	}
+
+	.markdown-examples strong {
+		font-weight: 700;
+		color: #111827;
+	}
+
+	.markdown-examples em {
+		font-style: italic;
+		color: #111827;
+	}
+
+	.markdown-examples a {
+		color: #667eea;
+		text-decoration: underline;
+	}
+	.warning-hint {
+		margin: 0.5rem 0 0 0;
+		padding: 0.5rem 0.75rem;
+		background: #fef3c7;
+		border-left: 3px solid #f59e0b;
+		border-radius: 4px;
+		font-size: 0.8125rem;
+		color: #92400e;
+		line-height: 1.4;
 	}
 </style>
