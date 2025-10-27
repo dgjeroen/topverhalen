@@ -143,6 +143,14 @@
 		switch (type) {
 			case 'heroVideo':
 				return { url: '', poster: '', label: '', title: '', source: '', textAlign: 'center' };
+			case 'imageHero':
+				return {
+					url: '',
+					label: '',
+					title: 'Hero titel',
+					source: '',
+					textAlign: 'center'
+				};
 			case 'heading':
 				return { text: '', level: 2 };
 			case 'subheading':
@@ -709,7 +717,18 @@
 										d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
 									></path>
 								</svg>
-								<span>Hero Video</span>
+								<span>Hero video</span>
+							</div>
+							<div class="block" data-type="imageHero">
+								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+									></path>
+								</svg>
+								<span>Hero afbeelding</span>
 							</div>
 
 							<hr />
@@ -971,6 +990,119 @@
 														<input
 															type="text"
 															placeholder="ANP"
+															bind:value={block.content.source}
+														/>
+													</div>
+												</div>
+
+												<div class="input-col-right">
+													<span class="input-label">Tekstpositie</span>
+													<div class="hero-align-picker">
+														<label class:active={block.content.textAlign === 'top'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="top"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="8"
+																		text-anchor="middle"
+																		font-size="7"
+																		font-weight="600"
+																		fill="currentColor">TOP</text
+																	>
+																</svg>
+															</div>
+														</label>
+														<label class:active={block.content.textAlign === 'center'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="center"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="14"
+																		text-anchor="middle"
+																		font-size="6"
+																		font-weight="600"
+																		fill="currentColor">CENTER</text
+																	>
+																</svg>
+															</div>
+														</label>
+														<label class:active={block.content.textAlign === 'bottom'}>
+															<input
+																type="radio"
+																bind:group={block.content.textAlign}
+																value="bottom"
+															/>
+															<div class="hero-align-icon">
+																<svg viewBox="0 0 24 24" fill="none">
+																	<text
+																		x="12"
+																		y="21"
+																		text-anchor="middle"
+																		font-size="6"
+																		font-weight="600"
+																		fill="currentColor">BOTTOM</text
+																	>
+																</svg>
+															</div>
+														</label>
+													</div>
+												</div>
+											</div>
+										</div>
+									{:else if block.type === 'imageHero'}
+										<div class="image-hero-editor">
+											<div class="input-row">
+												<div class="input-col">
+													<span class="input-label">Afbeelding URL</span>
+													<input
+														type="url"
+														placeholder="https://picsum.photos/1920/1080"
+														bind:value={block.content.url}
+													/>
+												</div>
+											</div>
+
+											{#if block.content.url}
+												<div class="input-row">
+													<div class="preview-col">
+														<img src={block.content.url} alt="Hero preview" class="media-preview" />
+													</div>
+												</div>
+											{/if}
+
+											<div class="input-row-split">
+												<div class="input-col-left">
+													<div class="input-group">
+														<span class="input-label">Label (optioneel)</span>
+														<input
+															type="text"
+															placeholder="SPECIAL"
+															bind:value={block.content.label}
+														/>
+													</div>
+													<div class="input-group">
+														<span class="input-label">Titel</span>
+														<input
+															type="text"
+															placeholder="Hoofdtitel"
+															bind:value={block.content.title}
+														/>
+													</div>
+													<div class="input-group">
+														<span class="input-label">Bron (optioneel)</span>
+														<input
+															type="text"
+															placeholder="Foto: Naam Fotograaf"
 															bind:value={block.content.source}
 														/>
 													</div>
@@ -1375,6 +1507,43 @@
 										<div class="textframe-editor">
 											<!-- Heading Input -->
 											<div class="control-group">
+												<label class="control-label" for="textframe-heading-{block.id}">
+													Kop (optioneel)
+													<span class="label-hint">(wordt boven de tekst getoond)</span>
+												</label>
+												<input
+													id="textframe-heading-{block.id}"
+													type="text"
+													bind:value={block.content.heading}
+													onchange={saveProject}
+													placeholder="Voer een titel in..."
+												/>
+											</div>
+
+											<!-- ========================================
+       TEXT INPUT
+       ======================================== -->
+											<div class="control-group">
+												<label class="control-label" for="textframe-text-{block.id}">
+													Tekst
+													<span class="label-hint"
+														>(Markdown: **vet**, *cursief*, __onderstreept__)</span
+													>
+												</label>
+												<textarea
+													id="textframe-text-{block.id}"
+													bind:value={block.content.text}
+													onchange={saveProject}
+													rows="8"
+													placeholder="Schrijf je tekst hier...
+
+Markdown wordt ondersteund:
+**vet**, *cursief*, __onderstreept__"
+												></textarea>
+											</div>
+
+											<!--bestaand-->
+											<div class="control-group">
 												<label class="checkbox-label">
 													<input
 														type="checkbox"
@@ -1586,7 +1755,7 @@
 															type="text"
 															bind:value={block.content.image.source}
 															onchange={saveProject}
-															placeholder="Foto: Naam Fotograaf"
+															placeholder="Foto: Naam fotograaf"
 															disabled={block.content.image.layout.startsWith('inline') &&
 																block.content.image.rounded}
 														/>
