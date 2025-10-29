@@ -1,3 +1,4 @@
+<!--src\lib\components\MediaPair.svelte-->
 <script lang="ts">
 	import Hls from 'hls.js';
 	import type { Action } from 'svelte/action';

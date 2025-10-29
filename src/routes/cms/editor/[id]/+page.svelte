@@ -1,7 +1,7 @@
 <!--src/routes/cms/editor/[id]/+page.svelte-->
-
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { tick } from 'svelte';
 	import type { PageData } from './$types';
 	import TextFrameIcons from '$lib/assets/icons/TextFrameIcons.svelte';
 	import IconButton from '../../IconButton.svelte';
@@ -13,7 +13,16 @@
 	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
 	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
-	import { tick } from 'svelte';
+
+	// ✅ NIEUW: Import save manager en localStorage utils
+	import { saveManager, rateLimitWarning } from '$lib/stores/saveManager';
+	import {
+		saveBackup,
+		getBackup,
+		clearBackup,
+		hasBackup,
+		clearExpiredBackups
+	} from '$lib/utils/localStorage';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -25,14 +34,167 @@
 	let splideInstances = new Map<string, any>();
 	let activeTab = $state<'blocks' | 'styling'>('blocks');
 	let selectedStyleComponent = $state<string>('general');
-	let imageHidden = $state<Record<string, boolean>>({});
+
+	// ✅ NIEUW: Save management state
+	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
+	let showBackupDialog = $state(false);
+	let backupData = $state<any>(null);
 
 	$effect(() => {
 		if (!data.project.theme) {
 			data.project.theme = {};
 		}
 	});
-	// ✅ NIEUW: Extract sortable init to function
+
+	// ✅ NIEUW: Debounced save met adaptive delay
+	function debouncedSave() {
+		saveManager.setUnsavedChanges(true);
+
+		// Immediate backup to localStorage
+		saveBackup(data.gistId, {
+			storyName: data.project.storyName,
+			theme: data.project.theme,
+			data: canvasBlocks
+		});
+
+		if (saveTimeout) clearTimeout(saveTimeout);
+
+		// Use adaptive delay from saveManager
+		const delay = $saveManager.currentDebounceDelay;
+
+		saveTimeout = setTimeout(() => {
+			saveToServer();
+		}, delay);
+	}
+
+	// ✅ NIEUW: Manual save (bypasses debounce)
+	async function forceSave() {
+		if (saveTimeout) clearTimeout(saveTimeout);
+		await saveToServer();
+	}
+
+	// ✅ NIEUW: Server save met retry + rate limit monitoring
+	async function saveToServer() {
+		saveManager.setSaving(true);
+
+		const maxRetries = 5;
+		const baseDelay = 2000;
+		let lastError: Error | null = null;
+
+		for (let attempt = 0; attempt < maxRetries; attempt++) {
+			try {
+				const response = await fetch(`/cms/api/projects/${data.gistId}`, {
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						version: data.project.version + 1,
+						storyName: data.project.storyName,
+						gistId: data.gistId,
+						theme: data.project.theme || {},
+						data: canvasBlocks
+					})
+				});
+
+				const result = await response.json();
+
+				// ✅ Update rate limit info
+				if (result.rateLimit) {
+					saveManager.setRateLimitInfo(
+						result.rateLimit.remaining,
+						result.rateLimit.limit,
+						result.rateLimit.reset
+					);
+				}
+
+				// ✅ Handle rate limit errors
+				if (response.status === 403 || response.status === 429) {
+					const delay = Math.max(baseDelay * Math.pow(2, attempt), 60000);
+
+					console.warn(`⚠️ Rate limited, retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
+
+					if (attempt < maxRetries - 1) {
+						await new Promise((resolve) => setTimeout(resolve, delay));
+						continue;
+					} else {
+						throw new Error('Rate limit bereikt. Probeer over enkele minuten opnieuw.');
+					}
+				}
+
+				if (!response.ok) {
+					throw new Error(result.error || 'Opslaan mislukt');
+				}
+
+				// ✅ Success!
+				data.project.version++;
+				saveManager.setSaved();
+				clearBackup(data.gistId);
+
+				if (attempt > 0) {
+					console.log(`✅ Saved successfully after ${attempt + 1} attempts`);
+				}
+
+				return;
+			} catch (error) {
+				console.error(`Attempt ${attempt + 1} failed:`, error);
+				lastError = error as Error;
+
+				if (attempt === maxRetries - 1) {
+					saveManager.setError(lastError.message);
+					throw error;
+				}
+
+				// Retry met exponential backoff
+				const delay = baseDelay * Math.pow(2, attempt);
+				await new Promise((resolve) => setTimeout(resolve, delay));
+			}
+		}
+	}
+
+	// ✅ DEPRECATED: Oude saveProject functie (niet meer gebruikt)
+	async function saveProject() {
+		await saveToServer();
+	}
+
+	// ✅ Check for backup on mount
+	onMount(() => {
+		clearExpiredBackups();
+
+		if (hasBackup(data.gistId)) {
+			backupData = getBackup(data.gistId);
+
+			// Check if backup is newer than current data
+			if (backupData && backupData.timestamp > Date.now() - 300000) {
+				// 5 min threshold
+				showBackupDialog = true;
+			}
+		}
+	});
+
+	// ✅ Restore from backup
+	function restoreBackup() {
+		if (backupData) {
+			data.project.storyName = backupData.storyName;
+			data.project.theme = backupData.theme;
+			canvasBlocks = backupData.data;
+
+			showBackupDialog = false;
+			saveManager.setUnsavedChanges(true);
+
+			// Save restored data
+			forceSave();
+		}
+	}
+
+	// ✅ Discard backup
+	function discardBackup() {
+		clearBackup(data.gistId);
+		showBackupDialog = false;
+	}
+
+	// ===== BESTAANDE CODE (ongewijzigd) =====
+
 	async function initToolboxSortable() {
 		if (typeof window === 'undefined' || !toolboxEl) return;
 
@@ -98,6 +260,9 @@
 					];
 					evt.item.remove();
 
+					// ✅ Trigger debounced save
+					debouncedSave();
+
 					if (blockType === 'heroVideo' || blockType === 'video') {
 						setTimeout(() => initHlsPlayer(newBlock), 100);
 					}
@@ -116,6 +281,9 @@
 						if (block) newOrder.push(block);
 					});
 					canvasBlocks = newOrder;
+
+					// ✅ Trigger debounced save
+					debouncedSave();
 				}
 			});
 		} catch (e) {
@@ -125,11 +293,9 @@
 
 	async function switchToBlocksTab() {
 		activeTab = 'blocks';
-
 		await tick();
 		await tick();
 		await new Promise((resolve) => setTimeout(resolve, 200));
-
 		await initToolboxSortable();
 		await initCanvasSortable();
 	}
@@ -144,13 +310,7 @@
 			case 'heroVideo':
 				return { url: '', poster: '', label: '', title: '', source: '', textAlign: 'center' };
 			case 'imageHero':
-				return {
-					url: '',
-					label: '',
-					title: 'Hero titel',
-					source: '',
-					textAlign: 'center'
-				};
+				return { url: '', label: '', title: 'Hero titel', source: '', textAlign: 'center' };
 			case 'heading':
 				return { text: '', level: 2 };
 			case 'subheading':
@@ -171,7 +331,7 @@
 				return { columns: 2, images: [] };
 			case 'timeline':
 				return { timelines: [] };
-			case 'mediaPaar':
+			case 'mediaPair':
 				return {
 					verticalAlign: 'top',
 					items: [
@@ -182,12 +342,7 @@
 			case 'audio':
 				return { url: '', title: '', description: '', image: '' };
 			case 'textframe':
-				return {
-					width: 'narrow',
-					heading: '',
-					text: '',
-					image: null
-				};
+				return { width: 'narrow', heading: '', text: '', image: null };
 			case 'colofon':
 				return { items: [{ functie: '', namen: '' }] };
 			default:
@@ -201,6 +356,9 @@
 			splideInstances.delete(blockId);
 		}
 		canvasBlocks = canvasBlocks.filter((b) => b.id !== blockId);
+
+		// ✅ Trigger debounced save
+		debouncedSave();
 	}
 
 	function initHlsPlayer(block: any) {
@@ -274,6 +432,7 @@
 					onEnd: () => {
 						splide.refresh();
 						updateSlideNumbers(blockId);
+						debouncedSave(); // ✅ Trigger save
 					}
 				});
 			}
@@ -330,6 +489,9 @@
 				if (splide) splide.go(block.content.timelines.length - 1);
 			}, 150);
 		}
+
+		// ✅ Trigger debounced save
+		debouncedSave();
 	}
 
 	function removeSlide(block: any, index: number) {
@@ -342,6 +504,9 @@
 		}
 		canvasBlocks = [...canvasBlocks];
 		setTimeout(() => initSplideForBlock(block.id, block.type), 100);
+
+		// ✅ Trigger debounced save
+		debouncedSave();
 	}
 
 	function moveSlide(block: any, index: number, direction: 'prev' | 'next') {
@@ -362,6 +527,9 @@
 			const splide = splideInstances.get(block.id);
 			if (splide) splide.go(newIndex);
 		}, 100);
+
+		// ✅ Trigger debounced save
+		debouncedSave();
 	}
 
 	function getGalleryLayoutInfo(block: any) {
@@ -386,13 +554,14 @@
 		return false;
 	}
 
-	function swapMediaPaarItems(block: any) {
+	function swapMediaPairItems(block: any) {
 		const items = block.content.items;
 		block.content.items = [items[1], items[0]];
 		canvasBlocks = [...canvasBlocks];
+		debouncedSave();
 	}
 
-	function toggleMediaPaarType(block: any, itemIndex: number) {
+	function toggleMediaPairType(block: any, itemIndex: number) {
 		const item = block.content.items[itemIndex];
 		if (item.type === 'image') {
 			item.type = 'video';
@@ -406,16 +575,19 @@
 			delete item.poster;
 		}
 		canvasBlocks = [...canvasBlocks];
+		debouncedSave();
 	}
 
 	function addColofonItem(block: any) {
 		block.content.items.push({ functie: '', namen: '' });
 		canvasBlocks = [...canvasBlocks];
+		debouncedSave();
 	}
 
 	function removeColofonItem(block: any, index: number) {
 		block.content.items.splice(index, 1);
 		canvasBlocks = [...canvasBlocks];
+		debouncedSave();
 	}
 
 	$effect(() => {
@@ -432,43 +604,9 @@
 		}
 	});
 
-	let saving = $state(false);
-	let saveMessage = $state('');
-
-	async function saveProject() {
-		saving = true;
-		saveMessage = '';
-
-		try {
-			const response = await fetch(`/cms/api/projects/${data.gistId}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					version: data.project.version + 1,
-					storyName: data.project.storyName,
-					gistId: data.gistId,
-					theme: data.project.theme || {},
-					data: canvasBlocks
-				})
-			});
-
-			if (!response.ok) throw new Error('Opslaan mislukt');
-
-			data.project.version++;
-			saveMessage = '✅ Opgeslagen!';
-			setTimeout(() => {
-				saveMessage = '';
-			}, 3000);
-		} catch (err) {
-			saveMessage = '❌ Fout bij opslaan';
-			console.error('Save error:', err);
-		} finally {
-			saving = false;
-		}
-	}
+	// ===== PREVIEW & PUBLISH (ongewijzigd) =====
 
 	let previewing = $state(false);
-	// ✅ Publish state management
 	let publishStatus = $state<'idle' | 'pending' | 'building' | 'completed' | 'failed'>('idle');
 	let jobId = $state<string | null>(null);
 	let downloadUrl = $state<string | null>(null);
@@ -484,32 +622,26 @@
 		previewing = true;
 
 		try {
-			await saveProject();
+			await forceSave(); // ✅ Force save voor preview
 
 			const previewUrl = new URL('/test-env', window.location.origin);
 			previewUrl.searchParams.set('id', data.gistId);
-			previewUrl.searchParams.set('t', Date.now().toString()); // Cache buster
+			previewUrl.searchParams.set('t', Date.now().toString());
 
 			window.open(previewUrl.toString(), '_blank');
-
-			// We hebben geen alert meer nodig, de gebruiker ziet het resultaat.
 		} catch (err) {
 			alert(`❌ ${err instanceof Error ? err.message : 'Fout'}`);
 		} finally {
-			previewing = false; // Zet de knop terug
+			previewing = false;
 		}
 	}
 
-	/**
-	 * Start async publish job
-	 */
 	async function handlePublish() {
 		publishStatus = 'pending';
 		publishError = null;
 
 		try {
-			// Sla eerst op
-			await saveProject();
+			await forceSave(); // ✅ Force save voor publish
 
 			const response = await fetch('/api/publish/start', {
 				method: 'POST',
@@ -524,7 +656,6 @@
 			const result = await response.json();
 			jobId = result.jobId;
 
-			// Start polling
 			startPolling();
 		} catch (err) {
 			publishStatus = 'failed';
@@ -532,16 +663,10 @@
 		}
 	}
 
-	/**
-	 * Poll job status elke 3 seconden
-	 */
 	function startPolling() {
 		pollInterval = setInterval(checkStatus, 3000);
 	}
 
-	/**
-	 * Check huidige job status
-	 */
 	async function checkStatus() {
 		if (!jobId) return;
 
@@ -567,9 +692,6 @@
 		}
 	}
 
-	/**
-	 * Stop polling interval
-	 */
 	function stopPolling() {
 		if (pollInterval) {
 			clearInterval(pollInterval);
@@ -577,9 +699,6 @@
 		}
 	}
 
-	/**
-	 * Reset publish state
-	 */
 	function resetPublish() {
 		publishStatus = 'idle';
 		jobId = null;
@@ -607,9 +726,10 @@
 			}
 		});
 	});
-	// Cleanup polling on component destroy
+
 	onDestroy(() => {
 		stopPolling();
+		if (saveTimeout) clearTimeout(saveTimeout);
 		if (toolboxSortable) {
 			try {
 				toolboxSortable.destroy();
@@ -627,6 +747,39 @@
 	});
 </script>
 
+<!-- ✅ NIEUW: Backup Restore Dialog -->
+{#if showBackupDialog}
+	<div class="backup-dialog-overlay" onclick={discardBackup}>
+		<div class="backup-dialog" onclick={(e) => e.stopPropagation()}>
+			<h3>🔄 Niet-opgeslagen wijzigingen gevonden</h3>
+			<p>
+				Er zijn lokale wijzigingen gevonden van {new Date(backupData?.timestamp).toLocaleString()}.
+			</p>
+			<p>Wil je deze herstellen?</p>
+
+			<div class="dialog-actions">
+				<button class="btn-primary" onclick={restoreBackup}> ✅ Herstellen </button>
+				<button class="btn-secondary" onclick={discardBackup}> ❌ Negeren </button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- ✅ NIEUW: Rate Limit Warning Banner -->
+{#if $rateLimitWarning}
+	<div
+		class="rate-limit-banner"
+		class:caution={$rateLimitWarning.level === 'caution'}
+		class:warning={$rateLimitWarning.level === 'warning'}
+		class:critical={$rateLimitWarning.level === 'critical'}
+	>
+		<span class="banner-message">{$rateLimitWarning.message}</span>
+		<span class="banner-reset">
+			Reset: {$rateLimitWarning.resetTime.toLocaleTimeString()}
+		</span>
+	</div>
+{/if}
+
 <TextFrameIcons />
 <svelte:head>
 	<title>Editor - {data.project.storyName}</title>
@@ -638,7 +791,6 @@
 </svelte:head>
 
 <div class="editor">
-	<!-- ===== UNIFIED HEADER ===== -->
 	<header class="editor-header">
 		<div class="header-left">
 			<a href="/cms" class="logo-link">
@@ -650,25 +802,41 @@
 		</div>
 
 		<div class="header-right">
-			{#if saveMessage}
-				<span
-					class="save-message"
-					class:success={saveMessage.includes('✅')}
-					class:error={saveMessage.includes('❌')}
-				>
-					{saveMessage}
-				</span>
-			{/if}
-			<button class="btn-header btn-save" onclick={saveProject} disabled={saving}>
-				{saving ? '💾 Bezig...' : '💾 Opslaan'}
-			</button>
+			<!-- ✅ NIEUW: Enhanced save status -->
+			<div class="save-status-indicator">
+				{#if $saveManager.isSaving}
+					<span class="status-badge status-saving">💾 Opslaan...</span>
+				{:else if $saveManager.hasUnsavedChanges}
+					<span class="status-badge status-unsaved">
+						⏳ Niet opgeslagen
+						<span class="countdown">
+							(over {Math.ceil($saveManager.currentDebounceDelay / 1000)}s)
+						</span>
+					</span>
+				{:else if $saveManager.lastSaved}
+					<span class="status-badge status-saved">
+						✅ {new Date($saveManager.lastSaved).toLocaleTimeString()}
+					</span>
+				{/if}
+
+				{#if $saveManager.lastError}
+					<span class="status-badge status-error">❌ {$saveManager.lastError}</span>
+				{/if}
+			</div>
+
+			<!-- ✅ NIEUW: Manual save button -->
 			<button
-				class="btn-header btn-preview"
-				onclick={handlePreview}
-				disabled={previewing || saving}
+				class="btn-header btn-save"
+				onclick={forceSave}
+				disabled={$saveManager.isSaving || !$saveManager.hasUnsavedChanges}
 			>
+				{$saveManager.isSaving ? '💾 Bezig...' : '💾 Opslaan'}
+			</button>
+
+			<button class="btn-header btn-preview" onclick={handlePreview} disabled={previewing}>
 				{previewing ? '🔄 Preview...' : '👁️ Preview'}
 			</button>
+
 			{#if publishStatus === 'idle'}
 				<button class="btn-header btn-publish" onclick={handlePublish}> 🚀 Publiceren </button>
 			{:else if publishStatus === 'pending' || publishStatus === 'building'}
@@ -679,14 +847,13 @@
 			{:else if publishStatus === 'failed'}
 				<button class="btn-header btn-publish" onclick={resetPublish}> ❌ Opnieuw </button>
 			{/if}
+
 			<a href="/cms/logout" class="btn-header btn-logout">Uitloggen</a>
 		</div>
 	</header>
 
 	<div class="editor-layout">
-		<!-- ===== FIXED TOOLBOX ===== -->
 		<aside class="toolbox">
-			<!-- ✅ TAB BUTTONS -->
 			<div class="toolbox-tabs">
 				<button class="tab-btn" class:active={activeTab === 'blocks'} onclick={switchToBlocksTab}>
 					Blokken
@@ -700,10 +867,8 @@
 				</button>
 			</div>
 
-			<!-- ✅ TAB CONTENT -->
 			<div class="toolbox-content">
 				{#if activeTab === 'blocks'}
-					<!-- ✅ KEY BLOCK: Forceer DOM recreate -->
 					{#key activeTab}
 						<div bind:this={toolboxEl}>
 							<h3>Blokken</h3>
@@ -831,7 +996,7 @@
 								<span>Fotogrid</span>
 							</div>
 
-							<div class="block" data-type="mediaPaar">
+							<div class="block" data-type="mediaPair">
 								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path
 										stroke-linecap="round"
@@ -901,16 +1066,13 @@
 						</div>
 					{/key}
 				{:else}
-					<!-- ✅ NIEUW: STYLING COMPONENT LIST -->
 					<StyleComponentList bind:selected={selectedStyleComponent} />
 				{/if}
 			</div>
 		</aside>
 
-		<!-- ===== SCROLLABLE CANVAS ===== -->
 		<main class="canvas">
 			{#if activeTab === 'blocks'}
-				<!-- BESTAANDE CANVAS -->
 				<div class="canvas-wrapper" bind:this={canvasEl}>
 					{#if canvasBlocks.length === 0}
 						<div class="empty-canvas">
@@ -923,6 +1085,7 @@
 								<button class="remove-btn" onclick={() => removeBlock(block.id)}>×</button>
 								<div class="content">
 									{#if block.type === 'heroVideo'}
+										<!-- BESTAANDE HERO VIDEO EDITOR (ongewijzigd, maar vervang onchange={saveProject} door oninput={debouncedSave}) -->
 										<div class="hero-video-editor">
 											<div class="input-row">
 												<div class="input-col">
@@ -931,6 +1094,7 @@
 														type="url"
 														placeholder="https://..."
 														bind:value={block.content.url}
+														oninput={debouncedSave}
 													/>
 												</div>
 												<div class="input-col">
@@ -939,6 +1103,7 @@
 														type="url"
 														placeholder="https://..."
 														bind:value={block.content.poster}
+														oninput={debouncedSave}
 													/>
 												</div>
 											</div>
@@ -975,6 +1140,7 @@
 															type="text"
 															placeholder="SPECIAL"
 															bind:value={block.content.label}
+															oninput={debouncedSave}
 														/>
 													</div>
 													<div class="input-group">
@@ -983,6 +1149,7 @@
 															type="text"
 															placeholder="Hoofdtitel"
 															bind:value={block.content.title}
+															oninput={debouncedSave}
 														/>
 													</div>
 													<div class="input-group">
@@ -991,6 +1158,7 @@
 															type="text"
 															placeholder="ANP"
 															bind:value={block.content.source}
+															oninput={debouncedSave}
 														/>
 													</div>
 												</div>
@@ -1003,6 +1171,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="top"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1022,6 +1191,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="center"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1041,6 +1211,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="bottom"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1060,6 +1231,7 @@
 											</div>
 										</div>
 									{:else if block.type === 'imageHero'}
+										<!-- IMAGE HERO EDITOR (zelfde structuur als heroVideo, vervang onchange door oninput) -->
 										<div class="image-hero-editor">
 											<div class="input-row">
 												<div class="input-col">
@@ -1068,6 +1240,7 @@
 														type="url"
 														placeholder="https://picsum.photos/1920/1080"
 														bind:value={block.content.url}
+														oninput={debouncedSave}
 													/>
 												</div>
 											</div>
@@ -1088,6 +1261,7 @@
 															type="text"
 															placeholder="SPECIAL"
 															bind:value={block.content.label}
+															oninput={debouncedSave}
 														/>
 													</div>
 													<div class="input-group">
@@ -1096,6 +1270,7 @@
 															type="text"
 															placeholder="Hoofdtitel"
 															bind:value={block.content.title}
+															oninput={debouncedSave}
 														/>
 													</div>
 													<div class="input-group">
@@ -1104,6 +1279,7 @@
 															type="text"
 															placeholder="Foto: Naam Fotograaf"
 															bind:value={block.content.source}
+															oninput={debouncedSave}
 														/>
 													</div>
 												</div>
@@ -1116,6 +1292,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="top"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1135,6 +1312,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="center"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1154,6 +1332,7 @@
 																type="radio"
 																bind:group={block.content.textAlign}
 																value="bottom"
+																onchange={debouncedSave}
 															/>
 															<div class="hero-align-icon">
 																<svg viewBox="0 0 24 24" fill="none">
@@ -1177,6 +1356,7 @@
 											type="text"
 											placeholder="Tekst kop..."
 											bind:value={block.content.text}
+											oninput={debouncedSave}
 											class="block-input"
 										/>
 									{:else if block.type === 'subheading'}
@@ -1184,6 +1364,7 @@
 											type="text"
 											placeholder="Tekst tussenkop..."
 											bind:value={block.content.text}
+											oninput={debouncedSave}
 											class="block-input block-input-subheading"
 										/>
 									{:else if block.type === 'subheadingSoccer'}
@@ -1192,6 +1373,7 @@
 												type="text"
 												placeholder="Tekst tussenkop voetbal..."
 												bind:value={block.content.text}
+												oninput={debouncedSave}
 												class="block-input block-input-subheading"
 											/>
 											<div class="style-preview">
@@ -1214,7 +1396,6 @@
 										</div>
 									{:else if block.type === 'textblock'}
 										<div class="textblock-editor">
-											<!-- ✅ NIEUW: Markdown Help -->
 											<details class="markdown-help">
 												<summary>📝 Markdown Opmaak</summary>
 												<div class="markdown-examples">
@@ -1231,11 +1412,16 @@
 											<textarea
 												placeholder="Typ hier je tekst..."
 												bind:value={block.content.text[0]}
+												oninput={debouncedSave}
 												class="block-textarea"
 												rows="4"
 											></textarea>
 											<label class="lead-toggle">
-												<input type="checkbox" bind:checked={block.content.isLead} />
+												<input
+													type="checkbox"
+													bind:checked={block.content.isLead}
+													onchange={debouncedSave}
+												/>
 												<span>Dit is een inleiding</span>
 											</label>
 										</div>
@@ -1244,6 +1430,7 @@
 											type="url"
 											placeholder="Afbeeldings-URL..."
 											bind:value={block.content.url}
+											oninput={debouncedSave}
 											class="block-input"
 										/>
 										{#if block.content.url}
@@ -1252,6 +1439,7 @@
 										<textarea
 											placeholder="Bijschrift..."
 											bind:value={block.content.caption}
+											oninput={debouncedSave}
 											class="block-textarea"
 											rows="2"
 										></textarea>
@@ -1259,16 +1447,22 @@
 											type="text"
 											placeholder="Bron..."
 											bind:value={block.content.source}
+											oninput={debouncedSave}
 											class="block-input"
 										/>
 										<label class="parallax-toggle">
-											<input type="checkbox" bind:checked={block.content.parallax} />
+											<input
+												type="checkbox"
+												bind:checked={block.content.parallax}
+												onchange={debouncedSave}
+											/>
 											<span>Parallax-effect toepassen</span>
 										</label>
 									{:else if block.type === 'quote'}
 										<textarea
 											placeholder="Citaat tekst..."
 											bind:value={block.content.text}
+											oninput={debouncedSave}
 											class="block-textarea"
 											rows="3"
 										></textarea>
@@ -1276,6 +1470,7 @@
 											type="text"
 											placeholder="Auteur..."
 											bind:value={block.content.author}
+											oninput={debouncedSave}
 											class="block-input"
 										/>
 									{:else if block.type === 'video'}
@@ -1287,6 +1482,7 @@
 														type="url"
 														placeholder="https://..."
 														bind:value={block.content.url}
+														oninput={debouncedSave}
 													/>
 												</div>
 												<div class="input-col">
@@ -1295,6 +1491,7 @@
 														type="url"
 														placeholder="https://..."
 														bind:value={block.content.poster}
+														oninput={debouncedSave}
 													/>
 												</div>
 											</div>
@@ -1368,11 +1565,13 @@
 																			type="url"
 																			placeholder="Afbeeldings-URL"
 																			bind:value={slide.url}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																		<textarea
 																			placeholder="Bijschrift (optioneel)"
 																			bind:value={slide.caption}
+																			oninput={debouncedSave}
 																			class="slide-textarea"
 																			rows="2"
 																		></textarea>
@@ -1380,6 +1579,7 @@
 																			type="text"
 																			placeholder="Bron (verplicht)"
 																			bind:value={slide.source}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																	</div>
@@ -1400,14 +1600,24 @@
 													<span class="input-label">Layout:</span>
 													<div class="layout-options">
 														<label class:active={block.content.columns === 2}>
-															<input type="radio" bind:group={block.content.columns} value={2} />
+															<input
+																type="radio"
+																bind:group={block.content.columns}
+																value={2}
+																onchange={debouncedSave}
+															/>
 															<div class="layout-icon cols-2">
 																<div></div>
 																<div></div>
 															</div>
 														</label>
 														<label class:active={block.content.columns === 3}>
-															<input type="radio" bind:group={block.content.columns} value={3} />
+															<input
+																type="radio"
+																bind:group={block.content.columns}
+																value={3}
+																onchange={debouncedSave}
+															/>
 															<div class="layout-icon cols-3">
 																<div></div>
 																<div></div>
@@ -1415,7 +1625,12 @@
 															</div>
 														</label>
 														<label class:active={block.content.columns === 4}>
-															<input type="radio" bind:group={block.content.columns} value={4} />
+															<input
+																type="radio"
+																bind:group={block.content.columns}
+																value={4}
+																onchange={debouncedSave}
+															/>
 															<div class="layout-icon cols-4">
 																<div></div>
 																<div></div>
@@ -1472,11 +1687,13 @@
 																			type="url"
 																			placeholder="Afbeeldings-URL"
 																			bind:value={image.url}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																		<textarea
 																			placeholder="Bijschrift (optioneel)"
 																			bind:value={image.caption}
+																			oninput={debouncedSave}
 																			class="slide-textarea"
 																			rows="2"
 																		></textarea>
@@ -1484,6 +1701,7 @@
 																			type="text"
 																			placeholder="Bron (verplicht)"
 																			bind:value={image.source}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																	</div>
@@ -1505,7 +1723,6 @@
 										</div>
 									{:else if block.type === 'textframe'}
 										<div class="textframe-editor">
-											<!-- Heading Input -->
 											<div class="control-group">
 												<label class="control-label" for="textframe-heading-{block.id}">
 													Kop (optioneel)
@@ -1515,14 +1732,11 @@
 													id="textframe-heading-{block.id}"
 													type="text"
 													bind:value={block.content.heading}
-													onchange={saveProject}
+													oninput={debouncedSave}
 													placeholder="Voer een titel in..."
 												/>
 											</div>
 
-											<!-- ========================================
-       TEXT INPUT
-       ======================================== -->
 											<div class="control-group">
 												<label class="control-label" for="textframe-text-{block.id}">
 													Tekst
@@ -1533,7 +1747,7 @@
 												<textarea
 													id="textframe-text-{block.id}"
 													bind:value={block.content.text}
-													onchange={saveProject}
+													oninput={debouncedSave}
 													rows="8"
 													placeholder="Schrijf je tekst hier...
 
@@ -1542,7 +1756,6 @@ Markdown wordt ondersteund:
 												></textarea>
 											</div>
 
-											<!--bestaand-->
 											<div class="control-group">
 												<label class="checkbox-label">
 													<input
@@ -1550,7 +1763,6 @@ Markdown wordt ondersteund:
 														checked={!!block.content.image && !block.content.image.hidden}
 														onchange={(e) => {
 															if (e.currentTarget.checked) {
-																// Restore of maak nieuw
 																if (!block.content.image) {
 																	block.content.image = {
 																		url: '',
@@ -1562,17 +1774,15 @@ Markdown wordt ondersteund:
 																		hidden: false
 																	};
 																} else {
-																	// Unhide bestaande image
 																	block.content.image.hidden = false;
 																}
 															} else {
-																// Hide maar verwijder niet
 																if (block.content.image) {
 																	block.content.image.hidden = true;
 																}
 															}
-															canvasBlocks = [...canvasBlocks]; // Trigger reactivity
-															saveProject();
+															canvasBlocks = [...canvasBlocks];
+															debouncedSave();
 														}}
 													/>
 													<span>Afbeelding toevoegen</span>
@@ -1586,10 +1796,8 @@ Markdown wordt ondersteund:
 												{/if}
 											</div>
 
-											<!-- Image controls conditie -->
 											{#if block.content.image && !block.content.image.hidden}
 												<div class="image-controls">
-													<!-- Image URL -->
 													<div class="control-group">
 														<label class="control-label" for="textframe-image-url-{block.id}">
 															Afbeelding URL
@@ -1598,12 +1806,11 @@ Markdown wordt ondersteund:
 															id="textframe-image-url-{block.id}"
 															type="url"
 															bind:value={block.content.image.url}
-															onchange={saveProject}
+															oninput={debouncedSave}
 															placeholder="https://example.com/image.jpg"
 														/>
 													</div>
 
-													<!-- Image Alt Text -->
 													<div class="control-group">
 														<label class="control-label" for="textframe-image-alt-{block.id}">
 															Alt-tekst
@@ -1613,16 +1820,14 @@ Markdown wordt ondersteund:
 															id="textframe-image-alt-{block.id}"
 															type="text"
 															bind:value={block.content.image.alt}
-															onchange={saveProject}
+															oninput={debouncedSave}
 															placeholder="Beschrijving van de afbeelding"
 														/>
 													</div>
 
-													<!-- Width + Layout (single row) -->
 													<div class="control-group">
 														<label class="control-label">Breedte + Layout</label>
 														<div class="width-layout-row">
-															<!-- Width Controls -->
 															<div class="width-controls">
 																<IconButton
 																	icon="icon-width-narrow"
@@ -1630,7 +1835,7 @@ Markdown wordt ondersteund:
 																	active={block.content.width === 'narrow'}
 																	onclick={() => {
 																		block.content.width = 'narrow';
-																		saveProject();
+																		debouncedSave();
 																	}}
 																/>
 																<IconButton
@@ -1639,15 +1844,13 @@ Markdown wordt ondersteund:
 																	active={block.content.width === 'wide'}
 																	onclick={() => {
 																		block.content.width = 'wide';
-																		saveProject();
+																		debouncedSave();
 																	}}
 																/>
 															</div>
 
-															<!-- Divider -->
 															<div class="divider"></div>
 
-															<!-- Layout Controls -->
 															<div class="layout-controls">
 																<IconButton
 																	icon="icon-layout-top-rect"
@@ -1656,7 +1859,7 @@ Markdown wordt ondersteund:
 																	onclick={() => {
 																		if (block.content.image) {
 																			block.content.image.layout = 'top-rect';
-																			saveProject();
+																			debouncedSave();
 																		}
 																	}}
 																/>
@@ -1667,7 +1870,7 @@ Markdown wordt ondersteund:
 																	onclick={() => {
 																		if (block.content.image) {
 																			block.content.image.layout = 'top-rect-bottom';
-																			saveProject();
+																			debouncedSave();
 																		}
 																	}}
 																/>
@@ -1678,7 +1881,7 @@ Markdown wordt ondersteund:
 																	onclick={() => {
 																		if (block.content.image) {
 																			block.content.image.layout = 'inline-square-left';
-																			saveProject();
+																			debouncedSave();
 																		}
 																	}}
 																/>
@@ -1689,7 +1892,7 @@ Markdown wordt ondersteund:
 																	onclick={() => {
 																		if (block.content.image) {
 																			block.content.image.layout = 'inline-square-right';
-																			saveProject();
+																			debouncedSave();
 																		}
 																	}}
 																/>
@@ -1697,19 +1900,17 @@ Markdown wordt ondersteund:
 														</div>
 													</div>
 
-													<!-- Rounded Toggle -->
 													<div class="control-group">
 														<label class="checkbox-label">
 															<input
 																type="checkbox"
 																bind:checked={block.content.image.rounded}
-																onchange={saveProject}
+																onchange={debouncedSave}
 															/>
 															<span>Toon afbeelding rond</span>
 														</label>
 													</div>
 
-													<!-- Image Caption (disabled bij inline + rounded) -->
 													<div class="control-group">
 														<label
 															class="control-label"
@@ -1728,14 +1929,13 @@ Markdown wordt ondersteund:
 															id="textframe-image-caption-{block.id}"
 															type="text"
 															bind:value={block.content.image.caption}
-															onchange={saveProject}
+															oninput={debouncedSave}
 															placeholder="Onderschrift bij de afbeelding"
 															disabled={block.content.image.layout.startsWith('inline') &&
 																block.content.image.rounded}
 														/>
 													</div>
 
-													<!-- Image Source (disabled bij inline + rounded) -->
 													<div class="control-group">
 														<label
 															class="control-label"
@@ -1754,7 +1954,7 @@ Markdown wordt ondersteund:
 															id="textframe-image-source-{block.id}"
 															type="text"
 															bind:value={block.content.image.source}
-															onchange={saveProject}
+															oninput={debouncedSave}
 															placeholder="Foto: Naam fotograaf"
 															disabled={block.content.image.layout.startsWith('inline') &&
 																block.content.image.rounded}
@@ -1806,17 +2006,20 @@ Markdown wordt ondersteund:
 																			type="text"
 																			placeholder="Jaar / Datum"
 																			bind:value={item.year}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																		<input
 																			type="text"
 																			placeholder="Titel (optioneel)"
 																			bind:value={item.title}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																		<textarea
 																			placeholder="Omschrijving"
 																			bind:value={item.description}
+																			oninput={debouncedSave}
 																			class="slide-textarea"
 																			rows="3"
 																		></textarea>
@@ -1824,6 +2027,7 @@ Markdown wordt ondersteund:
 																			type="url"
 																			placeholder="Afbeelding URL (optioneel)"
 																			bind:value={item.imageSrc}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																		{#if item.imageSrc}
@@ -1838,6 +2042,7 @@ Markdown wordt ondersteund:
 																			type="text"
 																			placeholder="ALT-tekst voor afbeelding"
 																			bind:value={item.imageAlt}
+																			oninput={debouncedSave}
 																			class="slide-input"
 																		/>
 																	</div>
@@ -1852,13 +2057,13 @@ Markdown wordt ondersteund:
 												Voeg tijdlijn-item toe
 											</button>
 										</div>
-									{:else if block.type === 'mediaPaar'}
+									{:else if block.type === 'mediaPair'}
 										<div class="mediapaar-editor">
 											<div class="mediapaar-controls">
 												<button
 													type="button"
 													class="swap-btn"
-													onclick={() => swapMediaPaarItems(block)}
+													onclick={() => swapMediaPairItems(block)}
 												>
 													<svg
 														width="20"
@@ -1881,6 +2086,7 @@ Markdown wordt ondersteund:
 																type="radio"
 																bind:group={block.content.verticalAlign}
 																value="top"
+																onchange={debouncedSave}
 															/>
 															<div class="valign-icon top">
 																<div></div>
@@ -1892,6 +2098,7 @@ Markdown wordt ondersteund:
 																type="radio"
 																bind:group={block.content.verticalAlign}
 																value="center"
+																onchange={debouncedSave}
 															/>
 															<div class="valign-icon center">
 																<div></div>
@@ -1903,6 +2110,7 @@ Markdown wordt ondersteund:
 																type="radio"
 																bind:group={block.content.verticalAlign}
 																value="bottom"
+																onchange={debouncedSave}
 															/>
 															<div class="valign-icon bottom">
 																<div></div>
@@ -1914,6 +2122,7 @@ Markdown wordt ondersteund:
 																type="radio"
 																bind:group={block.content.verticalAlign}
 																value="bottom-alt"
+																onchange={debouncedSave}
 															/>
 															<div class="valign-icon bottom-alt">
 																<div></div>
@@ -1931,7 +2140,7 @@ Markdown wordt ondersteund:
 														<select
 															class="type-select"
 															value={item.type}
-															onchange={(e) => toggleMediaPaarType(block, idx)}
+															onchange={(e) => toggleMediaPairType(block, idx)}
 														>
 															<option value="image">Afbeelding</option>
 															<option value="video">Video</option>
@@ -1941,6 +2150,7 @@ Markdown wordt ondersteund:
 															type="url"
 															placeholder="URL"
 															bind:value={item.url}
+															oninput={debouncedSave}
 															class="slide-input"
 														/>
 
@@ -1949,6 +2159,7 @@ Markdown wordt ondersteund:
 																type="url"
 																placeholder="Poster URL (voor video)"
 																bind:value={item.poster}
+																oninput={debouncedSave}
 																class="slide-input"
 															/>
 														{/if}
@@ -1956,6 +2167,7 @@ Markdown wordt ondersteund:
 														<textarea
 															placeholder="Bijschrift"
 															bind:value={item.caption}
+															oninput={debouncedSave}
 															class="slide-textarea"
 															rows="2"
 														></textarea>
@@ -1965,6 +2177,7 @@ Markdown wordt ondersteund:
 																type="text"
 																placeholder="Bron"
 																bind:value={item.source}
+																oninput={debouncedSave}
 																class="slide-input"
 															/>
 														{/if}
@@ -1997,6 +2210,7 @@ Markdown wordt ondersteund:
 												type="url"
 												placeholder="Afbeelding URL (optioneel)"
 												bind:value={block.content.image}
+												oninput={debouncedSave}
 												class="block-input"
 											/>
 											{#if block.content.image}
@@ -2006,11 +2220,13 @@ Markdown wordt ondersteund:
 												type="text"
 												placeholder="Titel van de audio"
 												bind:value={block.content.title}
+												oninput={debouncedSave}
 												class="block-input"
 											/>
 											<textarea
 												placeholder="Beschrijving (optioneel)"
 												bind:value={block.content.description}
+												oninput={debouncedSave}
 												class="block-textarea"
 												rows="2"
 											></textarea>
@@ -2018,6 +2234,7 @@ Markdown wordt ondersteund:
 												type="url"
 												placeholder="Audio URL (.mp3)"
 												bind:value={block.content.url}
+												oninput={debouncedSave}
 												class="block-input"
 											/>
 											{#if block.content.url}
@@ -2034,12 +2251,14 @@ Markdown wordt ondersteund:
 															type="text"
 															placeholder="Functie"
 															bind:value={item.functie}
+															oninput={debouncedSave}
 															class="colofon-input"
 														/>
 														<input
 															type="text"
 															placeholder="Naam/Namen"
 															bind:value={item.namen}
+															oninput={debouncedSave}
 															class="colofon-input"
 														/>
 														<button
@@ -2067,24 +2286,24 @@ Markdown wordt ondersteund:
 					{/if}
 				</div>
 			{:else}
-				<!-- ✅ NIEUW: STYLING EDITOR -->
+				<!-- ✅ STYLING TAB -->
 				<div class="styling-canvas">
 					{#if selectedStyleComponent === 'general'}
-						<GeneralStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<GeneralStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'heading'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={saveProject} level="h2" />
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h2" />
 					{:else if selectedStyleComponent === 'subheading'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={saveProject} level="h4" />
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h4" />
 					{:else if selectedStyleComponent === 'subheadingSoccer'}
-						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'text'}
-						<TextStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<TextStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'quote'}
-						<QuoteStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<QuoteStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'image'}
-						<ImageStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<ImageStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'slider'}
-						<SliderStyleEditor bind:theme={data.project.theme} onsave={saveProject} />
+						<SliderStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{/if}
 				</div>
 			{/if}
@@ -2093,6 +2312,8 @@ Markdown wordt ondersteund:
 </div>
 
 <style>
+	/* ===== BESTAANDE STYLES (ongewijzigd tot "NIEUW" markers) ===== */
+
 	:global(body) {
 		margin: 0;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -2106,7 +2327,6 @@ Markdown wordt ondersteund:
 		background: #f4f4f9;
 	}
 
-	/* ===== UNIFIED HEADER ===== */
 	.editor-header {
 		background: white;
 		border-bottom: 1px solid #e5e7eb;
@@ -2165,6 +2385,49 @@ Markdown wordt ondersteund:
 		align-items: center;
 	}
 
+	/* ✅ NIEUW: Enhanced save status indicator */
+	.save-status-indicator {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.25rem;
+	}
+
+	.status-badge {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		white-space: nowrap;
+		animation: fadeIn 0.3s;
+	}
+
+	.status-saving {
+		background: #dbeafe;
+		color: #1e40af;
+	}
+
+	.status-unsaved {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.status-saved {
+		background: #d1fae5;
+		color: #065f46;
+	}
+
+	.status-error {
+		background: #fee2e2;
+		color: #991b1b;
+	}
+
+	.countdown {
+		font-size: 0.75rem;
+		opacity: 0.8;
+		font-weight: 400;
+	}
+
 	.save-message {
 		font-size: 0.8125rem;
 		font-weight: 600;
@@ -2220,7 +2483,7 @@ Markdown wordt ondersteund:
 		color: #d10a10;
 	}
 
-	.btn-save:hover {
+	.btn-save:hover:not(:disabled) {
 		background: #fef2f2;
 	}
 
@@ -2229,7 +2492,7 @@ Markdown wordt ondersteund:
 		color: #667eea;
 	}
 
-	.btn-preview:hover {
+	.btn-preview:hover:not(:disabled) {
 		background: #eef2ff;
 	}
 
@@ -2238,7 +2501,7 @@ Markdown wordt ondersteund:
 		color: #059669;
 	}
 
-	.btn-publish:hover {
+	.btn-publish:hover:not(:disabled) {
 		background: #ecfdf5;
 	}
 
@@ -2256,7 +2519,160 @@ Markdown wordt ondersteund:
 		cursor: not-allowed;
 	}
 
-	/* ===== LAYOUT ===== */
+	.btn-download {
+		background: #28a745 !important;
+		color: white;
+		border-color: #28a745 !important;
+	}
+
+	.btn-download:hover {
+		background: #218838 !important;
+	}
+
+	.btn-reset {
+		background: #6c757d;
+		color: white;
+		border-color: #6c757d;
+	}
+
+	.btn-reset:hover {
+		background: #5a6268;
+	}
+
+	/* ✅ NIEUW: Backup Dialog */
+	.backup-dialog-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+		backdrop-filter: blur(4px);
+		animation: fadeIn 0.2s;
+	}
+
+	.backup-dialog {
+		background: white;
+		padding: 2rem;
+		border-radius: 12px;
+		max-width: 500px;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+		animation: slideUp 0.3s ease;
+	}
+
+	@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.backup-dialog h3 {
+		margin: 0 0 1rem 0;
+		color: #111827;
+		font-size: 1.25rem;
+	}
+
+	.backup-dialog p {
+		margin: 0 0 0.75rem 0;
+		color: #6b7280;
+		line-height: 1.6;
+	}
+
+	.dialog-actions {
+		display: flex;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+
+	.btn-primary,
+	.btn-secondary {
+		flex: 1;
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		font-size: 0.9375rem;
+		transition: all 0.15s;
+	}
+
+	.btn-primary {
+		background: #d10a10;
+		color: white;
+	}
+
+	.btn-primary:hover {
+		background: #b00909;
+	}
+
+	.btn-secondary {
+		background: #f3f4f6;
+		color: #374151;
+	}
+
+	.btn-secondary:hover {
+		background: #e5e7eb;
+	}
+
+	/* ✅ NIEUW: Rate Limit Warning Banner */
+	.rate-limit-banner {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		padding: 1rem 2rem;
+		background: #dbeafe;
+		border-bottom: 2px solid #3b82f6;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		z-index: 9998;
+		animation: slideDown 0.3s ease;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	}
+
+	@keyframes slideDown {
+		from {
+			transform: translateY(-100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	.rate-limit-banner.caution {
+		background: #e0e7ff;
+		border-color: #6366f1;
+	}
+
+	.rate-limit-banner.warning {
+		background: #fef3c7;
+		border-color: #f59e0b;
+	}
+
+	.rate-limit-banner.critical {
+		background: #fee2e2;
+		border-color: #ef4444;
+	}
+
+	.banner-message {
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: inherit;
+	}
+
+	.banner-reset {
+		font-size: 0.75rem;
+		opacity: 0.8;
+		font-weight: 500;
+	}
+
 	.editor-layout {
 		display: flex;
 		flex: 1;
@@ -2264,7 +2680,6 @@ Markdown wordt ondersteund:
 		height: calc(100vh - 60px);
 	}
 
-	/* ===== FIXED TOOLBOX ===== */
 	.toolbox {
 		width: 250px;
 		background: white;
@@ -2329,7 +2744,6 @@ Markdown wordt ondersteund:
 		flex-shrink: 0;
 	}
 
-	/* ===== SCROLLABLE CANVAS ===== */
 	.canvas {
 		flex: 1;
 		overflow-y: auto;
@@ -2417,7 +2831,6 @@ Markdown wordt ondersteund:
 		margin-left: 30px;
 	}
 
-	/* ===== BLOCK INPUTS ===== */
 	.block-input,
 	.block-textarea {
 		width: 100%;
@@ -2475,8 +2888,8 @@ Markdown wordt ondersteund:
 		cursor: pointer;
 	}
 
-	/* ===== HERO VIDEO ===== */
-	.hero-video-editor {
+	.hero-video-editor,
+	.image-hero-editor {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
@@ -2524,7 +2937,9 @@ Markdown wordt ondersteund:
 		background: #000;
 	}
 
-	.hero-video-editor label {
+	.hero-video-editor label,
+	.image-hero-editor label,
+	.video-editor label {
 		font-weight: 600;
 		font-size: 0.6875rem;
 		color: #6b7280;
@@ -2533,6 +2948,7 @@ Markdown wordt ondersteund:
 	}
 
 	.hero-video-editor input,
+	.image-hero-editor input,
 	.video-editor input {
 		padding: 0.5rem;
 		border: 1px solid #e5e7eb;
@@ -2540,7 +2956,6 @@ Markdown wordt ondersteund:
 		font-size: 0.875rem;
 	}
 
-	/* ===== HERO ALIGN PICKER ===== */
 	.hero-align-picker {
 		display: flex;
 		gap: 5px;
@@ -2598,14 +3013,12 @@ Markdown wordt ondersteund:
 		color: #d10a10;
 	}
 
-	/* ===== VIDEO EDITOR ===== */
 	.video-editor {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
 	}
 
-	/* ===== SLIDER / GALLERY / TIMELINE EDITOR ===== */
 	.slider-editor,
 	.gallery-editor,
 	.timeline-editor {
@@ -2757,7 +3170,6 @@ Markdown wordt ondersteund:
 		opacity: 0.6;
 	}
 
-	/* ===== GALLERY CONTROLS ===== */
 	.gallery-controls {
 		display: flex;
 		justify-content: space-between;
@@ -2835,7 +3247,6 @@ Markdown wordt ondersteund:
 		flex: 1;
 	}
 
-	/* ===== MEDIAPAAR EDITOR ===== */
 	.mediapaar-editor {
 		display: flex;
 		flex-direction: column;
@@ -3008,7 +3419,6 @@ Markdown wordt ondersteund:
 		background: #000;
 	}
 
-	/* ===== AUDIO EDITOR ===== */
 	.audio-editor {
 		display: flex;
 		flex-direction: column;
@@ -3028,7 +3438,6 @@ Markdown wordt ondersteund:
 		margin-top: 0.5rem;
 	}
 
-	/* ===== COLOFON EDITOR ===== */
 	.colofon-editor {
 		display: flex;
 		flex-direction: column;
@@ -3095,6 +3504,7 @@ Markdown wordt ondersteund:
 	.add-colofon-btn:hover {
 		background: #b00909;
 	}
+
 	:global(.sortable-ghost) {
 		opacity: 0.4;
 		background: #f3f4f6;
@@ -3109,183 +3519,7 @@ Markdown wordt ondersteund:
 		display: block;
 		margin-bottom: 0.25rem;
 	}
-	/* Publish button states */
-	.btn-download {
-		background: #28a745 !important;
-		color: white;
-		text-decoration: none;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
 
-	.btn-download:hover {
-		background: #218838 !important;
-	}
-
-	.btn-reset {
-		background: #6c757d;
-		color: white;
-	}
-
-	.btn-reset:hover {
-		background: #5a6268;
-	}
-
-	.btn-publish:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-	/* TextFrame Editor */
-	.textframe-editor {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.control-label {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-text, #374151);
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-	}
-
-	.label-hint {
-		font-size: 0.75rem;
-		font-weight: 400;
-		color: var(--color-text-secondary, #6b7280);
-	}
-
-	/* Textarea: Zelfde font als input fields */
-	.textframe-editor textarea {
-		font-family: inherit;
-		font-size: inherit;
-		line-height: 1.5;
-	}
-
-	/* Width + Layout Row */
-	.width-layout-row {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		flex-wrap: wrap;
-	}
-
-	.width-controls {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.divider {
-		width: 1px;
-		height: 44px;
-		background: var(--color-border, #e5e7eb);
-		flex-shrink: 0;
-	}
-
-	.layout-controls {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		flex: 1;
-	}
-
-	/* Responsive: Stack width + layout op mobiel */
-	@media (max-width: 768px) {
-		.width-layout-row {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.divider {
-			width: 100%;
-			height: 1px;
-		}
-
-		.layout-controls {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-		}
-	}
-
-	/* Checkbox Label */
-	.checkbox-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		user-select: none;
-		font-size: 0.875rem;
-		color: var(--color-text, #374151);
-		padding: 0.5rem 0;
-		transition: color 0.15s ease;
-	}
-
-	.checkbox-label:hover {
-		color: var(--color-text-dark, #111827);
-	}
-
-	.checkbox-label input[type='checkbox'] {
-		width: 18px;
-		height: 18px;
-		margin: 0;
-		cursor: pointer;
-		accent-color: var(--color-primary, #d10a10);
-	}
-
-	/* Image Controls Container */
-	.image-controls {
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
-		padding: 1.5rem;
-		background: var(--color-bg-secondary, #f9fafb);
-		border: 1px solid var(--color-border, #e5e7eb);
-		border-radius: 8px;
-		margin-top: 0.25rem;
-	}
-
-	/* Input Fields Focus States */
-	.textframe-editor input[type='text'],
-	.textframe-editor input[type='url'],
-	.textframe-editor textarea {
-		transition:
-			border-color 0.15s ease,
-			box-shadow 0.15s ease;
-	}
-
-	.textframe-editor input[type='text']:focus,
-	.textframe-editor input[type='url']:focus,
-	.textframe-editor textarea:focus {
-		border-color: var(--color-primary, #d10a10);
-		box-shadow: 0 0 0 3px rgba(209, 10, 16, 0.1);
-		outline: none;
-	}
-	.control-label.disabled {
-		color: var(--color-text-disabled, #9ca3af);
-	}
-
-	.disabled-hint {
-		color: var(--color-text-disabled, #9ca3af);
-		font-style: italic;
-	}
-
-	/* Disabled input styling */
-	.textframe-editor input:disabled {
-		background-color: var(--color-bg-disabled, #f3f4f6);
-		color: var(--color-text-disabled, #9ca3af);
-		cursor: not-allowed;
-		opacity: 0.6;
-	}
-	/* ===== TAB STYLING ===== */
 	.toolbox-tabs {
 		display: flex;
 		gap: 0;
@@ -3333,15 +3567,6 @@ Markdown wordt ondersteund:
 		margin: 20px;
 	}
 
-	.coming-soon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 400px;
-		color: #9ca3af;
-		font-size: 1.125rem;
-	}
-	/* ===== SUBHEADING SOCCER EDITOR ===== */
 	.subheading-soccer-editor {
 		display: flex;
 		flex-direction: column;
@@ -3369,7 +3594,7 @@ Markdown wordt ondersteund:
 		color: #6b7280;
 		font-style: italic;
 	}
-	/* ===== MARKDOWN HELP ===== */
+
 	.textblock-editor {
 		display: flex;
 		flex-direction: column;
@@ -3430,6 +3655,150 @@ Markdown wordt ondersteund:
 		color: #667eea;
 		text-decoration: underline;
 	}
+
+	.textframe-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.control-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.control-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+	}
+
+	.label-hint {
+		font-size: 0.75rem;
+		font-weight: 400;
+		color: #6b7280;
+	}
+
+	.textframe-editor textarea {
+		font-family: inherit;
+		font-size: inherit;
+		line-height: 1.5;
+	}
+
+	.width-layout-row {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.width-controls {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.divider {
+		width: 1px;
+		height: 44px;
+		background: #e5e7eb;
+		flex-shrink: 0;
+	}
+
+	.layout-controls {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		flex: 1;
+	}
+
+	@media (max-width: 768px) {
+		.width-layout-row {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.divider {
+			width: 100%;
+			height: 1px;
+		}
+
+		.layout-controls {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		user-select: none;
+		font-size: 0.875rem;
+		color: #374151;
+		padding: 0.5rem 0;
+		transition: color 0.15s ease;
+	}
+
+	.checkbox-label:hover {
+		color: #111827;
+	}
+
+	.checkbox-label input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+		margin: 0;
+		cursor: pointer;
+		accent-color: #d10a10;
+	}
+
+	.image-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding: 1.5rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		margin-top: 0.25rem;
+	}
+
+	.textframe-editor input[type='text'],
+	.textframe-editor input[type='url'],
+	.textframe-editor textarea {
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.textframe-editor input[type='text']:focus,
+	.textframe-editor input[type='url']:focus,
+	.textframe-editor textarea:focus {
+		border-color: #d10a10;
+		box-shadow: 0 0 0 3px rgba(209, 10, 16, 0.1);
+		outline: none;
+	}
+
+	.control-label.disabled {
+		color: #9ca3af;
+	}
+
+	.disabled-hint {
+		color: #9ca3af;
+		font-style: italic;
+	}
+
+	.textframe-editor input:disabled {
+		background-color: #f3f4f6;
+		color: #9ca3af;
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+
 	.warning-hint {
 		margin: 0.5rem 0 0 0;
 		padding: 0.5rem 0.75rem;
