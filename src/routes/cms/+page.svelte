@@ -14,7 +14,24 @@
 	let loading = $state(true);
 	let error = $state('');
 	let newProjectName = $state('');
+	let searchQuery = $state('');
 	let dialogEl: HTMLDialogElement;
+
+	// ✅ Filtered projects (real-time search)
+	let filteredProjects = $derived.by(() => {
+		const query = searchQuery.trim().toLowerCase();
+
+		// Toon alle projecten als query < 3 karakters
+		if (query.length < 3) {
+			return projects;
+		}
+
+		// Filter op projectnaam (case-insensitive)
+		return projects.filter((project) => project.name.toLowerCase().includes(query));
+	});
+
+	// ✅ Show search hint
+	let showSearchHint = $derived(searchQuery.trim().length > 0 && searchQuery.trim().length < 3);
 
 	async function loadProjects() {
 		try {
@@ -86,6 +103,53 @@
 			<button class="btn-primary" onclick={showModal}> + Nieuw Project </button>
 		</div>
 
+		<!-- ✅ SEARCH BAR -->
+		<div class="search-container">
+			<svg
+				class="search-icon"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			>
+				<circle cx="11" cy="11" r="8"></circle>
+				<path d="m21 21-4.35-4.35"></path>
+			</svg>
+			<input
+				type="search"
+				class="search-input"
+				placeholder="Zoek project..."
+				bind:value={searchQuery}
+			/>
+			{#if searchQuery}
+				<button class="clear-btn" onclick={() => (searchQuery = '')} aria-label="Wis zoekopdracht">
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			{/if}
+		</div>
+
+		<!-- ✅ SEARCH HINT -->
+		{#if showSearchHint}
+			<p class="search-hint">
+				Type nog {3 - searchQuery.trim().length} karakter{3 - searchQuery.trim().length === 1
+					? ''
+					: 's'} om te zoeken...
+			</p>
+		{/if}
+
+		<!-- ✅ RESULTS -->
 		{#if loading}
 			<p class="loading">Projecten laden...</p>
 		{:else if error}
@@ -95,9 +159,14 @@
 				<p>Nog geen projecten.</p>
 				<button class="btn-primary" onclick={showModal}> Maak je eerste project </button>
 			</div>
+		{:else if filteredProjects.length === 0}
+			<div class="empty-state">
+				<p>Geen projecten gevonden voor "{searchQuery}"</p>
+				<button class="btn-secondary" onclick={() => (searchQuery = '')}> Wis zoekopdracht </button>
+			</div>
 		{:else}
 			<div class="projects-grid">
-				{#each projects as project}
+				{#each filteredProjects as project (project.id)}
 					<div class="project-card">
 						<h3>{project.name}</h3>
 						<p class="project-id">ID: {project.id.substring(0, 8)}...</p>
@@ -108,19 +177,7 @@
 		{/if}
 	</div>
 
-	<div class="cards">
-		<div class="card">
-			<h2>🎨 Thema's</h2>
-			<p>Pas styling en branding aan</p>
-			<button disabled>Binnenkort beschikbaar</button>
-		</div>
-
-		<div class="card">
-			<h2>🚀 Deployments</h2>
-			<p>Bekijk en beheer deployments</p>
-			<button disabled>Binnenkort beschikbaar</button>
-		</div>
-	</div>
+	<!-- ✅ THEMA'S EN DEPLOYMENTS VERWIJDERD -->
 </div>
 
 <!-- ✅ Native <dialog> element -->
@@ -174,7 +231,6 @@
 		background: white;
 		padding: 30px;
 		border-radius: 12px;
-		margin-bottom: 30px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
@@ -191,6 +247,81 @@
 		color: #333;
 	}
 
+	/* ✅ SEARCH BAR STYLING */
+	.search-container {
+		position: relative;
+		margin-bottom: 24px;
+	}
+
+	.search-input {
+		width: 100%;
+		padding: 12px 48px 12px 44px;
+		border: 2px solid #e0e0e0;
+		border-radius: 8px;
+		font-size: 16px;
+		transition: all 0.2s;
+		box-sizing: border-box;
+	}
+
+	/* ✅ HIDE NATIVE CLEAR BUTTONS */
+	.search-input::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.search-input::-webkit-search-decoration {
+		-webkit-appearance: none;
+	}
+
+	.search-input::-ms-clear {
+		display: none;
+	}
+
+	.search-input:focus {
+		outline: none;
+		border-color: #d10a10;
+		box-shadow: 0 0 0 3px rgba(209, 10, 16, 0.1);
+	}
+
+	.search-icon {
+		position: absolute;
+		left: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #999;
+		pointer-events: none;
+	}
+
+	.clear-btn {
+		position: absolute;
+		right: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		background: none;
+		border: none;
+		color: #999;
+		cursor: pointer;
+		padding: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		transition: all 0.2s;
+	}
+
+	.clear-btn:hover {
+		background: #f0f0f0;
+		color: #333;
+	}
+
+	.search-hint {
+		color: #999;
+		font-size: 14px;
+		margin: -16px 0 16px 0;
+		font-style: italic;
+	}
+
+	/* ✅ PROJECTS GRID */
 	.projects-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -202,27 +333,36 @@
 		border: 1px solid #dee2e6;
 		border-radius: 8px;
 		padding: 1.5rem;
-		transition: box-shadow 0.2s;
+		transition: all 0.2s;
 	}
 
 	.project-card:hover {
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		transform: translateY(-2px);
 	}
 
 	.project-card h3 {
 		margin: 0 0 0.5rem 0;
+		font-size: 18px;
+		color: #333;
 	}
 
 	.project-id {
 		color: #6c757d;
 		font-size: 0.875rem;
 		margin-bottom: 1rem;
+		font-family: monospace;
 	}
 
 	.empty-state {
 		text-align: center;
 		padding: 3rem 2rem;
 		color: #6c757d;
+	}
+
+	.empty-state p {
+		margin-bottom: 1rem;
+		font-size: 16px;
 	}
 
 	.loading,
@@ -235,81 +375,16 @@
 		color: #dc3545;
 	}
 
-	.cards {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 20px;
-	}
-
-	.card {
-		background: white;
-		padding: 30px;
-		border-radius: 12px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	.card h2 {
-		margin: 0 0 10px;
-		font-size: 20px;
-		color: #333;
-	}
-
-	.card p {
-		margin: 0 0 20px;
-		color: #666;
-		font-size: 14px;
-	}
-
-	.card button {
-		padding: 10px 20px;
-		background: #e0e0e0;
-		color: #999;
-		border: none;
-		border-radius: 6px;
-		cursor: not-allowed;
-		font-size: 14px;
-	}
-
-	/* ✅ Native dialog styling */
-	dialog.modal {
-		border: none;
-		border-radius: 8px;
-		padding: 2rem;
-		width: 90%;
-		max-width: 400px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-	}
-
-	dialog.modal::backdrop {
-		background: rgba(0, 0, 0, 0.5);
-	}
-
-	.modal h2 {
-		margin-top: 0;
-	}
-
-	.modal input {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #dee2e6;
-		border-radius: 4px;
-		margin-bottom: 1rem;
-		box-sizing: border-box;
-	}
-
-	.modal-buttons {
-		display: flex;
-		gap: 1rem;
-		justify-content: flex-end;
-	}
-
+	/* ✅ BUTTONS */
 	.btn-primary,
 	.btn-secondary {
 		padding: 0.75rem 1.5rem;
 		border: none;
-		border-radius: 4px;
+		border-radius: 6px;
 		cursor: pointer;
 		font-weight: 600;
+		font-size: 14px;
+		transition: all 0.2s;
 	}
 
 	.btn-primary {
@@ -319,6 +394,8 @@
 
 	.btn-primary:hover {
 		background: #b00909;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(209, 10, 16, 0.3);
 	}
 
 	.btn-secondary {
@@ -328,5 +405,47 @@
 
 	.btn-secondary:hover {
 		background: #5a6268;
+	}
+
+	/* ✅ MODAL */
+	dialog.modal {
+		border: none;
+		border-radius: 12px;
+		padding: 2rem;
+		width: 90%;
+		max-width: 400px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	}
+
+	dialog.modal::backdrop {
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+	}
+
+	.modal h2 {
+		margin: 0 0 1rem 0;
+		font-size: 24px;
+		color: #333;
+	}
+
+	.modal input {
+		width: 100%;
+		padding: 0.75rem;
+		border: 2px solid #e0e0e0;
+		border-radius: 6px;
+		margin-bottom: 1rem;
+		box-sizing: border-box;
+		font-size: 16px;
+	}
+
+	.modal input:focus {
+		outline: none;
+		border-color: #d10a10;
+	}
+
+	.modal-buttons {
+		display: flex;
+		gap: 1rem;
+		justify-content: flex-end;
 	}
 </style>
