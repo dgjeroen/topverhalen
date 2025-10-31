@@ -1,4 +1,3 @@
-<!-- src/lib/components/cms/editors/HeadingStyleEditor.svelte -->
 <script lang="ts">
 	import type { Theme } from '$lib/types';
 
@@ -22,9 +21,11 @@
 		weightKey: string;
 		colorKey: string;
 		styleKey: string;
+		marginKey: string;
 		defaultSize: string;
 		defaultWeight: string;
 		defaultColor: string;
+		defaultMargin: string;
 	};
 
 	const configs: Record<'h2' | 'h4', Config> = {
@@ -34,9 +35,11 @@
 			weightKey: 'font-weight-headings',
 			colorKey: 'color-text',
 			styleKey: 'font-style-h2',
-			defaultSize: '2rem',
-			defaultWeight: '700',
-			defaultColor: '#000000'
+			marginKey: 'h2-margin-bottom',
+			defaultSize: '2.5rem',
+			defaultWeight: '800',
+			defaultColor: '#000000',
+			defaultMargin: '1rem' // ← 1rem + 0.5rem linked = 1.5rem totaal
 		},
 		h4: {
 			title: 'Tussenkop (H4)',
@@ -44,22 +47,61 @@
 			weightKey: 'font-weight-subheading',
 			colorKey: 'color-subheading',
 			styleKey: 'font-style-h4',
-			defaultSize: '1.25rem',
+			marginKey: 'h4-margin-bottom',
+			defaultSize: '1.125rem',
 			defaultWeight: '600',
-			defaultColor: '#4b5563'
+			defaultColor: '#4b5563',
+			defaultMargin: '0.25rem' // ← 0.25rem + 0.5rem linked = 0.75rem totaal
 		}
 	};
 
 	const config = $derived(configs[level as 'h2' | 'h4']);
 
+	// ✅ Lokale state voor hoofdkleur met fallback
+	let headingColor = $state('');
+
+	function updateHeadingColor(value: string) {
+		headingColor = value;
+		theme[config.colorKey] = value;
+	}
+
+	// ✅ Sync als theme of config wijzigt
+	$effect(() => {
+		headingColor = theme[config.colorKey] || config.defaultColor;
+	});
+
 	let showBackground = $state(theme[`${level}-background-enabled`] === 'true');
 
-	// ✅ Sync + cleanup
+	// ✅ Lokale state voor achtergrond balkje
+	let backgroundColor = $state('');
+	let textColor = $state('');
+	let padding = $state('');
+
+	function updateBackgroundColor(value: string) {
+		backgroundColor = value;
+		theme[`${level}-background-color`] = value;
+	}
+
+	function updateTextColor(value: string) {
+		textColor = value;
+		theme[`${level}-background-text-color`] = value;
+	}
+
+	function updatePadding(value: string) {
+		padding = value;
+		theme[`${level}-background-padding`] = value;
+	}
+
+	// ✅ Sync achtergrond state
 	$effect(() => {
 		const enabled = theme[`${level}-background-enabled`] === 'true';
 		showBackground = enabled;
 
-		if (!enabled && level === 'h4') {
+		if (enabled) {
+			backgroundColor = theme[`${level}-background-color`] || '#000000';
+			textColor = theme[`${level}-background-text-color`] || '#ffffff';
+			padding = theme[`${level}-background-padding`] || '0.2rem 0.5rem';
+		} else if (level === 'h4') {
 			delete theme[`${level}-background-color`];
 			delete theme[`${level}-background-text-color`];
 			delete theme[`${level}-background-padding`];
@@ -81,13 +123,15 @@
 				<input
 					id="{level}-color"
 					type="color"
-					bind:value={theme[config.colorKey]}
+					value={headingColor}
+					oninput={(e) => updateHeadingColor(e.currentTarget.value)}
 					onchange={onsave}
 				/>
 				<input
 					type="text"
 					class="color-value"
-					bind:value={theme[config.colorKey]}
+					value={headingColor}
+					oninput={(e) => updateHeadingColor(e.currentTarget.value)}
 					onchange={onsave}
 					placeholder={config.defaultColor}
 				/>
@@ -119,6 +163,26 @@
 				<option value="700">Bold (700)</option>
 				<option value="800">Extra-bold (800)</option>
 			</select>
+		</div>
+
+		<!-- ✅ NIEUW: Witruimte onder -->
+		<div class="control-group">
+			<label for="{level}-margin">Witruimte onder</label>
+			<input
+				id="{level}-margin"
+				type="text"
+				bind:value={theme[config.marginKey]}
+				onchange={onsave}
+				placeholder={config.defaultMargin}
+				class="text-input"
+			/>
+			<span class="hint">
+				{#if level === 'h2'}
+					Totale ruimte = deze waarde + 0.5rem. Bijv: 1rem = 1.5rem totaal
+				{:else}
+					Totale ruimte = deze waarde + 0.5rem. Bijv: 0.75rem = 1.25rem totaal
+				{/if}
+			</span>
 		</div>
 
 		<!-- Italic Toggle -->
@@ -154,12 +218,12 @@
 								delete theme[`${level}-background-text-color`];
 								delete theme[`${level}-background-padding`];
 							} else {
-								theme[`${level}-background-color`] =
-									theme[`${level}-background-color`] || '#000000';
-								theme[`${level}-background-text-color`] =
-									theme[`${level}-background-text-color`] || '#ffffff';
-								theme[`${level}-background-padding`] =
-									theme[`${level}-background-padding`] || '0.2rem 0.5rem';
+								// ✅ Set defaults in theme
+								theme[`${level}-background-color`] = '#000000';
+								theme[`${level}-background-text-color`] = '#ffffff';
+								theme[`${level}-background-padding`] = '0.2rem 0.5rem';
+
+								// ✅ Update lokale state (gebeurt via $effect)
 							}
 
 							await onsave();
@@ -176,13 +240,15 @@
 						<input
 							id="{level}-bg"
 							type="color"
-							bind:value={theme[`${level}-background-color`]}
+							value={backgroundColor}
+							oninput={(e) => updateBackgroundColor(e.currentTarget.value)}
 							onchange={onsave}
 						/>
 						<input
 							type="text"
 							class="color-value"
-							bind:value={theme[`${level}-background-color`]}
+							value={backgroundColor}
+							oninput={(e) => updateBackgroundColor(e.currentTarget.value)}
 							onchange={onsave}
 							placeholder="#000000"
 						/>
@@ -195,13 +261,15 @@
 						<input
 							id="{level}-bg-text-color"
 							type="color"
-							bind:value={theme[`${level}-background-text-color`]}
+							value={textColor}
+							oninput={(e) => updateTextColor(e.currentTarget.value)}
 							onchange={onsave}
 						/>
 						<input
 							type="text"
 							class="color-value"
-							bind:value={theme[`${level}-background-text-color`]}
+							value={textColor}
+							oninput={(e) => updateTextColor(e.currentTarget.value)}
 							onchange={onsave}
 							placeholder="#ffffff"
 						/>
@@ -213,7 +281,8 @@
 					<input
 						id="{level}-bg-padding"
 						type="text"
-						bind:value={theme[`${level}-background-padding`]}
+						value={padding}
+						oninput={(e) => updatePadding(e.currentTarget.value)}
 						onchange={onsave}
 						placeholder="0.2rem 0.5rem"
 						class="text-input"
@@ -224,8 +293,6 @@
 		{/if}
 	</div>
 </div>
-
-<!-- ... bestaande styles ... -->
 
 <style>
 	.style-editor {
