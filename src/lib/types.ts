@@ -1,10 +1,4 @@
 // src/lib/types.ts
-
-// =================================================================
-// 1. DEFINITIE VOOR HET THEMA-OBJECT
-// =================================================================
-// src/lib/types.ts
-
 export type Theme = {
     // ============================================
     // LAYOUT
@@ -61,6 +55,8 @@ export type Theme = {
     'h4-background-color'?: string;
     'h4-background-text-color'?: string;
     'h4-background-padding'?: string;
+    'h2-margin-bottom'?: string;
+    'h4-margin-bottom'?: string;
 
     // ============================================
     // SUBHEADING SOCCER COMPONENT
