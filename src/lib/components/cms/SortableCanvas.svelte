@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
+	import { onDestroy, tick, createEventDispatcher } from 'svelte';
 	import type { ContentBlock, Theme } from '$lib/types';
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte'; // Zorg dat dit pad klopt!
@@ -23,6 +23,28 @@
 
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
+	let showMarkdownInfo = $state(false);
+
+	// ✅ Lead checkbox logic
+	const firstTextblockId = $derived(
+		blocks.find((b: ContentBlock) => b.type === 'textblock')?.id || null
+	);
+
+	function canBeLead(blockId: string): boolean {
+		return blockId === firstTextblockId;
+	}
+
+	// ✅ Cleanup lead status
+	$effect(() => {
+		blocks.forEach((block: ContentBlock) => {
+			if (block.type === 'textblock' && block.id !== firstTextblockId) {
+				if (block.content.isLead) {
+					block.content.isLead = false;
+					dispatch('save');
+				}
+			}
+		});
+	});
 
 	function initHlsPlayer(block: ContentBlock) {
 		// <-- ': ContentBlock' toegevoegd
@@ -541,34 +563,62 @@
 					</div>
 				{:else if block.type === 'textblock'}
 					<div class="textblock-editor">
-						<details class="markdown-help">
-							<summary>📝 Markdown Opmaak</summary>
-							<div class="markdown-examples">
-								<code>**vet**</code> → <strong>vet</strong><br />
-								<code>*cursief*</code> → <em>cursief</em><br />
-								<code>[link](url)</code> → <a href="javascript:void(0)">link</a><br />
-								<code>- lijst</code> → Ongenummerde lijst<br />
-								<code>1. lijst</code> → Genummerde lijst<br />
-								<code>&gt; quote</code> → Blockquote<br />
-								<code>`code`</code> → <code>inline code</code>
+						<div class="editor-header-row">
+							<label class="input-label">
+								Tekst (Markdown)
+								<button
+									type="button"
+									class="info-button"
+									onclick={() => (showMarkdownInfo = !showMarkdownInfo)}
+									aria-label="Markdown hulp"
+								>
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 16 16"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
+										<path
+											d="M8 7V11M8 5V5.5"
+											stroke="currentColor"
+											stroke-width="1.5"
+											stroke-linecap="round"
+										/>
+									</svg>
+								</button>
+							</label>
+						</div>
+
+						{#if showMarkdownInfo}
+							<div class="markdown-tooltip">
+								<div class="markdown-tooltip-content">
+									<div class="markdown-example"><code>**vet**</code> → <strong>vet</strong></div>
+									<div class="markdown-example"><code>*cursief*</code> → <em>cursief</em></div>
+									<div class="markdown-example"><code>[link](https://url.nl)</code> → link</div>
+								</div>
 							</div>
-						</details>
+						{/if}
 
 						<textarea
-							placeholder="Typ hier je tekst..."
+							placeholder="Schrijf je tekst..."
 							bind:value={block.content.text[0]}
 							oninput={() => dispatch('save')}
 							class="block-textarea"
-							rows="4"
+							rows="6"
 						></textarea>
-						<label class="lead-toggle">
-							<input
-								type="checkbox"
-								bind:checked={block.content.isLead}
-								onchange={() => dispatch('save')}
-							/>
-							<span>Dit is een inleiding</span>
-						</label>
+
+						{#if canBeLead(block.id)}
+							<label class="lead-toggle">
+								<input
+									type="checkbox"
+									bind:checked={block.content.isLead}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Dit is een inleiding</span>
+							</label>
+						{/if}
 					</div>
 				{:else if block.type === 'image'}
 					<input
@@ -1478,8 +1528,6 @@
 {/if}
 
 <style>
-	/* HIER STAAT NU ALLE CSS DIE EERST IN +page.svelte STOND */
-
 	.canvas-wrapper {
 		max-width: 800px;
 		margin: 0 auto;
@@ -1596,9 +1644,27 @@
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 
+	/* ============================================
+   HEADING HIERARCHY IN EDITOR CANVAS
+   ============================================ */
+
+	/* H2 Input - Hoofdkop (imposant, urgent, zwaar) */
+	.block-input:not(.block-input-subheading) {
+		font-size: 1.5rem !important; /* 32px - Groot! */
+		font-weight: 700 !important; /* Extra bold */
+		color: #000000 !important; /* Zwart */
+		line-height: 1.2 !important;
+		padding: 0.75rem !important;
+		letter-spacing: -0.02em; /* Tighter spacing */
+	}
+
+	/* H4 Input - Tussenkop (bescheiden, ondersteunend) */
 	.block-input-subheading {
-		font-size: 1.0625rem;
-		font-weight: 600;
+		font-size: 1.125rem !important; /* 18px - Kleiner dan H2 */
+		font-weight: 500 !important; /* Semi-bold */
+		color: #4c4d4e !important; /* Grijs */
+		line-height: 1.3 !important;
+		padding: 0.75rem !important;
 	}
 
 	.block-preview {
@@ -2311,61 +2377,6 @@
 		gap: 0.75rem;
 	}
 
-	.markdown-help {
-		background: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		padding: 0.75rem;
-		font-size: 0.8125rem;
-	}
-
-	.markdown-help summary {
-		cursor: pointer;
-		font-weight: 600;
-		color: #374151;
-		user-select: none;
-		list-style: none;
-	}
-
-	.markdown-help summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.markdown-help[open] summary {
-		margin-bottom: 0.75rem;
-		padding-bottom: 0.75rem;
-		border-bottom: 1px solid #e5e7eb;
-	}
-
-	.markdown-examples {
-		line-height: 1.8;
-		color: #6b7280;
-	}
-
-	.markdown-examples code {
-		background: white;
-		padding: 0.125rem 0.375rem;
-		border-radius: 3px;
-		font-family: 'SF Mono', Monaco, monospace;
-		color: #d10a10;
-		font-size: 0.75rem;
-	}
-
-	.markdown-examples strong {
-		font-weight: 700;
-		color: #111827;
-	}
-
-	.markdown-examples em {
-		font-style: italic;
-		color: #111827;
-	}
-
-	.markdown-examples a {
-		color: #667eea;
-		text-decoration: underline;
-	}
-
 	.textframe-editor {
 		display: flex;
 		flex-direction: column;
@@ -2517,7 +2528,6 @@
 		cursor: not-allowed;
 		opacity: 0.6;
 	}
-
 	.warning-hint {
 		margin: 0.5rem 0 0 0;
 		padding: 0.5rem 0.75rem;
@@ -2527,5 +2537,143 @@
 		font-size: 0.8125rem;
 		color: #92400e;
 		line-height: 1.4;
+	}
+
+	/* ============================================
+	   HEADING HIERARCHY IN EDITOR CANVAS
+	   ============================================ */
+
+	/* H2 - Hoofdkop (imposant, urgent, zwaar) */
+	.canvas-block :global(h2) {
+		font-size: 2rem; /* Groot */
+		font-weight: 800; /* Extra bold */
+		color: #000000; /* Zwart */
+		line-height: 1.2;
+		margin: 0 0 0.5rem 0;
+		letter-spacing: -0.02em; /* Tighter voor impact */
+	}
+
+	/* H4 - Tussenkop (bescheiden, ondersteunend) */
+	.canvas-block :global(h4) {
+		font-size: 1.125rem; /* Kleiner */
+		font-weight: 600; /* Semi-bold */
+		color: #6b7280; /* Grijs */
+		line-height: 1.3;
+		margin: 0 0 0.5rem 0;
+	}
+
+	/* Tekstblok paragrafen - Normaal */
+	.canvas-block :global(p) {
+		font-size: 1rem;
+		font-weight: 400;
+		color: #374151;
+		line-height: 1.6;
+		margin: 0 0 0.5rem 0;
+	}
+
+	/* Strong/Bold in tekstblokken */
+	.canvas-block :global(strong) {
+		font-weight: 700;
+		color: #111827;
+	}
+
+	/* Italic in tekstblokken */
+	.canvas-block :global(em) {
+		font-style: italic;
+		color: #4b5563;
+	}
+	/* Markdown info button */
+	.editor-header-row {
+		display: flex;
+		align-items: flex-start;
+		margin-bottom: 0.5rem;
+	}
+
+	.input-label {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.info-button {
+		background: none;
+		border: none;
+		padding: 2px;
+		cursor: pointer;
+		color: #9ca3af;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		transition: all 0.15s;
+		vertical-align: middle;
+	}
+
+	.info-button:hover {
+		background: #f3f4f6;
+		color: #6b7280;
+	}
+
+	.info-button svg {
+		width: 14px;
+		height: 14px;
+	}
+
+	.markdown-tooltip {
+		margin-bottom: 0.75rem;
+	}
+
+	.markdown-tooltip-content {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		padding: 0.75rem;
+		font-size: 0.8125rem;
+		line-height: 1.6;
+		animation: slideDown 0.2s ease;
+	}
+
+	.markdown-example {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.375rem;
+		color: #6b7280;
+	}
+
+	.markdown-example:last-child {
+		margin-bottom: 0;
+	}
+
+	.markdown-example code {
+		background: white;
+		padding: 0.125rem 0.375rem;
+		border-radius: 3px;
+		font-family: 'SF Mono', Monaco, monospace;
+		color: #d10a10;
+		font-size: 0.75rem;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	.markdown-example strong {
+		font-weight: 700;
+		color: #111827;
+	}
+
+	.markdown-example em {
+		font-style: italic;
+		color: #111827;
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 </style>

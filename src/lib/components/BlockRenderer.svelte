@@ -59,7 +59,9 @@
 {:else}
 	<div
 		class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}
-		class:is-linked-to-next={block.type === 'subheading' || block.type === 'subheadingSoccer'}
+		class:is-linked-to-next={block.type === 'heading' ||
+			block.type === 'subheading' ||
+			block.type === 'subheadingSoccer'}
 	>
 		<ComponentToRender {...block.content} />
 	</div>

@@ -7,15 +7,39 @@
 		onsave: () => Promise<void>;
 	}>();
 
+	const defaults = {
+		'color-background-light': '#ffffff',
+		'font-family-quote': "'acumin-pro-extra-condensed', sans-serif",
+		'font-family-base': "'Inter', sans-serif"
+	};
+
+	// ✅ Ensure theme exists
 	$effect(() => {
 		if (!theme) theme = {};
 	});
 
-	const defaults = {
-		'color-background-light': '#faedad',
-		'font-family-quote': "'acumin-pro-extra-condensed', sans-serif",
-		'font-family-base': "'Inter', sans-serif"
-	};
+	// ✅ Gebruik lokale state met fallback
+	let backgroundColor = $state(
+		theme['color-background-light'] || defaults['color-background-light']
+	);
+	let fontQuote = $state(theme['font-family-quote'] || defaults['font-family-quote']);
+	let fontBase = $state(theme['font-family-base'] || defaults['font-family-base']);
+
+	// ✅ Sync changes terug naar theme
+	function updateBackgroundColor(value: string) {
+		backgroundColor = value;
+		theme['color-background-light'] = value;
+	}
+
+	function updateFontQuote(value: string) {
+		fontQuote = value;
+		theme['font-family-quote'] = value;
+	}
+
+	function updateFontBase(value: string) {
+		fontBase = value;
+		theme['font-family-base'] = value;
+	}
 </script>
 
 <div class="style-editor">
@@ -32,13 +56,15 @@
 				<input
 					id="body-bg"
 					type="color"
-					bind:value={theme['color-background-light']}
+					value={backgroundColor}
+					oninput={(e) => updateBackgroundColor(e.currentTarget.value)}
 					onchange={onsave}
 				/>
 				<input
 					type="text"
 					class="color-value"
-					bind:value={theme['color-background-light']}
+					value={backgroundColor}
+					oninput={(e) => updateBackgroundColor(e.currentTarget.value)}
 					onchange={onsave}
 					placeholder={defaults['color-background-light']}
 				/>
@@ -49,7 +75,14 @@
 		<div class="control-group">
 			<label for="font-heading">Lettertype Koppen</label>
 			<p class="control-hint">Gebruikt voor H2, H4 en TextFrame koppen</p>
-			<select id="font-heading" bind:value={theme['font-family-quote']} onchange={onsave}>
+			<select
+				id="font-heading"
+				value={fontQuote}
+				onchange={(e) => {
+					updateFontQuote(e.currentTarget.value);
+					onsave();
+				}}
+			>
 				<option value="'acumin-pro-extra-condensed', sans-serif">Acumin Pro (standaard)</option>
 				<option value="'Inter', sans-serif">Inter</option>
 				<option value="'Georgia', serif">Georgia</option>
@@ -62,7 +95,14 @@
 		<div class="control-group">
 			<label for="font-body">Lettertype Body</label>
 			<p class="control-hint">Gebruikt voor tekstblokken en quote auteur</p>
-			<select id="font-body" bind:value={theme['font-family-base']} onchange={onsave}>
+			<select
+				id="font-body"
+				value={fontBase}
+				onchange={(e) => {
+					updateFontBase(e.currentTarget.value);
+					onsave();
+				}}
+			>
 				<option value="'Inter', sans-serif">Inter (standaard)</option>
 				<option value="'Georgia', serif">Georgia</option>
 				<option value="'Arial', sans-serif">Arial</option>
@@ -71,6 +111,8 @@
 		</div>
 	</div>
 </div>
+
+<!-- Styles blijven hetzelfde -->
 
 <style>
 	.style-editor {
