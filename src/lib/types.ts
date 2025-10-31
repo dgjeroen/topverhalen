@@ -300,7 +300,12 @@ export interface TimelineContent {
 // =================================================================
 // 3. UNION TYPE DIE ALLE MOGELIJKE BLOKKEN VERZAMELT
 // =================================================================
-export type ContentBlock =
+
+type BlockBase = {
+    /** De unieke identifier voor Svelte's {#each} key */
+    id: string;
+};
+type BlockUnion =
     | { type: 'textblock'; content: TextBlockContent }
     | { type: 'heading'; content: HeadingContent }
     | { type: 'subheading'; content: HeadingContent }
@@ -317,7 +322,7 @@ export type ContentBlock =
     | { type: 'timeline'; content: TimelineContent }
     | { type: 'mediaPair'; content: MediaPairContent }
     | { type: 'textframe'; content: TextFrameContent };
-
+export type ContentBlock = BlockBase & BlockUnion;
 // =================================================================
 // 4. HET HOOFDTYPE DAT DE VOLLEDIGE STRUCTUUR VAN content.json BESCHRIJFT
 // =================================================================
