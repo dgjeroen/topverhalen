@@ -4,6 +4,7 @@
 	import { tick } from 'svelte';
 	import type { PageData } from './$types';
 	import type { ContentBlock } from '$lib/types';
+	import BlockIcons from '$lib/assets/icons/BlockIcons.svelte';
 	import TextFrameIcons from '$lib/assets/icons/TextFrameIcons.svelte';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 	import SortableCanvas from '$lib/components/cms/SortableCanvas.svelte';
@@ -33,7 +34,7 @@
 	let activeTab = $state<'blocks' | 'styling'>('blocks');
 	let selectedStyleComponent = $state<string>('general');
 	let toolboxEl = $state<HTMLElement>();
-	let toolboxSortable: any;
+	let toolboxSortable = $state<any>(null);
 
 	// ✅ NIEUW: Save management state
 	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -334,6 +335,8 @@
 				return { url: '', label: '', title: 'Hero titel', source: '', textAlign: 'center' };
 			case 'heading':
 				return { text: '', level: 2 };
+			case 'subheadingMedium':
+				return { text: '', level: 3 };
 			case 'subheading':
 				return { text: '', level: 4 };
 			case 'subheadingSoccer':
@@ -346,8 +349,16 @@
 				return { url: '', caption: '', source: '', parallax: false };
 			case 'video':
 				return { url: '', poster: '' };
+			case 'embed':
+				return {
+					code: '',
+					aspectRatio: 'auto',
+					caption: '',
+					source: ''
+				};
 			case 'slider':
 				return { images: [{ url: '', caption: '', source: '' }] };
+
 			case 'gallery':
 				return { columns: 2, images: [] };
 			case 'timeline':
@@ -603,14 +614,17 @@
 
 <!-- ✅ NIEUW: Backup Restore Dialog -->
 {#if showBackupDialog}
-	<div
+	<dialog
 		class="backup-dialog-overlay"
-		role="dialog"
-		tabindex="-1"
-		onclick={discardBackup}
-		onkeydown={(e) => e.key === 'Escape' && discardBackup}
+		open
+		onclick={(e) => {
+			if (e.target === e.currentTarget) discardBackup();
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') discardBackup();
+		}}
 	>
-		<div class="backup-dialog" role="document" onclick={(e) => e.stopPropagation()}>
+		<div class="backup-dialog" role="document">
 			<h3>🔄 Niet-opgeslagen wijzigingen gevonden</h3>
 			<p>
 				Er zijn lokale wijzigingen gevonden van {new Date(backupData?.timestamp).toLocaleString()}.
@@ -622,7 +636,7 @@
 				<button type="button" class="btn-secondary" onclick={discardBackup}> ❌ Negeren </button>
 			</div>
 		</div>
-	</div>
+	</dialog>
 {/if}
 
 <!-- ✅ NIEUW: Rate Limit Warning Banner -->
@@ -639,7 +653,7 @@
 		</span>
 	</div>
 {/if}
-
+<BlockIcons />
 <TextFrameIcons />
 <svelte:head>
 	<title>Editor - {data.project.storyName}</title>
@@ -733,24 +747,15 @@
 						<h3>Blokken</h3>
 
 						<div class="block" data-type="heroVideo">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-hero-video" />
 							</svg>
 							<span>Hero video</span>
 						</div>
+
 						<div class="block" data-type="imageHero">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-image-hero" />
 							</svg>
 							<span>Hero afbeelding</span>
 						</div>
@@ -758,43 +763,27 @@
 						<hr />
 
 						<div class="block" data-type="heading">
-							<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor"
-									>H2</text
-								>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-h2" />
 							</svg>
 							<span>Kop</span>
 						</div>
-
 						<div class="block" data-type="subheading">
-							<svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor"
-									>H4</text
-								>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-h4" />
 							</svg>
 							<span>Tussenkop</span>
 						</div>
-
 						<div class="block" data-type="textblock">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 6h16M4 12h16M4 18h16"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-text" />
 							</svg>
 							<span>Tekstblok</span>
 						</div>
 
 						<div class="block" data-type="quote">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-quote" />
 							</svg>
 							<span>Citaat</span>
 						</div>
@@ -802,67 +791,36 @@
 						<hr />
 
 						<div class="block" data-type="image">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-image" />
 							</svg>
 							<span>Afbeelding</span>
 						</div>
 
 						<div class="block" data-type="video">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-								></path>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-video" />
 							</svg>
 							<span>Video</span>
 						</div>
 
 						<div class="block" data-type="slider">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-slider" />
 							</svg>
 							<span>Fotoslider</span>
 						</div>
 
 						<div class="block" data-type="gallery">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-gallery" />
 							</svg>
 							<span>Fotogrid</span>
 						</div>
 
 						<div class="block" data-type="mediaPair">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-media-pair" />
 							</svg>
 							<span>Mediapaar</span>
 						</div>
@@ -870,56 +828,51 @@
 						<hr />
 
 						<div class="block" data-type="textframe">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-text-frame" />
 							</svg>
 							<span>Tekstkader</span>
 						</div>
 
+						<div class="block" data-type="embed">
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-embed" />
+							</svg>
+							<span>Embed</span>
+						</div>
+
 						<div class="block" data-type="timeline">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-timeline" />
 							</svg>
 							<span>Tijdlijn</span>
 						</div>
 
 						<div class="block" data-type="audio">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-audio" />
 							</svg>
 							<span>Audiospeler</span>
 						</div>
 
 						<div class="block" data-type="colofon">
-							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-								></path>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-colofon" />
 							</svg>
 							<span>Colofon</span>
 						</div>
-						<hr />
 
+						<hr />
+						<div class="block" data-type="subheadingMedium">
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-h3" />
+							</svg>
+							<span>Extra tussenkop</span>
+						</div>
 						<div class="block" data-type="subheadingSoccer">
-							<span style="font-size: 18px;">⚽</span>
+							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+								<use href="#icon-block-soccer" />
+							</svg>
 							<span>Tussenkop voetbal</span>
 						</div>
 					</div>
@@ -949,6 +902,8 @@
 					{:else if selectedStyleComponent === 'heading'}
 						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h2" />
 					{:else if selectedStyleComponent === 'subheading'}
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h3" />
+					{:else if selectedStyleComponent === 'subheadingMedium'}
 						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h4" />
 					{:else if selectedStyleComponent === 'subheadingSoccer'}
 						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
@@ -1014,9 +969,15 @@
 		color: #111827;
 		letter-spacing: -0.025em;
 	}
+	.block-icon {
+		width: 20px;
+		height: 20px;
+		flex-shrink: 0;
+		color: currentColor;
+	}
 
 	.divider {
-		color: #d1d5db;
+		color: #d10a10;
 		font-weight: 300;
 	}
 
@@ -1343,7 +1304,7 @@
 
 	.toolbox hr {
 		border: none;
-		border-top: 1px solid #e5e7eb;
+		border-top: 1px solid #d10a10;
 		margin: 1rem 0;
 	}
 
@@ -1429,20 +1390,12 @@
 		margin: 20px;
 	}
 
-	.divider {
-		width: 1px;
-		height: 44px;
-		background: #e5e7eb;
-		flex-shrink: 0;
-	}
-
-	/* Voeg deze regels toe aan je component <style> of een globale stylesheet */
 	main.canvas {
 		position: relative;
-		flex: 1; /* Zorgt dat het canvas alle beschikbare ruimte pakt */
-		height: 100%; /* Respecteert de hoogte van de .editor-layout */
-		overflow-y: auto; /* De MAGISCHE regel: voegt scrollbalk toe als nodig */
+		flex: 1;
+		height: 100%;
+		overflow-y: auto;
 		overflow-x: hidden;
-		padding: 20px; /* Geeft je canvas wat ademruimte */
+		padding: 20px;
 	}
 </style>

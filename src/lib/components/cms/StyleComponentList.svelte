@@ -1,30 +1,35 @@
-<!-- src/lib/components/cms/StyleComponentList.svelte -->
 <script lang="ts">
+	import BlockIcons from '$lib/assets/icons/BlockIcons.svelte';
+
 	let { selected = $bindable('general') } = $props<{
 		selected: string;
 	}>();
 
 	const components = [
-		{ id: 'general', label: 'Algemeen', icon: '⚙️' },
-		{ id: 'heading', label: 'Kop (H2)', icon: 'H2' },
-		{ id: 'subheading', label: 'Tussenkop (H4)', icon: 'H4' },
-		{ id: 'text', label: 'Tekst', icon: '¶' },
-		{ id: 'quote', label: 'Citaat', icon: '💬' },
-		{ id: 'image', label: 'Afbeelding', icon: '🖼️' },
-		{ id: 'slider', label: 'Slider', icon: '🎞️' },
-		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: '⚽' }
+		{ id: 'general', label: 'Algemeen', icon: 'icon-style-general' },
+		{ id: 'heading', label: 'Kop', icon: 'icon-block-h2' },
+		{ id: 'subheading', label: 'Tussenkop', icon: 'icon-block-h4' },
+		{ id: 'text', label: 'Tekst', icon: 'icon-block-text' },
+		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
+		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
+		{ id: 'slider', label: 'Slider', icon: 'icon-block-slider' },
+		{ id: 'subheadingMedium', label: 'Extra tussenkop', icon: 'icon-block-h3' },
+		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' }
 	];
 </script>
 
+<BlockIcons />
+
 <div class="component-list">
-	<h3>Componenten</h3>
 	{#each components as comp}
 		<button
 			class="component-item"
 			class:active={selected === comp.id}
 			onclick={() => (selected = comp.id)}
 		>
-			<span class="icon">{comp.icon}</span>
+			<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+				<use href="#{comp.icon}" />
+			</svg>
 			<span class="label">{comp.label}</span>
 		</button>
 	{/each}
@@ -36,16 +41,6 @@
 		flex-direction: column;
 		gap: 0.5rem;
 	}
-
-	h3 {
-		margin: 0 0 1rem 0;
-		color: #111827;
-		font-size: 0.875rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
 	.component-item {
 		display: flex;
 		align-items: center;
@@ -77,13 +72,10 @@
 	}
 
 	.icon {
-		width: 18px;
-		height: 18px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		width: 20px;
+		height: 20px;
 		flex-shrink: 0;
-		font-size: 14px;
+		color: currentColor;
 	}
 
 	.label {

@@ -44,19 +44,27 @@ export type Theme = {
     'font-size-h4'?: string;
     'font-weight-headings'?: string;
     'font-weight-subheading'?: string;
+    'font-weight-subheading-medium'?: string;
     'color-subheading'?: string;
+    'color-subheading-medium'?: string;
     'font-style-h2'?: string;
+    'font-style-h3'?: string;
     'font-style-h4'?: string;
+    'h2-margin-bottom'?: string;
+    'h3-margin-bottom'?: string;
+    'h4-margin-bottom'?: string;
     'h2-background-enabled'?: string;
     'h2-background-color'?: string;
     'h2-background-text-color'?: string;
     'h2-background-padding'?: string;
+    'h3-background-enabled'?: string;
+    'h3-background-color'?: string;
+    'h3-background-text-color'?: string;
+    'h3-background-padding'?: string;
     'h4-background-enabled'?: string;
     'h4-background-color'?: string;
     'h4-background-text-color'?: string;
     'h4-background-padding'?: string;
-    'h2-margin-bottom'?: string;
-    'h4-margin-bottom'?: string;
 
     // ============================================
     // SUBHEADING SOCCER COMPONENT
@@ -293,6 +301,13 @@ export interface TimelineContent {
     timelines: TimelineItem[];
 }
 
+export interface EmbedContent {
+    code: string;              // Embed code (iframe/script/URL)
+    aspectRatio?: '16:9' | '4:3' | '1:1' | '3:2' | '21:9' | 'auto';
+    caption?: string;
+    source?: string;
+}
+
 // =================================================================
 // 3. UNION TYPE DIE ALLE MOGELIJKE BLOKKEN VERZAMELT
 // =================================================================
@@ -305,6 +320,7 @@ type BlockUnion =
     | { type: 'textblock'; content: TextBlockContent }
     | { type: 'heading'; content: HeadingContent }
     | { type: 'subheading'; content: HeadingContent }
+    | { type: 'subheadingMedium'; content: HeadingContent }
     | { type: 'subheadingSoccer'; content: HeadingContent }
     | { type: 'image'; content: ImageContent }
     | { type: 'quote'; content: QuoteContent }
@@ -317,7 +333,8 @@ type BlockUnion =
     | { type: 'colofon'; content: ColofonContent }
     | { type: 'timeline'; content: TimelineContent }
     | { type: 'mediaPair'; content: MediaPairContent }
-    | { type: 'textframe'; content: TextFrameContent };
+    | { type: 'textframe'; content: TextFrameContent }
+    | { type: 'embed'; content: EmbedContent };
 export type ContentBlock = BlockBase & BlockUnion;
 // =================================================================
 // 4. HET HOOFDTYPE DAT DE VOLLEDIGE STRUCTUUR VAN content.json BESCHRIJFT
