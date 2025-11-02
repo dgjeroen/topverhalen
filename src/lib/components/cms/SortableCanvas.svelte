@@ -540,6 +540,14 @@
 						oninput={() => dispatch('save')}
 						class="block-input block-input-subheading"
 					/>
+				{:else if block.type === 'subheadingMedium'}
+					<input
+						type="text"
+						placeholder="Tekst tussenkop (H3)..."
+						bind:value={block.content.text}
+						oninput={() => dispatch('save')}
+						class="block-input block-input-subheading-medium"
+					/>
 				{:else if block.type === 'subheadingSoccer'}
 					<div class="subheading-soccer-editor">
 						<input
@@ -710,6 +718,77 @@
 										<img src={block.content.poster} alt="Poster" class="media-preview" />
 									</div>
 								{/if}
+							</div>
+						{/if}
+					</div>
+				{:else if block.type === 'embed'}
+					<div class="embed-editor">
+						<label class="input-label" for="embed-code-{block.id}">Embed Code</label>
+						<textarea
+							id="embed-code-{block.id}"
+							placeholder="Plak hier je embed code (iframe, script, blockquote) of URL...
+
+Voorbeelden:
+• YouTube: https://youtube.com/watch?v=xxx
+• Twitter: https://twitter.com/user/status/xxx
+• Datawrapper: Plak de embed code
+• Spotify: https://open.spotify.com/track/xxx
+• Iframe: Plak de iframe code"
+							bind:value={block.content.code}
+							oninput={() => dispatch('save')}
+							class="block-textarea"
+							rows="6"
+						></textarea>
+
+						<div class="control-group">
+							<label class="input-label" for="aspect-ratio-{block.id}">Aspect Ratio</label>
+							<select
+								id="aspect-ratio-{block.id}"
+								bind:value={block.content.aspectRatio}
+								onchange={() => dispatch('save')}
+								class="type-select"
+							>
+								<option value="auto">Auto (geen ratio)</option>
+								<option value="16:9">16:9 (standaard video)</option>
+								<option value="4:3">4:3 (klassiek)</option>
+								<option value="1:1">1:1 (vierkant)</option>
+								<option value="3:2">3:2 (foto)</option>
+								<option value="21:9">21:9 (ultrawide)</option>
+							</select>
+							<span class="hint">Voor YouTube/Twitter/Spotify wordt aspect ratio genegeerd</span>
+						</div>
+
+						<input
+							type="text"
+							placeholder="Bijschrift (optioneel)..."
+							bind:value={block.content.caption}
+							oninput={() => dispatch('save')}
+							class="block-input"
+						/>
+
+						<input
+							type="text"
+							placeholder="Bron (optioneel)..."
+							bind:value={block.content.source}
+							oninput={() => dispatch('save')}
+							class="block-input"
+						/>
+
+						{#if block.content.code}
+							<div class="embed-preview-notice">
+								<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+									<circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
+									<path
+										d="M8 7V11M8 5V5.5"
+										stroke="currentColor"
+										stroke-width="1.5"
+										stroke-linecap="round"
+									/>
+								</svg>
+								<span
+									>Preview beschikbaar na publicatie (YouTube, Twitter en Spotify worden automatisch
+									gedetecteerd)</span
+								>
 							</div>
 						{/if}
 					</div>
@@ -1044,8 +1123,14 @@
 								</div>
 
 								<div class="control-group">
-									<label class="control-label">Breedte + Layout</label>
-									<div class="width-layout-row">
+									<label class="control-label" id="width-layout-label" for="width-layout-row"
+										>Breedte + Layout</label
+									>
+									<div
+										class="width-layout-row"
+										id="width-layout-row"
+										aria-labelledby="width-layout-label"
+									>
 										<div class="width-controls">
 											<IconButton
 												icon="icon-width-narrow"
@@ -1657,6 +1742,13 @@
 		padding: 0.75rem !important;
 		letter-spacing: -0.02em; /* Tighter spacing */
 	}
+	.block-input-subheading-medium {
+		font-size: 1.25rem !important; /* Tussen H2 (1.5rem) en H4 (1.125rem) */
+		font-weight: 650 !important; /* Tussen H2 (700) en H4 (600) */
+		color: #4b5563 !important; /* Zelfde als H4 */
+		line-height: 1.3 !important;
+		padding: 0.75rem !important;
+	}
 
 	/* H4 Input - Tussenkop (bescheiden, ondersteunend) */
 	.block-input-subheading {
@@ -1744,8 +1836,7 @@
 	}
 
 	.hero-video-editor label,
-	.image-hero-editor label,
-	.video-editor label {
+	.image-hero-editor label {
 		font-weight: 600;
 		font-size: 0.6875rem;
 		color: #6b7280;
@@ -2427,23 +2518,6 @@
 		flex-wrap: wrap;
 		flex: 1;
 	}
-	.save-message {
-		font-size: 0.8125rem;
-		font-weight: 600;
-		padding: 0.375rem 0.75rem;
-		border-radius: 6px;
-		animation: fadeIn 0.3s;
-	}
-
-	.save-message.success {
-		background: #d1fae5;
-		color: #065f46;
-	}
-
-	.save-message.error {
-		background: #fee2e2;
-		color: #991b1b;
-	}
 
 	@media (max-width: 768px) {
 		.width-layout-row {
@@ -2675,5 +2749,29 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+	.embed-editor {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.embed-preview-notice {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: #dbeafe;
+		border-left: 3px solid #3b82f6;
+		border-radius: 4px;
+		font-size: 0.8125rem;
+		color: #1e40af;
+		line-height: 1.4;
+	}
+
+	.embed-preview-notice svg {
+		flex-shrink: 0;
+		color: #3b82f6;
+		margin-top: 2px;
 	}
 </style>
