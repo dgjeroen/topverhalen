@@ -8,7 +8,7 @@
 	} = $props<{
 		theme: Theme;
 		onsave: () => Promise<void>;
-		level: 'h2' | 'h4';
+		level: 'h2' | 'h3' | 'h4';
 	}>();
 
 	$effect(() => {
@@ -28,7 +28,7 @@
 		defaultMargin: string;
 	};
 
-	const configs: Record<'h2' | 'h4', Config> = {
+	const configs: Record<'h2' | 'h3' | 'h4', Config> = {
 		h2: {
 			title: 'Kop (H2)',
 			sizeKey: 'font-size-h2',
@@ -40,6 +40,19 @@
 			defaultWeight: '800',
 			defaultColor: '#000000',
 			defaultMargin: '1rem' // ← 1rem + 0.5rem linked = 1.5rem totaal
+		},
+		h3: {
+			// ← NIEUW
+			title: 'Tussenkop (H3)',
+			sizeKey: 'font-size-h3',
+			weightKey: 'font-weight-subheading-medium',
+			colorKey: 'color-subheading-medium',
+			styleKey: 'font-style-h3',
+			marginKey: 'h3-margin-bottom',
+			defaultSize: '1.5rem',
+			defaultWeight: '700',
+			defaultColor: '#374151',
+			defaultMargin: '0.25rem'
 		},
 		h4: {
 			title: 'Tussenkop (H4)',
@@ -201,7 +214,7 @@
 		</div>
 
 		<!-- ✅ ACHTERGROND BALKJE (ALLEEN H4) -->
-		{#if level === 'h4'}
+		{#if level === 'h3' || level === 'h4'}
 			<div class="section-divider"></div>
 
 			<div class="control-group">

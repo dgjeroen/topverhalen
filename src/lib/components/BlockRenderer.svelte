@@ -17,6 +17,7 @@
 	import SubheadingSoccer from './SubheadingSoccer.svelte';
 	import Unsupported from './Unsupported.svelte';
 	import type { ContentBlock } from '$lib/types';
+	import Embed from './Embed.svelte';
 
 	let { block, isFirst = false } = $props<{
 		block: ContentBlock;
@@ -29,6 +30,7 @@
 		textblock: TextBlock,
 		heading: Heading,
 		subheading: Heading,
+		subheadingMedium: Heading,
 		subheadingSoccer: SubheadingSoccer,
 		image: Image,
 		quote: Quote,
@@ -39,7 +41,8 @@
 		gallery: ImageGrid,
 		timeline: Timeline,
 		mediaPair: MediaPair,
-		textframe: TextFrame
+		textframe: TextFrame,
+		embed: Embed
 	};
 
 	const ComponentToRender = componentMap[block.type] || Unsupported;
@@ -61,6 +64,7 @@
 		class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}
 		class:is-linked-to-next={block.type === 'heading' ||
 			block.type === 'subheading' ||
+			block.type === 'subheadingMedium' ||
 			block.type === 'subheadingSoccer'}
 	>
 		<ComponentToRender {...block.content} />
