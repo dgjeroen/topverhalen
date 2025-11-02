@@ -634,7 +634,7 @@
 						placeholder="Afbeeldings-URL..."
 						bind:value={block.content.url}
 						oninput={() => dispatch('save')}
-						class="block-input"
+						class="slide-input"
 					/>
 					{#if block.content.url}
 						<img src={block.content.url} alt="" class="block-preview" />
@@ -651,7 +651,7 @@
 						placeholder="Bron..."
 						bind:value={block.content.source}
 						oninput={() => dispatch('save')}
-						class="block-input"
+						class="slide-input"
 					/>
 					<label class="parallax-toggle">
 						<input
@@ -674,7 +674,7 @@
 						placeholder="Auteur..."
 						bind:value={block.content.author}
 						oninput={() => dispatch('save')}
-						class="block-input"
+						class="slide-input"
 					/>
 				{:else if block.type === 'video'}
 					<div class="video-editor">
@@ -758,22 +758,29 @@ Voorbeelden:
 							<span class="hint">Voor YouTube/Twitter/Spotify wordt aspect ratio genegeerd</span>
 						</div>
 
-						<input
-							type="text"
-							placeholder="Bijschrift (optioneel)..."
-							bind:value={block.content.caption}
-							oninput={() => dispatch('save')}
-							class="block-input"
-						/>
+						<div class="control-group">
+							<label class="input-label" for="embed-caption-{block.id}">Bijschrift</label>
+							<input
+								id="embed-caption-{block.id}"
+								type="text"
+								placeholder="Bijschrift..."
+								bind:value={block.content.caption}
+								oninput={() => dispatch('save')}
+								class="slide-input"
+							/>
+						</div>
 
-						<input
-							type="text"
-							placeholder="Bron (optioneel)..."
-							bind:value={block.content.source}
-							oninput={() => dispatch('save')}
-							class="block-input"
-						/>
-
+						<div class="control-group">
+							<label class="input-label" for="embed-source-{block.id}">Bron</label>
+							<input
+								id="embed-source-{block.id}"
+								type="text"
+								placeholder="Bron..."
+								bind:value={block.content.source}
+								oninput={() => dispatch('save')}
+								class="slide-input"
+							/>
+						</div>
 						{#if block.content.code}
 							<div class="embed-preview-notice">
 								<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1531,7 +1538,7 @@ Voorbeelden:
 							placeholder="Afbeelding URL (optioneel)"
 							bind:value={block.content.image}
 							oninput={() => dispatch('save')}
-							class="block-input"
+							class="slide-input"
 						/>
 						{#if block.content.image}
 							<img src={block.content.image} alt="" class="audio-image-preview" />
@@ -1541,7 +1548,7 @@ Voorbeelden:
 							placeholder="Titel van de audio"
 							bind:value={block.content.title}
 							oninput={() => dispatch('save')}
-							class="block-input"
+							class="slide-input"
 						/>
 						<textarea
 							placeholder="Beschrijving (optioneel)"
@@ -1555,7 +1562,7 @@ Voorbeelden:
 							placeholder="Audio URL (.mp3)"
 							bind:value={block.content.url}
 							oninput={() => dispatch('save')}
-							class="block-input"
+							class="slide-input"
 						/>
 						{#if block.content.url}
 							<audio controls src={block.content.url} class="audio-player"></audio>
