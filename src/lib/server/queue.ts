@@ -1,4 +1,5 @@
 // src/lib/server/queue.ts
+
 import { dev } from '$app/environment';
 import { Redis } from '@upstash/redis';
 import { Octokit } from '@octokit/rest';
@@ -31,6 +32,20 @@ async function getRedis() {
         });
     }
     return redis;
+}
+
+// ✅ NIEUW: Detecteer huidige branch
+function getCurrentBranch(): string {
+    // Vercel deployments hebben deze env var
+    if (process.env.VERCEL_GIT_COMMIT_REF) {
+        const branch = process.env.VERCEL_GIT_COMMIT_REF;
+        console.log(`🌿 Detected branch from Vercel: ${branch}`);
+        return branch;
+    }
+
+    // Fallback voor manual runs, cron, etc.
+    console.log('🌿 No Vercel branch detected, using main');
+    return 'main';
 }
 
 export async function createJob(gistId: string): Promise<string> {
@@ -109,7 +124,7 @@ export async function simulateJobCompletion(jobId: string, success: boolean = tr
     }
 }
 
-// ✅ NIEUW: Trigger GitHub Actions workflow
+// ✅ UPDATED: Dynamic branch detection
 export async function triggerWorkflow(jobId: string): Promise<void> {
     if (dev) {
         console.log(`[DEV] Would trigger workflow for job ${jobId}`);
@@ -117,22 +132,24 @@ export async function triggerWorkflow(jobId: string): Promise<void> {
     }
 
     const octokit = new Octokit({
-        auth: process.env.SECRET_GITHUB_TOKEN // ⚠️ Gebruik SECRET_GITHUB_TOKEN (niet GITHUB_TOKEN)
+        auth: process.env.SECRET_GITHUB_TOKEN
     });
+
+    const branch = getCurrentBranch();
 
     try {
         await octokit.actions.createWorkflowDispatch({
             owner: 'dgjeroen',
             repo: 'topverhalen',
             workflow_id: 'build-worker.yml',
-            ref: 'main', // ⚠️ Of 'develop' afhankelijk van je branch
+            ref: branch,  // ✅ DYNAMIC
             inputs: {
                 jobId: jobId
             }
         });
-        console.log(`✅ Workflow triggered for job ${jobId}`);
+        console.log(`✅ Workflow triggered for job ${jobId} on branch ${branch}`);
     } catch (err) {
-        console.error('❌ Failed to trigger workflow:', err);
+        console.error(`❌ Failed to trigger workflow on ${branch}:`, err);
         throw err;
     }
 }
