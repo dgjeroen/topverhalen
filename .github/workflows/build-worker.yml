@@ -1,9 +1,18 @@
+# .github/workflows/build-worker.yml
 name: Publish Worker
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
+  # ✅ NIEUW: Webhook trigger (primary)
   workflow_dispatch:
+    inputs:
+      jobId:
+        description: 'Specific job ID to process (optional)'
+        required: false
+        type: string
+  
+  # ✅ BEHOUDEN: Cron als fallback (voor stuck jobs)
+  schedule:
+    - cron: '*/30 * * * *'  # ⚠️ Verhoogd naar 30 min (fallback only)
 
 jobs:
   process-queue:
@@ -33,4 +42,6 @@ jobs:
           PUBLIC_GTM_ID: ${{ secrets.PUBLIC_GTM_ID }}
           SECRET_GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
           SECRET_INDEX_GIST_ID: ${{ secrets.SECRET_INDEX_GIST_ID }}
+          # ✅ NIEUW: Pass specific job ID if provided
+          SPECIFIC_JOB_ID: ${{ github.event.inputs.jobId }}
         run: node scripts/process-queue.js

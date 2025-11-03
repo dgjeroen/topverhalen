@@ -19,6 +19,28 @@ const redis = new Redis({
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function getNextJob() {
+    // ✅ NIEUW: Prioriteer specifieke job ID
+    const specificJobId = process.env.SPECIFIC_JOB_ID;
+
+    if (specificJobId) {
+        console.log(`🎯 Processing specific job: ${specificJobId}`);
+        const data = await redis.get(`job:${specificJobId}`);
+        if (!data) {
+            console.error(`❌ Job ${specificJobId} not found in Redis`);
+            return null;
+        }
+        const job = typeof data === 'string' ? JSON.parse(data) : data;
+
+        // ✅ Verify job is still pending/building
+        if (job.status !== 'pending' && job.status !== 'building') {
+            console.log(`⚠️ Job ${specificJobId} already ${job.status}, skipping`);
+            return null;
+        }
+
+        return job;
+    }
+
+    // ✅ FALLBACK: Process queue normally
     const jobId = await redis.rpop('job:queue');
     if (!jobId) return null;
     const data = await redis.get(`job:${jobId}`);
@@ -77,7 +99,7 @@ async function processJob(job) {
         fs.copyFileSync(staticConfig, originalConfig);
 
         try {
-            // Build met static config EN specifieke route voor prerendering
+            // Build met static config
             execSync('npm run build', {
                 cwd: rootDir,
                 stdio: 'inherit',
@@ -90,23 +112,19 @@ async function processJob(job) {
             // Restore originele config
             fs.renameSync(backupConfig, originalConfig);
         }
-        console.log('📂 Root directory contents:');
-        execSync('ls -la', { cwd: rootDir, stdio: 'inherit' });
 
         console.log('📂 Checking for build output...');
-
         const buildDir = path.join(rootDir, 'build');
 
         if (!fs.existsSync(buildDir)) {
             throw new Error('Build folder not found. Static build failed?');
         }
 
-        // ✅ Check beide mogelijke locaties
+        // Check beide mogelijke locaties
         const storyHtmlPath = path.join(buildDir, 'story.html');
         const storyFolderPath = path.join(buildDir, 'story', 'index.html');
 
         let htmlPath;
-
         if (fs.existsSync(storyHtmlPath)) {
             console.log('✅ Found build/story.html');
             htmlPath = storyHtmlPath;
@@ -115,50 +133,43 @@ async function processJob(job) {
             htmlPath = storyFolderPath;
         } else {
             console.error('❌ No story HTML found!');
-            console.log('📂 Build structure:');
             execSync('find build -type f -name "*.html"', { cwd: rootDir, stdio: 'inherit' });
             throw new Error('Prerendered story HTML not found');
         }
 
         console.log(`📄 Using HTML: ${htmlPath}`);
 
-        // ✅ FIX PATHS in HTML
+        // Fix paths
         console.log('🔧 Fixing absolute paths to relative...');
         let html = fs.readFileSync(htmlPath, 'utf-8');
-
         html = html.replace(/href="\/_app\//g, 'href="./_app/');
         html = html.replace(/src="\/_app\//g, 'src="./_app/');
         html = html.replace(/href='\/_app\//g, "href='./_app/");
         html = html.replace(/src='\/_app\//g, "src='./_app/");
-
         fs.writeFileSync(htmlPath, html);
         console.log('✅ Paths fixed to relative');
 
-        // ✅ Maak temp folder voor standalone zip
+        // Create temp folder
         const tempDir = path.join(rootDir, 'temp-publish');
         if (fs.existsSync(tempDir)) {
             fs.rmSync(tempDir, { recursive: true });
         }
         fs.mkdirSync(tempDir, { recursive: true });
 
-        // Copy HTML als index.html (zodat het in root van zip staat)
+        // Copy files
         const targetHtmlPath = path.join(tempDir, 'index.html');
         fs.copyFileSync(htmlPath, targetHtmlPath);
         console.log('✅ Copied story.html → index.html');
 
-        // Copy _app folder
         const appDir = path.join(buildDir, '_app');
         const targetAppDir = path.join(tempDir, '_app');
-
         if (fs.existsSync(appDir)) {
             console.log('📦 Copying _app assets...');
             execSync(`cp -r "${appDir}" "${targetAppDir}"`, { cwd: rootDir, stdio: 'inherit' });
             console.log('✅ Copied _app assets');
-        } else {
-            console.warn('⚠️ No _app folder found!');
         }
 
-        // Copy static assets (favicon, robots.txt, etc.)
+        // Copy static assets
         const staticFiles = ['robots.txt', 'favicon.svg', 'favicon.png', 'favicon.ico'];
         staticFiles.forEach(file => {
             const srcPath = path.join(buildDir, file);
@@ -169,12 +180,10 @@ async function processJob(job) {
             }
         });
 
-        // ✅ Zip vanaf temp folder
+        // Create zip
         const zipPath = path.join(rootDir, `${job.id}.zip`);
         console.log(`📦 Creating zip from temp folder...`);
         execSync(`zip -r "${zipPath}" .`, { cwd: tempDir, stdio: 'inherit' });
-
-        // Cleanup
         fs.rmSync(tempDir, { recursive: true });
 
         if (!fs.existsSync(zipPath)) {
@@ -184,6 +193,7 @@ async function processJob(job) {
         const zipStats = fs.statSync(zipPath);
         console.log(`✅ Zip created: ${(zipStats.size / 1024 / 1024).toFixed(2)} MB`);
 
+        // Upload
         const downloadUrl = await uploadToGitHub(job.id, zipPath);
         fs.unlinkSync(zipPath);
 
@@ -202,6 +212,22 @@ async function processJob(job) {
 
 async function main() {
     console.log('🚀 Worker started');
+
+    // ✅ NIEUW: Single job mode (webhook triggered)
+    const specificJobId = process.env.SPECIFIC_JOB_ID;
+    if (specificJobId) {
+        console.log('🎯 Single job mode');
+        const job = await getNextJob();
+        if (job) {
+            await processJob(job);
+        } else {
+            console.log('⚠️ Specified job not found or already processed');
+        }
+        return;
+    }
+
+    // ✅ FALLBACK: Queue mode (cron triggered)
+    console.log('🔄 Queue mode');
     while (true) {
         const job = await getNextJob();
         if (!job) break;

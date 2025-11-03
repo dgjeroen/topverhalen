@@ -2,7 +2,7 @@
 import { json, error } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import type { RequestHandler } from './$types';
-import { createJob, simulateJobCompletion } from '$lib/server/queue';
+import { createJob, simulateJobCompletion, triggerWorkflow } from '$lib/server/queue';
 import { verifySession } from '$lib/server/auth';
 
 /**
@@ -29,19 +29,33 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         // ✅ Maak job aan
         const jobId = await createJob(gistId);
 
-        // ✅ Development: Simuleer worker (na 5s)
+        // ✅ Development: Simuleer worker
         if (dev) {
-            simulateJobCompletion(jobId, true); // Verander naar false om failure te testen
+            simulateJobCompletion(jobId, true);
+            return json(
+                {
+                    jobId,
+                    status: 'pending',
+                    message: '[DEV MODE] Build gesimuleerd. Status updates elke 3s.'
+                },
+                { status: 202 }
+            );
         }
 
-        // ✅ Direct response
+        // ✅ NIEUW: Trigger workflow direct via GitHub API
+        try {
+            await triggerWorkflow(jobId);
+            console.log(`✅ Workflow triggered for job ${jobId}`);
+        } catch (triggerError) {
+            console.error('⚠️ Failed to trigger workflow, falling back to cron:', triggerError);
+            // Fallback: Job blijft in queue voor cron pickup
+        }
+
         return json(
             {
                 jobId,
                 status: 'pending',
-                message: dev
-                    ? '[DEV MODE] Build gesimuleerd. Status updates elke 3s.'
-                    : 'Build gestart. Gebruik /api/publish/status/{jobId} om voortgang te volgen.'
+                message: 'Build gestart. Gebruik /api/publish/status/{jobId} om voortgang te volgen.'
             },
             { status: 202 }
         );

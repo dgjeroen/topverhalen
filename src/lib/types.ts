@@ -1,4 +1,5 @@
 // src/lib/types.ts
+
 export type Theme = {
     // ============================================
     // LAYOUT
@@ -175,17 +176,23 @@ export type Theme = {
     'slider-dot-active-border-color'?: string;
 
     // ============================================
+    // ACHTERGROND AFBEELDING (Desktop only)
+    // ============================================
+    'background-image'?: string;
+    'background-repeat'?: 'repeat' | 'no-repeat' | 'repeat-x' | 'repeat-y';
+    'background-position'?: string;
+    'background-size'?: 'cover' | 'contain' | 'auto';
+    'background-opacity'?: number;
+    'background-attachment'?: 'scroll' | 'fixed';
+
+    // ============================================
     // OVERIG
     // ============================================
     'border-radius-base'?: string;
     'box-shadow-base'?: string;
 };
 
-// =================================================================
-// 2. DEFINITIES VOOR INDIVIDUELE CONTENTBLOKKEN
-// (Jouw bestaande, uitstekende definities)
-// =================================================================
-
+// Rest van types blijft hetzelfde...
 export interface TextBlockContent {
     text: string[];
     isLead?: boolean;
@@ -288,10 +295,10 @@ export interface TextFrameContent {
         caption?: string;
         source?: string;
         layout:
-        | 'top-rect'                // Foto boven, kop + tekst onder
-        | 'top-rect-bottom'         // Kop + tekst boven, foto onderaan
-        | 'inline-square-left'      // Kop boven, foto links (50% width)
-        | 'inline-square-right';    // Kop boven, foto rechts (50% width)
+        | 'top-rect'
+        | 'top-rect-bottom'
+        | 'inline-square-left'
+        | 'inline-square-right';
         rounded: boolean;
         hidden?: boolean;
     } | null;
@@ -302,20 +309,16 @@ export interface TimelineContent {
 }
 
 export interface EmbedContent {
-    code: string;              // Embed code (iframe/script/URL)
+    code: string;
     aspectRatio?: '16:9' | '4:3' | '1:1' | '3:2' | '21:9' | 'auto';
     caption?: string;
     source?: string;
 }
 
-// =================================================================
-// 3. UNION TYPE DIE ALLE MOGELIJKE BLOKKEN VERZAMELT
-// =================================================================
-
 type BlockBase = {
-    /** De unieke identifier voor Svelte's {#each} key */
     id: string;
 };
+
 type BlockUnion =
     | { type: 'textblock'; content: TextBlockContent }
     | { type: 'heading'; content: HeadingContent }
@@ -335,14 +338,12 @@ type BlockUnion =
     | { type: 'mediaPair'; content: MediaPairContent }
     | { type: 'textframe'; content: TextFrameContent }
     | { type: 'embed'; content: EmbedContent };
+
 export type ContentBlock = BlockBase & BlockUnion;
-// =================================================================
-// 4. HET HOOFDTYPE DAT DE VOLLEDIGE STRUCTUUR VAN content.json BESCHRIJFT
-// =================================================================
+
 export interface ContentFile {
     version: number;
     storyName: string;
     theme: Theme;
-    /** De 'data' array mag uitsluitend objecten bevatten die voldoen aan het ContentBlock type. */
     data: ContentBlock[];
 }

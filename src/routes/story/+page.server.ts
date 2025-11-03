@@ -1,3 +1,4 @@
+//src\routes\story\+page.server.ts
 import { getGist, type ProjectContent } from '$lib/server/gist';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';

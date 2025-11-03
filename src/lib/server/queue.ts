@@ -1,6 +1,8 @@
 // src/lib/server/queue.ts
+
 import { dev } from '$app/environment';
 import { Redis } from '@upstash/redis';
+import { Octokit } from '@octokit/rest';
 
 export type JobStatus = 'pending' | 'building' | 'completed' | 'failed';
 
@@ -26,11 +28,24 @@ async function getRedis() {
         redis = new Redis({
             url: process.env.UPSTASH_REDIS_REST_URL!,
             token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-            // ✅ Disable automatic JSON deserialization
             automaticDeserialization: false
         });
     }
     return redis;
+}
+
+// ✅ NIEUW: Detecteer huidige branch
+function getCurrentBranch(): string {
+    // Vercel deployments hebben deze env var
+    if (process.env.VERCEL_GIT_COMMIT_REF) {
+        const branch = process.env.VERCEL_GIT_COMMIT_REF;
+        console.log(`🌿 Detected branch from Vercel: ${branch}`);
+        return branch;
+    }
+
+    // Fallback voor manual runs, cron, etc.
+    console.log('🌿 No Vercel branch detected, using main');
+    return 'main';
 }
 
 export async function createJob(gistId: string): Promise<string> {
@@ -48,7 +63,6 @@ export async function createJob(gistId: string): Promise<string> {
         console.log(`[DEV] Job ${jobId} aangemaakt`);
     } else {
         const r = await getRedis();
-        // ✅ Store as JSON string
         await r!.set(`job:${jobId}`, JSON.stringify(job));
         await r!.lpush('job:queue', jobId);
     }
@@ -62,8 +76,6 @@ export async function getJob(jobId: string): Promise<PublishJob | null> {
     } else {
         const r = await getRedis();
         const data = await r!.get(`job:${jobId}`);
-
-        // ✅ Parse JSON string
         if (!data) return null;
         return JSON.parse(data as string);
     }
@@ -80,7 +92,6 @@ export async function updateJob(jobId: string, updates: Partial<PublishJob>): Pr
         console.log(`[DEV] Job ${jobId} updated:`, updates);
     } else {
         const r = await getRedis();
-        // ✅ Store as JSON string
         await r!.set(`job:${jobId}`, JSON.stringify(updated));
     }
 }
@@ -110,5 +121,35 @@ export async function simulateJobCompletion(jobId: string, success: boolean = tr
             status: 'failed',
             error: 'Gesimuleerde fout'
         });
+    }
+}
+
+// ✅ UPDATED: Dynamic branch detection
+export async function triggerWorkflow(jobId: string): Promise<void> {
+    if (dev) {
+        console.log(`[DEV] Would trigger workflow for job ${jobId}`);
+        return;
+    }
+
+    const octokit = new Octokit({
+        auth: process.env.SECRET_GITHUB_TOKEN
+    });
+
+    const branch = getCurrentBranch();
+
+    try {
+        await octokit.actions.createWorkflowDispatch({
+            owner: 'dgjeroen',
+            repo: 'topverhalen',
+            workflow_id: 'build-worker.yml',
+            ref: branch,  // ✅ DYNAMIC
+            inputs: {
+                jobId: jobId
+            }
+        });
+        console.log(`✅ Workflow triggered for job ${jobId} on branch ${branch}`);
+    } catch (err) {
+        console.error(`❌ Failed to trigger workflow on ${branch}:`, err);
+        throw err;
     }
 }
