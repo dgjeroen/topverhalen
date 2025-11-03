@@ -2,12 +2,22 @@
 	// Het script-gedeelte blijft ongewijzigd
 	import dgLogo from '$lib/assets/dgLogo-dia.svg';
 	import bdLogo from '$lib/assets/bdLogo-dia.svg';
-	// ... (alle andere logo-imports) ...
+	import adLogo from '$lib/assets/adLogo-dia.svg';
+	import edLogo from '$lib/assets/edLogo-dia.svg';
+	import tubLogo from '$lib/assets/tubLogo-dia.svg';
+	import dsLogo from '$lib/assets/dsLogo-dia.svg';
+	import bndsLogo from '$lib/assets/bndsLogo-dia.svg';
+	import pzcLogo from '$lib/assets/pzcLogo-dia.svg';
 
 	const logoMap: Record<string, string> = {
 		'www.gelderlander.nl': dgLogo,
 		'www.bd.nl': bdLogo,
-		// ... (de rest van de map) ...
+		'www.ad.nl': adLogo,
+		'www.ed.nl': edLogo,
+		'www.tubantia.nl': tubLogo,
+		'www.destentor.nl': dsLogo,
+		'www.bndestem.nl': bndsLogo,
+		'www.pzc.nl': pzcLogo,
 		localhost: dgLogo
 	};
 
