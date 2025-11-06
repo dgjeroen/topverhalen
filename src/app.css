@@ -1,4 +1,26 @@
 /* src/app.css */
+@import '$lib/styles/fonts.css';
+
+/* ============================================= */
+/* 0. SCROLLBAR FIX                              */
+/* ============================================= */
+html {
+    scroll-behavior: smooth;
+    overflow-y: scroll !important;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family-base);
+    background-color: var(--color-background-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: visible !important;
+    min-height: 100vh;
+    height: auto !important;
+    position: relative;
+}
 
 /* ============================================= */
 /* 1. GLOBALE RESET                              */
@@ -12,10 +34,6 @@
 /* ============================================= */
 /* 2. DESIGN TOKENS (VARIABELEN)                 */
 /* ============================================= */
-html {
-    scroll-behavior: smooth;
-}
-
 :root {
     /* --- Layout Breedtes --- */
     --standard-max-width: 720px;
@@ -23,19 +41,11 @@ html {
 
     /* --- Afstanden (Spacing) --- */
     --space-s: 0.5rem;
-    /* 8px */
     --space-m: 1rem;
-    /* 16px */
     --space-l: 1.5rem;
-    /* 24px */
     --space-xl: 2rem;
-    /* 32px */
     --space-xxl: 3rem;
-    /* 48px */
     --space-xxxl: 5rem;
-    /* 80px */
-
-    /* --- Verticale Marge tussen blokken --- */
     --block-vertical-margin: 3rem;
 
     /* --- Kleuren --- */
@@ -43,14 +53,13 @@ html {
     --color-text-rgb: 17, 24, 39;
     --color-text-muted: #4b5563;
     --color-background-light: #faedad;
-    /*#f6e8d9;*/
     --color-border: #d1d5db;
     --color-accent: #ef4444;
     --color-white: #ffffff;
 
     /* --- Typografie --- */
-    --font-family-base: 'Inter', sans-serif;
-    --font-family-quote: 'acumin-pro-extra-condensed', sans-serif;
+    --font-family-base: 'Arial', sans-serif;
+    --font-family-quote: 'Flama Semi Condensed', 'Arial Narrow', sans-serif;
     --font-size-s: 0.9rem;
     --font-size-base: 1rem;
     --font-size-m: 1.1rem;
@@ -58,27 +67,54 @@ html {
     --font-size-xl: 1.6em;
     --font-size-hero-title: clamp(2.5rem, 6vw, 4rem);
 
+    /* --- Heading Font Sizes --- */
+    --font-size-h1: 4.5rem;
+    --font-size-h2: 2rem;
+    --font-size-h3: 1.75rem;
+    --font-size-h4: 1.25rem;
+
+    /* --- Heading Font Weights --- */
+    --font-weight-headings: 700;
+    /* H2 - Bold */
+    --font-weight-subheading-medium: 700;
+    /* H3 - Bold */
+    --font-weight-subheading: 500;
+    /* H4 - Medium */
+    /* ✅ FIXED: was 600 */
+
+    /* --- Heading Font Styles --- */
+    --font-style-h2: normal;
+    --font-style-h3: normal;
+    --font-style-h4: normal;
+
+    /* --- Heading Margins --- */
+    --h2-margin-bottom: 1rem;
+    --h3-margin-bottom: 0.5rem;
+    --h4-margin-bottom: 0.5rem;
+
+    /* --- Heading Colors --- */
+    --h2-color: #000000;
+    --h3-color: #374151;
+    --h4-color: #4b5563;
+
+    p {
+        font-size: var(--text-font-size, 1rem);
+        font-weight: var(--text-font-weight, 400);
+        line-height: var(--text-line-height, 1.6);
+        color: var(--text-color, #000000);
+        margin: 0 0 1em 0;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+
     /* --- Overig --- */
     --linked-block-spacing: 0.5rem;
     --parallax-height: 10vh;
     --parallax-aspect-ratio: 18 / 9;
     --border-radius-base: 8px;
     --box-shadow-base: 0 2px 10px rgba(0, 0, 0, .1);
-
-    /* --- Heading Font Sizes --- */
-    --font-size-h1: 4.5rem;
-    --font-size-h2: 2rem;
-    --font-size-h3: 1.75rem;
-    --font-size-h4: 1.25rem;
-    /* eventueel H% en H6 toevoegen */
-    --font-weight-headings: 700;
-
-    /* --- Subheaders --- */
-    --font-size-subheading: 1.5rem;
-    --font-weight-subheading: 600;
-    --color-subheading: var(--color-text-muted);
-
-    /* --- Speciale Font Styles --- */
     --font-family-hero-title: var(--font-family-quote);
 }
 
@@ -93,20 +129,6 @@ main>*:first-child {
 /* ============================================= */
 /* 3. WRAPPER CLASSES                          */
 /* ============================================= */
-
-body {
-    margin: 0;
-    /* Goede gewoonte om standaard marge te verwijderen */
-    font-family: var(--font-family-base);
-    /* HIER passen we het lettertype toe */
-    background-color: var(--color-background-light);
-    /*#FFD302;*/
-    /* Standaard achtergrondkleur */
-    -webkit-font-smoothing: antialiased;
-    /* Zorgt voor scherpere tekst op Mac/iOS */
-    -moz-osx-font-smoothing: grayscale;
-}
-
 .wrapper-standard,
 .wrapper-wide {
     width: 100%;
@@ -123,70 +145,90 @@ body {
 /* ============================================= */
 /* 4. BASIS ELEMENT STIJLEN                      */
 /* ============================================= */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    margin: 0;
-    line-height: 1.3;
-    font-weight: var(--font-weight-headings);
-}
-
 h1 {
     font-size: var(--font-size-h1);
+    font-family: var(--font-family-quote);
+    font-weight: var(--font-weight-headings, 700);
+    line-height: 1.3;
+    margin: 0;
 }
 
 h2 {
     font-size: var(--font-size-h2, 4rem);
     font-weight: var(--font-weight-headings, 700);
     font-style: var(--font-style-h2, normal);
+    font-family: var(--font-family-quote);
     line-height: 1.3;
     margin: 0;
+    margin-bottom: var(--h2-margin-bottom, 1rem);
+    color: var(--color-text, #000000);
     background-color: var(--h2-background-color, transparent);
-    color: var(--h2-background-text-color, var(--color-text));
     padding: var(--h2-background-padding, 0);
     width: fit-content;
 }
 
 h3 {
-    font-size: var(--font-size-h3);
+    font-size: var(--font-size-h3, 1.75rem);
+    font-weight: var(--font-weight-subheading-medium, 700);
+    font-style: var(--font-style-h3, normal);
+    font-family: var(--font-family-quote);
+    line-height: 1.3;
+    margin: 0;
+    margin-bottom: var(--h3-margin-bottom, 0.5rem);
+    color: var(--h3-color, #374151);
+    width: fit-content;
+    background-color: var(--h3-background-color, transparent);
+    padding: var(--h3-background-padding, 0);
 }
 
 h4 {
-    font-size: var(--font-size-h4, 2rem);
-    font-weight: var(--font-weight-subheading, 600);
+    font-size: var(--font-size-h4, 1.25rem);
+    font-weight: var(--font-weight-subheading, 500);
+    /* ✅ FIXED: was 600 */
     font-style: var(--font-style-h4, normal);
+    font-family: var(--font-family-quote);
     line-height: 1.3;
     margin: 0;
+    margin-bottom: var(--h4-margin-bottom, 0.5rem);
+    color: var(--h4-color, #4b5563);
     width: fit-content;
     background-color: var(--h4-background-color, transparent);
-    color: var(--h4-background-text-color, var(--color-subheading, #4b5563));
     padding: var(--h4-background-padding, 0);
 }
 
-/* ============================================= */
-/* 5. Witruimte voor blokken die elkaar opvolgen                          */
-/* ============================================= */
+h5,
+h6 {
+    margin: 0;
+    line-height: 1.3;
+    font-weight: 600;
+}
 
-.is-linked-to-next+.wrapper-standard,
-.is-linked-to-next+.wrapper-wide {
-    margin-top: var(--linked-block-spacing);
-    /* Gebruikt onze bestaande variabele! */
+p {
+    font-size: var(--text-font-size, 1rem);
+    font-weight: var(--text-font-weight, 400);
+    line-height: var(--text-line-height, 1.6);
+    color: var(--text-color, #000000);
+    margin: 0 0 1em 0;
+}
+
+p:last-child {
+    margin-bottom: 0;
 }
 
 /* ============================================= */
-/* 6. RESPONSIVE AANPASSINGEN                        */
+/* 5. Witruimte voor blokken die elkaar opvolgen */
+/* ============================================= */
+.is-linked-to-next+.wrapper-standard,
+.is-linked-to-next+.wrapper-wide {
+    margin-top: var(--linked-block-spacing);
+}
+
+/* ============================================= */
+/* 6. RESPONSIVE AANPASSINGEN                    */
 /* ============================================= */
 @media (max-width: 768px) {
     :root {
-        /* Verlaag de hoogte van het parallax-blok op kleinere schermen */
         --parallax-height: 35vh;
-
-
-        /* We kunnen hier in de toekomst meer aanpassingen voor mobiel toevoegen */
     }
 
     .hero-container+main {

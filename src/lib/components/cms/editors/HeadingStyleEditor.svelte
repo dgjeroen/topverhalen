@@ -37,38 +37,37 @@
 			styleKey: 'font-style-h2',
 			marginKey: 'h2-margin-bottom',
 			defaultSize: '2.5rem',
-			defaultWeight: '800',
+			defaultWeight: '700',
 			defaultColor: '#000000',
-			defaultMargin: '1rem' // ← 1rem + 0.5rem linked = 1.5rem totaal
+			defaultMargin: '1rem'
 		},
 		h3: {
-			// ← NIEUW
-			title: 'Tussenkop (H3)',
+			title: 'Extra Tussenkop (H3)',
 			sizeKey: 'font-size-h3',
 			weightKey: 'font-weight-subheading-medium',
-			colorKey: 'color-subheading-medium',
+			colorKey: 'h3-color',
 			styleKey: 'font-style-h3',
 			marginKey: 'h3-margin-bottom',
 			defaultSize: '1.5rem',
-			defaultWeight: '700',
+			defaultWeight: '700', // ✅ FIXED: was 500
 			defaultColor: '#374151',
-			defaultMargin: '0.25rem'
+			defaultMargin: '0.5rem' // ✅ FIXED: was 0.25rem
 		},
 		h4: {
 			title: 'Tussenkop (H4)',
 			sizeKey: 'font-size-h4',
 			weightKey: 'font-weight-subheading',
-			colorKey: 'color-subheading',
+			colorKey: 'h4-color',
 			styleKey: 'font-style-h4',
 			marginKey: 'h4-margin-bottom',
 			defaultSize: '1.125rem',
-			defaultWeight: '600',
+			defaultWeight: '500',
 			defaultColor: '#4b5563',
-			defaultMargin: '0.25rem' // ← 0.25rem + 0.5rem linked = 0.75rem totaal
+			defaultMargin: '0.5rem' // ✅ FIXED: was 0.25rem
 		}
 	};
 
-	const config = $derived(configs[level as 'h2' | 'h4']);
+	const config = $derived(configs[level as keyof typeof configs]); // index with a properly typed key
 
 	// ✅ Lokale state voor hoofdkleur met fallback
 	let headingColor = $state('');
@@ -114,7 +113,7 @@
 			backgroundColor = theme[`${level}-background-color`] || '#000000';
 			textColor = theme[`${level}-background-text-color`] || '#ffffff';
 			padding = theme[`${level}-background-padding`] || '0.2rem 0.5rem';
-		} else if (level === 'h4') {
+		} else {
 			delete theme[`${level}-background-color`];
 			delete theme[`${level}-background-text-color`];
 			delete theme[`${level}-background-padding`];
@@ -169,16 +168,23 @@
 		<div class="control-group">
 			<label for="{level}-weight">Letterdikte</label>
 			<select id="{level}-weight" bind:value={theme[config.weightKey]} onchange={onsave}>
-				<option value="">Standaard ({config.defaultWeight})</option>
-				<option value="400">Normal (400)</option>
+				{#if config.defaultWeight === '400'}
+					<option value="">Standaard (Regular)</option>
+				{:else if config.defaultWeight === '500'}
+					<option value="">Standaard (Medium)</option>
+				{:else if config.defaultWeight === '700'}
+					<option value="">Standaard (Bold)</option>
+				{:else}
+					<option value="">Standaard (Black)</option>
+				{/if}
+				<option value="400">Regular (400)</option>
 				<option value="500">Medium (500)</option>
-				<option value="600">Semi-bold (600)</option>
 				<option value="700">Bold (700)</option>
-				<option value="800">Extra-bold (800)</option>
+				<option value="900">Black (900)</option>
 			</select>
 		</div>
 
-		<!-- ✅ NIEUW: Witruimte onder -->
+		<!-- Witruimte onder -->
 		<div class="control-group">
 			<label for="{level}-margin">Witruimte onder</label>
 			<input
@@ -189,13 +195,7 @@
 				placeholder={config.defaultMargin}
 				class="text-input"
 			/>
-			<span class="hint">
-				{#if level === 'h2'}
-					Totale ruimte = deze waarde + 0.5rem. Bijv: 1rem = 1.5rem totaal
-				{:else}
-					Totale ruimte = deze waarde + 0.5rem. Bijv: 0.75rem = 1.25rem totaal
-				{/if}
-			</span>
+			<span class="hint">Bijv: 0.5rem, 1rem, 2rem</span>
 		</div>
 
 		<!-- Italic Toggle -->
@@ -213,7 +213,7 @@
 			</label>
 		</div>
 
-		<!-- ✅ ACHTERGROND BALKJE (ALLEEN H4) -->
+		<!-- Achtergrond Balkje (H3 en H4) -->
 		{#if level === 'h3' || level === 'h4'}
 			<div class="section-divider"></div>
 
@@ -231,12 +231,9 @@
 								delete theme[`${level}-background-text-color`];
 								delete theme[`${level}-background-padding`];
 							} else {
-								// ✅ Set defaults in theme
 								theme[`${level}-background-color`] = '#000000';
 								theme[`${level}-background-text-color`] = '#ffffff';
 								theme[`${level}-background-padding`] = '0.2rem 0.5rem';
-
-								// ✅ Update lokale state (gebeurt via $effect)
 							}
 
 							await onsave();

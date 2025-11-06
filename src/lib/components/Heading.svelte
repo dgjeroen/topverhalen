@@ -6,17 +6,24 @@
 
 	const theme = getContext<Theme>('theme') || {};
 
-	// ✅ Get margin-bottom from theme with fallback
 	const marginBottom =
 		level === 2
-			? theme['h2-margin-bottom'] || '0'
+			? theme['h2-margin-bottom'] || '1rem'
 			: level === 3
 				? theme['h3-margin-bottom'] || '0.5rem'
 				: level === 4
 					? theme['h4-margin-bottom'] || '0.5rem'
 					: '1rem';
 
-	// ✅ Check if background is enabled (works for h3 and h4)
+	const fontWeight =
+		level === 2
+			? theme['font-weight-headings'] || '700'
+			: level === 3
+				? theme['font-weight-subheading-medium'] || '700'
+				: level === 4
+					? theme['font-weight-subheading'] || '500'
+					: '400';
+
 	const hasBackground = $derived(
 		level === 3
 			? theme['h3-background-enabled'] === 'true'
@@ -25,7 +32,6 @@
 				: false
 	);
 
-	// ✅ Get background styles
 	const bgColor = $derived(
 		level === 3
 			? theme['h3-background-color'] || '#000000'
@@ -54,7 +60,7 @@
 <svelte:element
 	this={`h${level}`}
 	class="heading heading-{level}"
-	style="margin-bottom: {marginBottom}"
+	style="margin-bottom: {marginBottom}; font-weight: {fontWeight};"
 >
 	{#if hasBackground}
 		<span

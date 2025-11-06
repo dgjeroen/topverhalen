@@ -46,8 +46,9 @@ export type Theme = {
     'font-weight-headings'?: string;
     'font-weight-subheading'?: string;
     'font-weight-subheading-medium'?: string;
-    'color-subheading'?: string;
-    'color-subheading-medium'?: string;
+    'h2-color'?: string;
+    'h3-color'?: string;
+    'h4-color'?: string;
     'font-style-h2'?: string;
     'font-style-h3'?: string;
     'font-style-h4'?: string;
