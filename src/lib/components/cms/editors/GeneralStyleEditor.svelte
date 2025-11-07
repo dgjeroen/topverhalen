@@ -281,6 +281,7 @@
 				<option value="'Inter', sans-serif">Inter</option>
 				<option value="'Georgia', serif">Georgia</option>
 				<option value="'Courier New', monospace">Courier New</option>
+				<option value="'acumin-pro-extra-condensed', sans-serif">Acumin Pro Extra Condensed</option>
 			</select>
 		</div>
 
