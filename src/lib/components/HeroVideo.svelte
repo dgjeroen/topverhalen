@@ -1,3 +1,4 @@
+<!--src\lib\components\HeroVideo.svelte-->
 <script lang="ts">
 	import SwitchLogo from './SwitchLogo.svelte';
 	import type { HeroVideoContent } from '$lib/types';
@@ -196,7 +197,7 @@
 		text-transform: uppercase;
 		max-width: 800px;
 		line-height: 1.2;
-		margin-block: var(--space-m);
+		margin: var(--space-m) auto;
 	}
 
 	.label,
@@ -209,6 +210,7 @@
 		position: relative;
 		width: 100%;
 		max-width: 800px;
+		margin-inline: auto;
 	}
 
 	.label {

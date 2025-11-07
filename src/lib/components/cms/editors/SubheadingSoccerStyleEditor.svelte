@@ -149,6 +149,18 @@
 			/>
 			<span class="hint">Moet minimaal gelijk zijn aan bal grootte</span>
 		</div>
+		<div class="control-group">
+			<label for="soccer-margin-bottom">Witruimte onder</label>
+			<input
+				id="soccer-margin-bottom"
+				type="text"
+				bind:value={theme['subheading-soccer-margin-bottom']}
+				onchange={onsave}
+				placeholder="1.5rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 1rem, 1.5rem, 2rem, 24px</span>
+		</div>
 	</div>
 </div>
 

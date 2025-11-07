@@ -8,7 +8,8 @@
 	}>();
 
 	const defaults = {
-		'font-family-quote': "'Flama Semi Condensed', 'Arial Narrow', sans-serif",
+		'font-family-quote':
+			"'Flama Semi Condensed', 'Arial Narrow', sans-serif, 'acumin-pro-extra-condensed'",
 		'font-family-base': "'Arial', sans-serif",
 		'color-background-light': '#ffffff'
 	};
