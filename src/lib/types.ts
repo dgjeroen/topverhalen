@@ -46,8 +46,9 @@ export type Theme = {
     'font-weight-headings'?: string;
     'font-weight-subheading'?: string;
     'font-weight-subheading-medium'?: string;
-    'color-subheading'?: string;
-    'color-subheading-medium'?: string;
+    'h2-color'?: string;
+    'h3-color'?: string;
+    'h4-color'?: string;
     'font-style-h2'?: string;
     'font-style-h3'?: string;
     'font-style-h4'?: string;
@@ -97,6 +98,27 @@ export type Theme = {
     'text-link-color'?: string;
     'text-link-hover-color'?: string;
     'text-link-decoration'?: string;
+
+    // ============================================
+    // TEXTFRAME COMPONENT (✅ ADD THESE)
+    // ============================================
+    'textframe-bg-color'?: string;
+    'textframe-border-color'?: string;
+    'textframe-border-radius'?: string;
+    'textframe-padding'?: string;
+    'textframe-heading-color'?: string;
+    'textframe-heading-size'?: string;
+    'textframe-heading-weight'?: string;
+    'textframe-text-color'?: string;
+    'textframe-line-height'?: string;
+    'textframe-text-size'?: string;
+    'textframe-caption-color'?: string;
+    'textframe-caption-size'?: string;
+    'textframe-img-radius'?: string;
+    'textframe-toggle-size'?: string;
+    'textframe-toggle-color'?: string;
+    'textframe-toggle-bg'?: string;
+    'textframe-toggle-hover-bg'?: string;
 
     // ============================================
     // QUOTE COMPONENT
@@ -302,6 +324,8 @@ export interface TextFrameContent {
         rounded: boolean;
         hidden?: boolean;
     } | null;
+    collapsible?: boolean;
+    defaultOpen?: boolean;
 }
 
 export interface TimelineContent {

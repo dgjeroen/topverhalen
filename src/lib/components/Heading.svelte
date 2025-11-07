@@ -1,61 +1,42 @@
 <script lang="ts">
 	import type { HeadingContent, Theme } from '$lib/types';
 	import { getContext } from 'svelte';
+	import { browser } from '$app/environment';
 
 	let { text, level = 2 }: HeadingContent = $props();
 
 	const theme = getContext<Theme>('theme') || {};
 
-	// ✅ Get margin-bottom from theme with fallback
-	const marginBottom =
-		level === 2
-			? theme['h2-margin-bottom'] || '0'
-			: level === 3
-				? theme['h3-margin-bottom'] || '0.5rem'
-				: level === 4
-					? theme['h4-margin-bottom'] || '0.5rem'
-					: '1rem';
+	// ✅ Lees CSS variabelen in plaats van theme object
+	let element: HTMLElement | undefined = $state();
 
-	// ✅ Check if background is enabled (works for h3 and h4)
-	const hasBackground = $derived(
-		level === 3
-			? theme['h3-background-enabled'] === 'true'
-			: level === 4
-				? theme['h4-background-enabled'] === 'true'
-				: false
-	);
+	const hasBackground = $derived.by(() => {
+		if (!browser || !element) return false;
+		const styles = getComputedStyle(element);
+		const enabled = styles.getPropertyValue(`--h${level}-background-enabled`).trim();
+		return enabled === 'true';
+	});
 
-	// ✅ Get background styles
-	const bgColor = $derived(
-		level === 3
-			? theme['h3-background-color'] || '#000000'
-			: level === 4
-				? theme['h4-background-color'] || '#000000'
-				: '#000000'
-	);
+	const bgColor = $derived.by(() => {
+		if (!browser || !element) return '#000000';
+		const styles = getComputedStyle(element);
+		return styles.getPropertyValue(`--h${level}-background-color`).trim() || '#000000';
+	});
 
-	const bgTextColor = $derived(
-		level === 3
-			? theme['h3-background-text-color'] || '#ffffff'
-			: level === 4
-				? theme['h4-background-text-color'] || '#ffffff'
-				: '#ffffff'
-	);
+	const bgTextColor = $derived.by(() => {
+		if (!browser || !element) return '#ffffff';
+		const styles = getComputedStyle(element);
+		return styles.getPropertyValue(`--h${level}-background-text-color`).trim() || '#ffffff';
+	});
 
-	const bgPadding = $derived(
-		level === 3
-			? theme['h3-background-padding'] || '0.2rem 0.5rem'
-			: level === 4
-				? theme['h4-background-padding'] || '0.2rem 0.5rem'
-				: '0.2rem 0.5rem'
-	);
+	const bgPadding = $derived.by(() => {
+		if (!browser || !element) return '0.2rem 0.5rem';
+		const styles = getComputedStyle(element);
+		return styles.getPropertyValue(`--h${level}-background-padding`).trim() || '0.2rem 0.5rem';
+	});
 </script>
 
-<svelte:element
-	this={`h${level}`}
-	class="heading heading-{level}"
-	style="margin-bottom: {marginBottom}"
->
+<svelte:element this={`h${level}`} bind:this={element} class="heading heading-{level}">
 	{#if hasBackground}
 		<span
 			class="heading-bg"
@@ -70,8 +51,22 @@
 
 <style>
 	.heading {
-		margin: 0;
+		margin-top: 0;
+		margin-left: 0;
+		margin-right: 0;
 		line-height: 1.3;
+	}
+
+	.heading-2 {
+		margin-bottom: var(--h2-margin-bottom, 2rem);
+	}
+
+	.heading-3 {
+		margin-bottom: var(--h3-margin-bottom, 1.5rem);
+	}
+
+	.heading-4 {
+		margin-bottom: var(--h4-margin-bottom, 1rem);
 	}
 
 	.heading-bg {
