@@ -75,7 +75,7 @@ html {
     /* --- Subheaders --- */
     --font-size-subheading: 1.5rem;
     --font-weight-subheading: 600;
-    --color-subheading: var(--color-text-muted);
+    --h4-color: var(--color-text-muted);
 
     /* --- Speciale Font Styles --- */
     --font-family-hero-title: var(--font-family-quote);

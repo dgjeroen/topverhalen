@@ -1,5 +1,5 @@
+<!--src\lib\components\SwitchLogo.svelte-->
 <script lang="ts">
-	// Het script-gedeelte blijft ongewijzigd
 	import dgLogo from '$lib/assets/dgLogo-dia.svg';
 	import bdLogo from '$lib/assets/bdLogo-dia.svg';
 	import adLogo from '$lib/assets/adLogo-dia.svg';

@@ -1,3 +1,4 @@
+<!--src\lib\components\cms\editors\HeadingStyleEditor.svelte-->
 <script lang="ts">
 	import type { Theme } from '$lib/types';
 
@@ -33,7 +34,7 @@
 			title: 'Kop (H2)',
 			sizeKey: 'font-size-h2',
 			weightKey: 'font-weight-headings',
-			colorKey: 'color-text',
+			colorKey: 'h2-color',
 			styleKey: 'font-style-h2',
 			marginKey: 'h2-margin-bottom',
 			defaultSize: '2.5rem',

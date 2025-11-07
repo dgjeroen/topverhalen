@@ -1,0 +1,54 @@
+/* src/lib/styles/fonts.css */
+
+/* ============================================= */
+/* FLAMA SEMI CONDENSED - MULTIPLE WEIGHTS     */
+/* Voor: Hoofdtitels, accenten                  */
+/* ============================================= */
+
+/* Regular/Basic - 400 */
+@font-face {
+    font-family: "Flama Semi Condensed";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://statics.gelderlander.nl/fonts/flamasemicondbasic-c316120682.woff2") format("woff2"),
+        url("https://statics.gelderlander.nl/fonts/flamasemicondbasic-6ce0ecb08f.woff") format("woff");
+}
+
+/* Medium - 500 */
+@font-face {
+    font-family: "Flama Semi Condensed";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("https://statics.gelderlander.nl/fonts/flamsemicondmed-2976592b95.woff2") format("woff2"),
+        url("https://statics.gelderlander.nl/fonts/flamsemicondmed-a0dce94791.woff") format("woff");
+}
+
+/* Bold - 700 */
+@font-face {
+    font-family: "Flama Semi Condensed";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("https://statics.gelderlander.nl/fonts/FlamaSemicond-Bold-8199bf9ba9.woff2") format("woff2"),
+        url("https://statics.gelderlander.nl/fonts/FlamaProSemicond-Bold-9fcffad7b7.woff") format("woff");
+}
+
+/* Black - 900 */
+@font-face {
+    font-family: "Flama Semi Condensed";
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: url("https://statics.gelderlander.nl/fonts/FlamaSemicond-Black-6cf7d54458.woff2") format("woff2"),
+        url("https://statics.gelderlander.nl/fonts/FlamaProSemicond-Black-dfaca22687.woff") format("woff");
+}
+
+/* ============================================= */
+/* ARIAL SYSTEM FONT                            */
+/* Voor: Broodtekst, paragrafen, UI elementen   */
+/* Weights: 300 (Light), 400 (Regular),         */
+/*          600 (Semibold), 700 (Bold)          */
+/* ============================================= */
+/* Geen @font-face nodig - system font */

@@ -1047,7 +1047,33 @@ Voorbeelden:
 								placeholder="Voer een titel in..."
 							/>
 						</div>
+						<div class="control-group">
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.collapsible}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Maak tekstkader inklapbaar</span>
+							</label>
 
+							{#if block.content.collapsible}
+								<div class="sub-control">
+									<label class="checkbox-label checkbox-label-sub">
+										<input
+											type="checkbox"
+											bind:checked={block.content.defaultOpen}
+											onchange={() => dispatch('save')}
+										/>
+										<span>Standaard open tonen</span>
+									</label>
+									<p class="control-hint">
+										💡 Als inklapbaar: bezoeker kan het kader open/dicht klappen.
+										{block.content.defaultOpen ? 'Start open.' : 'Start dichtgeklapt.'}
+									</p>
+								</div>
+							{/if}
+						</div>
 						<div class="control-group">
 							<label class="control-label" for="textframe-text-{block.id}">
 								Tekst
@@ -2618,6 +2644,34 @@ Voorbeelden:
 		font-size: 0.8125rem;
 		color: #92400e;
 		line-height: 1.4;
+	}
+	/* ============================================
+   COLLAPSIBLE TEXTFRAME CONTROLS
+   ============================================ */
+
+	.sub-control {
+		margin-left: 1.75rem;
+		margin-top: 0.75rem;
+		padding: 0.75rem;
+		background: #f9fafb;
+		border-left: 3px solid #d10a10;
+		border-radius: 4px;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.checkbox-label-sub {
+		font-size: 0.8125rem;
+		color: #6b7280;
+	}
+
+	.control-hint {
+		margin: 0;
+		font-size: 0.75rem;
+		color: #6b7280;
+		line-height: 1.4;
+		font-style: italic;
 	}
 
 	/* ============================================

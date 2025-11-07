@@ -1,3 +1,4 @@
+<!--src\lib\components\cms\StyleComponentList.svelte-->
 <script lang="ts">
 	import BlockIcons from '$lib/assets/icons/BlockIcons.svelte';
 
@@ -7,13 +8,14 @@
 
 	const components = [
 		{ id: 'general', label: 'Algemeen', icon: 'icon-style-general' },
-		{ id: 'heading', label: 'Kop', icon: 'icon-block-h2' },
-		{ id: 'subheading', label: 'Tussenkop', icon: 'icon-block-h4' },
+		{ id: 'heading', label: 'Kop (H2)', icon: 'icon-block-h2' },
+		{ id: 'subheading', label: 'Tussenkop (H4)', icon: 'icon-block-h4' },
 		{ id: 'text', label: 'Tekst', icon: 'icon-block-text' },
+		{ id: 'textframe', label: 'Tekstkader', icon: 'icon-block-text' },
 		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
 		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
 		{ id: 'slider', label: 'Slider', icon: 'icon-block-slider' },
-		{ id: 'subheadingMedium', label: 'Extra tussenkop', icon: 'icon-block-h3' },
+		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },
 		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' }
 	];
 </script>

@@ -100,6 +100,27 @@ export type Theme = {
     'text-link-decoration'?: string;
 
     // ============================================
+    // TEXTFRAME COMPONENT (✅ ADD THESE)
+    // ============================================
+    'textframe-bg-color'?: string;
+    'textframe-border-color'?: string;
+    'textframe-border-radius'?: string;
+    'textframe-padding'?: string;
+    'textframe-heading-color'?: string;
+    'textframe-heading-size'?: string;
+    'textframe-heading-weight'?: string;
+    'textframe-text-color'?: string;
+    'textframe-line-height'?: string;
+    'textframe-text-size'?: string;
+    'textframe-caption-color'?: string;
+    'textframe-caption-size'?: string;
+    'textframe-img-radius'?: string;
+    'textframe-toggle-size'?: string;
+    'textframe-toggle-color'?: string;
+    'textframe-toggle-bg'?: string;
+    'textframe-toggle-hover-bg'?: string;
+
+    // ============================================
     // QUOTE COMPONENT
     // ============================================
     'quote-font-family'?: string;
@@ -303,6 +324,8 @@ export interface TextFrameContent {
         rounded: boolean;
         hidden?: boolean;
     } | null;
+    collapsible?: boolean;
+    defaultOpen?: boolean;
 }
 
 export interface TimelineContent {
