@@ -80,6 +80,7 @@ export type Theme = {
     'subheading-soccer-height'?: string;
     'subheading-soccer-ball-size'?: string;
     'subheading-soccer-text-offset'?: string;
+    'subheading-soccer-margin-bottom'?: string;
 
     // ============================================
     // TEXT COMPONENT

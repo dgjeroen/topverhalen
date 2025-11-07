@@ -76,6 +76,7 @@
 		overflow: hidden;
 		background: var(--subheading-soccer-bg, linear-gradient(to right, #0b1320 100%, transparent));
 		border-radius: var(--subheading-soccer-border-radius, 0);
+		margin-bottom: var(--subheading-soccer-margin-bottom, -2.5rem);
 	}
 
 	.heading-text-container {

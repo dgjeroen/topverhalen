@@ -8,7 +8,8 @@
 	}>();
 
 	const defaults = {
-		'font-family-quote': "'Flama Semi Condensed', 'Arial Narrow', sans-serif",
+		'font-family-quote':
+			"'Flama Semi Condensed', 'Arial Narrow', sans-serif, 'acumin-pro-extra-condensed'",
 		'font-family-base': "'Arial', sans-serif",
 		'color-background-light': '#ffffff'
 	};
@@ -280,6 +281,7 @@
 				<option value="'Inter', sans-serif">Inter</option>
 				<option value="'Georgia', serif">Georgia</option>
 				<option value="'Courier New', monospace">Courier New</option>
+				<option value="'acumin-pro-extra-condensed', sans-serif">Acumin Pro Extra Condensed</option>
 			</select>
 		</div>
 
