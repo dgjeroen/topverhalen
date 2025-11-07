@@ -7,13 +7,11 @@
 	$effect(() => {
 		if (!theme || Object.keys(theme).length === 0) return;
 
-		// ✅ Filter en map CSS variables
 		const cssVars = Object.entries(theme)
 			.filter(([_, value]) => typeof value === 'string' && value.trim() !== '')
 			.map(([key, value]) => `  --${key}: ${value};`)
 			.join('\n');
 
-		// ✅ NIEUW: Achtergrond afbeelding variables (apart, want special handling)
 		const bgImage = theme['background-image'];
 		const bgVars = bgImage
 			? `
@@ -26,15 +24,15 @@
 			: `
   --background-image: none;`;
 
+		// ❌ REMOVED: textColorOverride (niet meer nodig)
+
 		const allVars = cssVars + bgVars;
 
 		if (!allVars.trim()) return;
 
-		// Remove oude style
 		const oldStyle = document.getElementById('theme-overrides');
 		if (oldStyle) oldStyle.remove();
 
-		// ✅ Injecteer nieuwe style met body styling
 		const style = document.createElement('style');
 		style.id = 'theme-overrides';
 		style.textContent = `
@@ -42,13 +40,20 @@
 ${allVars}
 }
 
-/* Body achtergrond (alleen kleur) */
+html {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 body {
   position: relative;
   background-color: var(--color-background-light, #ffffff);
+  overflow: visible;
+  min-height: 100vh;
+  height: auto;
+  /* ❌ REMOVED: color override (TextStyleEditor doet dit) */
 }
 
-/* Achtergrond afbeelding (desktop only) */
 @media (min-width: 769px) {
   body::before {
     content: '';

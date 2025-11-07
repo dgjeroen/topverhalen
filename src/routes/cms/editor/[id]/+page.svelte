@@ -12,6 +12,7 @@
 	import GeneralStyleEditor from '$lib/components/cms/editors/GeneralStyleEditor.svelte';
 	import HeadingStyleEditor from '$lib/components/cms/editors/HeadingStyleEditor.svelte';
 	import TextStyleEditor from '$lib/components/cms/editors/TextStyleEditor.svelte';
+	import TextFrameStyleEditor from '$lib/components/cms/editors/TextFrameStyleEditor.svelte';
 	import QuoteStyleEditor from '$lib/components/cms/editors/QuoteStyleEditor.svelte';
 	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
@@ -389,7 +390,6 @@
 		}
 		canvasBlocks = canvasBlocks.filter((b) => b.id !== blockId);
 
-		// ✅ Trigger debounced save
 		debouncedSave();
 	}
 
@@ -410,8 +410,6 @@
 			});
 			canvasBlocks = [...canvasBlocks];
 		}
-
-		// ✅ Trigger debounced save
 		debouncedSave();
 	}
 
@@ -425,7 +423,6 @@
 		}
 		canvasBlocks = [...canvasBlocks];
 
-		// ✅ Trigger debounced save
 		debouncedSave();
 	}
 
@@ -902,13 +899,15 @@
 					{:else if selectedStyleComponent === 'heading'}
 						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h2" />
 					{:else if selectedStyleComponent === 'subheading'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h3" />
-					{:else if selectedStyleComponent === 'subheadingMedium'}
 						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h4" />
+					{:else if selectedStyleComponent === 'subheadingMedium'}
+						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h3" />
 					{:else if selectedStyleComponent === 'subheadingSoccer'}
 						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'text'}
 						<TextStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+					{:else if selectedStyleComponent === 'textframe'}
+						<TextFrameStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'quote'}
 						<QuoteStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'image'}
@@ -923,16 +922,14 @@
 </div>
 
 <style>
-	/* ===== BESTAANDE STYLES (ongewijzigd tot "NIEUW" markers) ===== */
-
 	:global(body) {
 		margin: 0;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		overflow: hidden;
+		overflow: visible;
 	}
 
 	.editor {
-		height: 100vh;
+		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
 		background: #f4f4f9;
@@ -948,6 +945,8 @@
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		flex-shrink: 0;
 		z-index: 100;
+		position: sticky;
+		top: 0;
 	}
 
 	.header-left {
@@ -969,6 +968,7 @@
 		color: #111827;
 		letter-spacing: -0.025em;
 	}
+
 	.block-icon {
 		width: 20px;
 		height: 20px;
@@ -1002,7 +1002,6 @@
 		align-items: center;
 	}
 
-	/* ✅ NIEUW: Enhanced save status indicator */
 	.save-status-indicator {
 		display: flex;
 		flex-direction: column;
@@ -1138,7 +1137,6 @@
 		background: #5a6268;
 	}
 
-	/* ✅ NIEUW: Backup Dialog */
 	.backup-dialog-overlay {
 		position: fixed;
 		inset: 0;
@@ -1219,7 +1217,6 @@
 		background: #e5e7eb;
 	}
 
-	/* ✅ NIEUW: Rate Limit Warning Banner */
 	.rate-limit-banner {
 		position: fixed;
 		top: 0;
@@ -1275,8 +1272,7 @@
 	.editor-layout {
 		display: flex;
 		flex: 1;
-		overflow: hidden;
-		height: calc(100vh - 60px);
+		min-height: calc(100vh - 60px);
 	}
 
 	.toolbox {
@@ -1285,7 +1281,9 @@
 		border-right: 1px solid #e5e7eb;
 		flex-shrink: 0;
 		overflow-y: auto;
-		height: 100%;
+		max-height: calc(100vh - 60px);
+		position: sticky;
+		top: 60px;
 	}
 
 	.toolbox-content {
@@ -1377,25 +1375,19 @@
 		background: white;
 	}
 
-	.toolbox-content {
-		padding: 20px;
-		overflow-y: auto;
-		height: calc(100% - 45px);
-	}
-
 	.styling-canvas {
 		background: white;
 		min-height: 100%;
 		border-radius: 8px;
-		margin: 20px;
+		margin: 0 20px;
 	}
 
 	main.canvas {
 		position: relative;
 		flex: 1;
-		height: 100%;
-		overflow-y: auto;
-		overflow-x: hidden;
-		padding: 20px;
+		overflow-x: hidden !important;
+		overflow-y: visible !important;
+		padding: 40px 20px;
+		height: auto !important;
 	}
 </style>

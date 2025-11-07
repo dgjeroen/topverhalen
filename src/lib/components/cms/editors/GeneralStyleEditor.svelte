@@ -8,24 +8,22 @@
 	}>();
 
 	const defaults = {
-		'color-background-light': '#ffffff',
-		'font-family-quote': "'acumin-pro-extra-condensed', sans-serif",
-		'font-family-base': "'Inter', sans-serif"
+		'font-family-quote': "'Flama Semi Condensed', 'Arial Narrow', sans-serif",
+		'font-family-base': "'Arial', sans-serif",
+		'color-background-light': '#ffffff'
 	};
 
-	// ✅ Ensure theme exists
 	$effect(() => {
 		if (!theme) theme = {};
 	});
 
-	// ✅ Lokale state met fallback
 	let backgroundColor = $state(
 		theme['color-background-light'] || defaults['color-background-light']
 	);
 	let fontQuote = $state(theme['font-family-quote'] || defaults['font-family-quote']);
 	let fontBase = $state(theme['font-family-base'] || defaults['font-family-base']);
 
-	// ✅ NIEUW: Achtergrond state
+	// Achtergrond state
 	let backgroundImage = $state(theme['background-image'] || '');
 	let backgroundRepeat = $state(theme['background-repeat'] || 'repeat');
 	let backgroundPosition = $state(theme['background-position'] || 'center');
@@ -33,7 +31,6 @@
 	let backgroundOpacity = $state(theme['background-opacity'] ?? 100);
 	let backgroundAttachment = $state(theme['background-attachment'] || 'scroll');
 
-	// ✅ Sync changes terug naar theme
 	function updateBackgroundColor(value: string) {
 		backgroundColor = value;
 		theme['color-background-light'] = value;
@@ -49,7 +46,6 @@
 		theme['font-family-base'] = value;
 	}
 
-	// ✅ NIEUW: Achtergrond updates
 	function updateBackgroundImage(value: string) {
 		backgroundImage = value;
 		theme['background-image'] = value || undefined;
@@ -119,9 +115,14 @@
 					placeholder={defaults['color-background-light']}
 				/>
 			</div>
+			<p class="control-hint small">
+				<strong>Tip:</strong> Raadpleeg de
+				<a href="https://adr-brand-guide.web.app/kleuren.html" target="_blank">Brand Guide</a> voor aanbevolen
+				kleuren.
+			</p>
 		</div>
 
-		<!-- ✅ NIEUW: Achtergrond Afbeelding -->
+		<!-- Achtergrond Afbeelding -->
 		<div class="control-group section-divider">
 			<label for="bg-image">Achtergrond Afbeelding (Desktop)</label>
 			<p class="control-hint">
@@ -272,10 +273,12 @@
 					onsave();
 				}}
 			>
-				<option value="'acumin-pro-extra-condensed', sans-serif">Acumin Pro (standaard)</option>
+				<option value="'Flama Semi Condensed', 'Arial Narrow', sans-serif">
+					Flama Semi Condensed (standaard)
+				</option>
+				<option value="'Arial', sans-serif">Arial</option>
 				<option value="'Inter', sans-serif">Inter</option>
 				<option value="'Georgia', serif">Georgia</option>
-				<option value="'Arial', sans-serif">Arial</option>
 				<option value="'Courier New', monospace">Courier New</option>
 			</select>
 		</div>
@@ -292,9 +295,9 @@
 					onsave();
 				}}
 			>
-				<option value="'Inter', sans-serif">Inter (standaard)</option>
+				<option value="'Arial', sans-serif">Arial (standaard)</option>
+				<option value="'Inter', sans-serif">Inter</option>
 				<option value="'Georgia', serif">Georgia</option>
-				<option value="'Arial', sans-serif">Arial</option>
 				<option value="'Courier New', monospace">Courier New</option>
 			</select>
 		</div>
@@ -484,6 +487,7 @@
 		background: #e5e7eb;
 		outline: none;
 		-webkit-appearance: none;
+		appearance: none;
 	}
 
 	input[type='range']::-webkit-slider-thumb {

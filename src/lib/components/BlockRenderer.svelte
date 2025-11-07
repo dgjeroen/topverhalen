@@ -14,14 +14,14 @@
 	import Timeline from './Timeline.svelte';
 	import MediaPair from './MediaPair.svelte';
 	import TextFrame from './TextFrame.svelte';
+	import Embed from './Embed.svelte';
 	import SubheadingSoccer from './SubheadingSoccer.svelte';
 	import Unsupported from './Unsupported.svelte';
 	import type { ContentBlock } from '$lib/types';
-	import Embed from './Embed.svelte';
 
 	let { block, isFirst = false } = $props<{
 		block: ContentBlock;
-		isFirst?: boolean; // ✅ NIEUW
+		isFirst?: boolean;
 	}>();
 
 	const componentMap: Record<string, any> = {
@@ -47,26 +47,29 @@
 
 	const ComponentToRender = componentMap[block.type] || Unsupported;
 
-	const noWrapperBlocks = ['heroVideo', 'imageHero', 'textframe'];
+	const noWrapperBlocks = ['heroVideo', 'imageHero'];
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 	const heroBlocks = ['heroVideo', 'imageHero'];
+
+	// ✅ NIEUW: Helper functie voor heading levels
+	function getHeadingLevel(type: string): number | undefined {
+		if (type === 'heading') return 2;
+		if (type === 'subheading') return 4;
+		if (type === 'subheadingMedium') return 3;
+		return undefined;
+	}
+
+	const headingLevel = $derived(getHeadingLevel(block.type));
 </script>
 
 {#if noWrapperBlocks.includes(block.type)}
-	<ComponentToRender {...block.content} />
+	<ComponentToRender {...block.content} level={headingLevel} />
 
-	<!-- ✅ NIEUW: Automatisch anchor na hero blocks -->
 	{#if isFirst && heroBlocks.includes(block.type)}
 		<div id="content-start"></div>
 	{/if}
 {:else}
-	<div
-		class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}
-		class:is-linked-to-next={block.type === 'heading' ||
-			block.type === 'subheading' ||
-			block.type === 'subheadingMedium' ||
-			block.type === 'subheadingSoccer'}
-	>
-		<ComponentToRender {...block.content} />
+	<div class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}>
+		<ComponentToRender {...block.content} level={headingLevel} />
 	</div>
 {/if}
