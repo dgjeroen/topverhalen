@@ -148,6 +148,45 @@ export type Theme = {
     'quote-author-align'?: string;
 
     // ============================================
+    // COLOFON COMPONENT
+    // ============================================
+    'colofon-padding-block'?: string;
+    'colofon-border-color'?: string;
+    'colofon-font-size'?: string;
+    'colofon-dt-color'?: string;
+    'colofon-dt-weight'?: string;
+    'colofon-dt-align'?: string;
+    'colofon-dd-color'?: string;
+    'colofon-dd-weight'?: string;
+    'colofon-gap'?: string;
+    'colofon-column-gap'?: string;
+
+    // ============================================
+    // AUDIO COMPONENT
+    // ============================================
+    'audio-bg-color'?: string;
+    'audio-border-radius'?: string;
+    'audio-padding'?: string;
+    'audio-gap'?: string;
+    'audio-image-size'?: string;
+    'audio-image-border-radius'?: string;
+    'audio-title-color'?: string;
+    'audio-title-size'?: string;
+    'audio-title-weight'?: string;
+    'audio-description-color'?: string;
+    'audio-description-size'?: string;
+    'audio-button-size'?: string;
+    'audio-button-border-color'?: string;
+    'audio-button-hover-bg'?: string;
+    'audio-button-icon-color'?: string;
+    'audio-progress-height'?: string;
+    'audio-progress-bg'?: string;
+    'audio-progress-fill-color'?: string;
+    'audio-progress-border-radius'?: string;
+    'audio-time-color'?: string;
+    'audio-time-size'?: string;
+
+    // ============================================
     // IMAGE COMPONENTS (Standard, Parallax, Grid, Slider)
     // ============================================
     'image-border-radius'?: string;
@@ -242,7 +281,11 @@ export interface AudioContent {
     url: string;
     title: string;
     description: string;
-    image: string;
+    image?: string;
+    imageLayout?: 'none' | 'stamp' | 'portrait';
+    imageScale?: number;
+    imageFocusX?: number;
+    imageFocusY?: number;
 }
 
 export interface HeroVideoContent {
@@ -283,6 +326,7 @@ export interface SliderContent {
 export interface ColofonContent {
     items: { functie: string; namen: string }[];
     showLogo?: boolean;
+    logoVariant?: 'color' | 'dia';
 }
 
 export interface TimelineItem {

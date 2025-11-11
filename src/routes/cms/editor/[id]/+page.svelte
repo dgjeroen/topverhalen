@@ -14,6 +14,8 @@
 	import TextStyleEditor from '$lib/components/cms/editors/TextStyleEditor.svelte';
 	import TextFrameStyleEditor from '$lib/components/cms/editors/TextFrameStyleEditor.svelte';
 	import QuoteStyleEditor from '$lib/components/cms/editors/QuoteStyleEditor.svelte';
+	import ColofonStyleEditor from '$lib/components/cms/editors/ColofonStyleEditor.svelte';
+	import AudioStyleEditor from '$lib/components/cms/editors/AudioStyleEditor.svelte';
 	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
 	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
@@ -373,11 +375,24 @@
 					]
 				};
 			case 'audio':
-				return { url: '', title: '', description: '', image: '' };
+				return {
+					url: '',
+					title: '',
+					description: '',
+					image: '',
+					imageLayout: 'stamp',
+					imageScale: 100,
+					imageFocusX: 50,
+					imageFocusY: 50
+				};
 			case 'textframe':
 				return { width: 'narrow', heading: '', text: '', image: null };
 			case 'colofon':
-				return { items: [{ functie: '', namen: '' }] };
+				return {
+					items: [{ functie: '', namen: '' }],
+					showLogo: true,
+					logoVariant: 'dia'
+				};
 			default:
 				return {};
 		}
@@ -910,6 +925,10 @@
 						<TextFrameStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'quote'}
 						<QuoteStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+					{:else if selectedStyleComponent === 'colofon'}
+						<ColofonStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+					{:else if selectedStyleComponent === 'audio'}
+						<AudioStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'image'}
 						<ImageStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'slider'}

@@ -1,0 +1,485 @@
+<!-- src/lib/components/cms/editors/AudioStyleEditor.svelte -->
+<script lang="ts">
+	import type { Theme } from '$lib/types';
+
+	let { theme = $bindable(), onsave } = $props<{
+		theme: Theme;
+		onsave: () => Promise<void>;
+	}>();
+
+	$effect(() => {
+		if (!theme) theme = {};
+	});
+</script>
+
+<div class="style-editor">
+	<div class="editor-header">
+		<h3>Audio Speler Styling</h3>
+		<p class="editor-description">Pas de stijl van audio speler blokken aan</p>
+	</div>
+
+	<div class="controls">
+		<!-- SECTIE: Container -->
+		<div class="section-header">Container</div>
+
+		<div class="control-group">
+			<label for="audio-bg">Achtergrondkleur</label>
+			<div class="color-control">
+				<input id="audio-bg" type="color" bind:value={theme['audio-bg-color']} onchange={onsave} />
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-bg-color']}
+					onchange={onsave}
+					placeholder="#f3f3f3"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-border-radius">Border Radius</label>
+			<input
+				id="audio-border-radius"
+				type="text"
+				bind:value={theme['audio-border-radius']}
+				onchange={onsave}
+				placeholder="8px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 6px, 8px, 12px</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-padding">Padding</label>
+			<input
+				id="audio-padding"
+				type="text"
+				bind:value={theme['audio-padding']}
+				onchange={onsave}
+				placeholder="1.5rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 1rem, 1.5rem, 2rem</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-gap">Ruimte tussen afbeelding en content</label>
+			<input
+				id="audio-gap"
+				type="text"
+				bind:value={theme['audio-gap']}
+				onchange={onsave}
+				placeholder="1.5rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 1rem, 1.5rem, 2rem</span>
+		</div>
+
+		<!-- SECTIE: Afbeelding -->
+		<div class="section-header">Afbeelding</div>
+
+		<div class="control-group">
+			<label for="audio-image-size">Afbeelding grootte</label>
+			<input
+				id="audio-image-size"
+				type="text"
+				bind:value={theme['audio-image-size']}
+				onchange={onsave}
+				placeholder="80px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 60px, 80px, 100px</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-image-radius">Afbeelding border radius</label>
+			<input
+				id="audio-image-radius"
+				type="text"
+				bind:value={theme['audio-image-border-radius']}
+				onchange={onsave}
+				placeholder="6px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 4px, 6px, 50% (rond)</span>
+		</div>
+
+		<!-- SECTIE: Titel & Beschrijving -->
+		<div class="section-header">Titel & Beschrijving</div>
+
+		<div class="control-group">
+			<label for="audio-title-color">Titel kleur</label>
+			<div class="color-control">
+				<input
+					id="audio-title-color"
+					type="color"
+					bind:value={theme['audio-title-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-title-color']}
+					onchange={onsave}
+					placeholder="#111827"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-title-size">Titel grootte</label>
+			<input
+				id="audio-title-size"
+				type="text"
+				bind:value={theme['audio-title-size']}
+				onchange={onsave}
+				placeholder="1.1rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 1rem, 1.1rem, 1.25rem</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-title-weight">Titel dikte</label>
+			<select id="audio-title-weight" bind:value={theme['audio-title-weight']} onchange={onsave}>
+				<option value="">Standaard (600)</option>
+				<option value="400">Normal (400)</option>
+				<option value="500">Medium (500)</option>
+				<option value="600">Semi-bold (600)</option>
+				<option value="700">Bold (700)</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-desc-color">Beschrijving kleur</label>
+			<div class="color-control">
+				<input
+					id="audio-desc-color"
+					type="color"
+					bind:value={theme['audio-description-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-description-color']}
+					onchange={onsave}
+					placeholder="#6b7280"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-desc-size">Beschrijving grootte</label>
+			<input
+				id="audio-desc-size"
+				type="text"
+				bind:value={theme['audio-description-size']}
+				onchange={onsave}
+				placeholder="0.9rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 0.8rem, 0.9rem, 1rem</span>
+		</div>
+
+		<!-- SECTIE: Play Button -->
+		<div class="section-header">Play Button</div>
+
+		<div class="control-group">
+			<label for="audio-btn-size">Button grootte</label>
+			<input
+				id="audio-btn-size"
+				type="text"
+				bind:value={theme['audio-button-size']}
+				onchange={onsave}
+				placeholder="40px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 36px, 40px, 48px</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-btn-border">Button rand kleur</label>
+			<div class="color-control">
+				<input
+					id="audio-btn-border"
+					type="color"
+					bind:value={theme['audio-button-border-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-button-border-color']}
+					onchange={onsave}
+					placeholder="#d1d5db"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-btn-hover">Button hover achtergrond</label>
+			<div class="color-control">
+				<input
+					id="audio-btn-hover"
+					type="color"
+					bind:value={theme['audio-button-hover-bg']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-button-hover-bg']}
+					onchange={onsave}
+					placeholder="#e5e7eb"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-btn-icon">Icoon kleur</label>
+			<div class="color-control">
+				<input
+					id="audio-btn-icon"
+					type="color"
+					bind:value={theme['audio-button-icon-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-button-icon-color']}
+					onchange={onsave}
+					placeholder="#111827"
+				/>
+			</div>
+		</div>
+
+		<!-- SECTIE: Progress Bar -->
+		<div class="section-header">Progress Bar</div>
+
+		<div class="control-group">
+			<label for="audio-progress-height">Hoogte</label>
+			<input
+				id="audio-progress-height"
+				type="text"
+				bind:value={theme['audio-progress-height']}
+				onchange={onsave}
+				placeholder="6px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 4px, 6px, 8px</span>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-progress-bg">Achtergrond kleur</label>
+			<div class="color-control">
+				<input
+					id="audio-progress-bg"
+					type="color"
+					bind:value={theme['audio-progress-bg']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-progress-bg']}
+					onchange={onsave}
+					placeholder="#e5e7eb"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-progress-fill">Vul kleur (accent)</label>
+			<div class="color-control">
+				<input
+					id="audio-progress-fill"
+					type="color"
+					bind:value={theme['audio-progress-fill-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-progress-fill-color']}
+					onchange={onsave}
+					placeholder="#ef4444"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-progress-radius">Border radius</label>
+			<input
+				id="audio-progress-radius"
+				type="text"
+				bind:value={theme['audio-progress-border-radius']}
+				onchange={onsave}
+				placeholder="3px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 2px, 3px, 4px</span>
+		</div>
+
+		<!-- SECTIE: Tijd Display -->
+		<div class="section-header">Tijd Display</div>
+
+		<div class="control-group">
+			<label for="audio-time-color">Tekstkleur</label>
+			<div class="color-control">
+				<input
+					id="audio-time-color"
+					type="color"
+					bind:value={theme['audio-time-color']}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					bind:value={theme['audio-time-color']}
+					onchange={onsave}
+					placeholder="#6b7280"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="audio-time-size">Lettergrootte</label>
+			<input
+				id="audio-time-size"
+				type="text"
+				bind:value={theme['audio-time-size']}
+				onchange={onsave}
+				placeholder="0.8rem"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 0.75rem, 0.8rem, 0.875rem</span>
+		</div>
+	</div>
+</div>
+
+<style>
+	.style-editor {
+		padding: 2rem;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.editor-header {
+		margin-bottom: 2rem;
+		padding-bottom: 1rem;
+		border-bottom: 2px solid #e5e7eb;
+	}
+
+	h3 {
+		margin: 0 0 0.5rem 0;
+		color: #111827;
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+
+	.editor-description {
+		margin: 0;
+		color: #6b7280;
+		font-size: 0.875rem;
+	}
+
+	.section-header {
+		font-weight: 700;
+		font-size: 0.75rem;
+		color: #9ca3af;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin-top: 2rem;
+		margin-bottom: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #e5e7eb;
+	}
+
+	.section-header:first-of-type {
+		margin-top: 0;
+		padding-top: 0;
+		border-top: none;
+	}
+
+	.controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.control-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	label {
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: #374151;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.color-control {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	input[type='color'] {
+		width: 60px;
+		height: 40px;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		cursor: pointer;
+		flex-shrink: 0;
+	}
+
+	.color-value,
+	.text-input {
+		flex: 1;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		color: #374151;
+	}
+
+	.color-value {
+		font-family: 'SF Mono', Monaco, monospace;
+	}
+
+	.text-input:focus,
+	.color-value:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+
+	.hint {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		font-style: italic;
+	}
+
+	select {
+		width: 100%;
+		padding: 0.75rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		font-size: 0.9375rem;
+		color: #374151;
+		background: white;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	select:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+</style>

@@ -51,7 +51,7 @@
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 	const heroBlocks = ['heroVideo', 'imageHero'];
 
-	// ✅ NIEUW: Helper functie voor heading levels
+	// ✅ Helper functie voor heading levels
 	function getHeadingLevel(type: string): number | undefined {
 		if (type === 'heading') return 2;
 		if (type === 'subheading') return 4;
@@ -60,6 +60,21 @@
 	}
 
 	const headingLevel = $derived(getHeadingLevel(block.type));
+
+	// ✅ NIEUW: Bepaal wrapper class (inclusief textframe width)
+	const wrapperClass = $derived(() => {
+		// Standaard wide blocks
+		if (wideBlocks.includes(block.type)) {
+			return 'wrapper-wide';
+		}
+
+		// ✅ TextFrame: check width property ('narrow' | 'wide')
+		if (block.type === 'textframe') {
+			return block.content?.width === 'wide' ? 'wrapper-wide' : 'wrapper-standard';
+		}
+
+		return 'wrapper-standard';
+	});
 </script>
 
 {#if noWrapperBlocks.includes(block.type)}
@@ -69,7 +84,7 @@
 		<div id="content-start"></div>
 	{/if}
 {:else}
-	<div class={wideBlocks.includes(block.type) ? 'wrapper-wide' : 'wrapper-standard'}>
+	<div class={wrapperClass()}>
 		<ComponentToRender {...block.content} level={headingLevel} />
 	</div>
 {/if}

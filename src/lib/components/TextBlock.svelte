@@ -5,21 +5,43 @@
 
 	let { text, isLead = false }: TextBlockContent = $props();
 
-	// ✅ FIX: Gebruik walkTokens voor preprocessing
+	// ✅ Configure Marked with ALL features
 	marked.use({
-		walkTokens(token) {
-			// Converteer __text__ naar <u>text</u>
-			if (token.type === 'text' && typeof token.text === 'string') {
-				token.text = token.text.replace(/__([^_]+)__/g, '<u>$1</u>');
-			}
-		}
+		gfm: true, // ✅ GitHub Flavored Markdown
+		breaks: true, // ✅ Line breaks
+		async: false // ✅ Force synchronous parsing
 	});
 
-	const htmlContent = $derived(marked.parse(text[0] || '', { breaks: true }));
+	// ✅ PREPROCESSING: Convert custom syntax BEFORE marked parses
+	function preprocessMarkdown(md: string): string {
+		return (
+			md
+				// __text__ → underline (must be before marked parses it as bold)
+				.replace(/__([^_]+)__/g, '{{U}}$1{{/U}}')
+				// ~~text~~ is already handled by GFM, but we ensure it works
+				.replace(/~~([^~]+)~~/g, '{{DEL}}$1{{/DEL}}')
+		);
+	}
+
+	// ✅ POSTPROCESSING: Convert custom tokens to HTML tags
+	function postprocessHtml(html: string): string {
+		return html
+			.replace(/\{\{U\}\}/g, '<u>')
+			.replace(/\{\{\/U\}\}/g, '</u>')
+			.replace(/\{\{DEL\}\}/g, '<del>')
+			.replace(/\{\{\/DEL\}\}/g, '</del>');
+	}
+
+	// ✅ Parse with pre/postprocessing
+	const htmlContent = $derived(() => {
+		const preprocessed = preprocessMarkdown(text[0] || '');
+		const parsed = marked.parse(preprocessed, { breaks: true }) as string;
+		return postprocessHtml(parsed);
+	});
 </script>
 
 <div class="textblock" class:is-lead={isLead}>
-	{@html htmlContent}
+	{@html htmlContent()}
 </div>
 
 <style>
@@ -55,11 +77,20 @@
 		color: var(--text-italic-color, inherit);
 	}
 
+	/* ✅ UNDERLINE STYLING */
 	.textblock :global(u) {
 		text-decoration: var(--text-underline-style, underline);
 		text-decoration-color: var(--text-underline-color, currentColor);
 		text-decoration-thickness: var(--text-underline-thickness, 1px);
 		text-underline-offset: var(--text-underline-offset, 2px);
+	}
+
+	/* ✅ STRIKETHROUGH STYLING */
+	.textblock :global(del) {
+		text-decoration: line-through;
+		text-decoration-color: var(--text-strikethrough-color, currentColor);
+		text-decoration-thickness: var(--text-strikethrough-thickness, 1px);
+		opacity: 0.7;
 	}
 
 	.textblock :global(a) {
@@ -75,6 +106,7 @@
 		text-decoration: var(--text-link-hover-decoration, none);
 	}
 
+	/* ✅ LISTS */
 	.textblock :global(ul),
 	.textblock :global(ol) {
 		margin: 0.5em 0;
@@ -85,6 +117,7 @@
 		margin: 0.25em 0;
 	}
 
+	/* ✅ BLOCKQUOTES */
 	.textblock :global(blockquote) {
 		margin: 1em 0;
 		padding-left: 1em;
@@ -93,6 +126,7 @@
 		font-style: italic;
 	}
 
+	/* ✅ CODE */
 	.textblock :global(code) {
 		background: var(--color-background-light, #f3f4f6);
 		padding: 0.125em 0.25em;
