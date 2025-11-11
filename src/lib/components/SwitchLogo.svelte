@@ -1,30 +1,57 @@
-<!--src\lib\components\SwitchLogo.svelte-->
+<!-- src/lib/components/SwitchLogo.svelte -->
 <script lang="ts">
-	import dgLogo from '$lib/assets/dgLogo-dia.svg';
-	import bdLogo from '$lib/assets/bdLogo-dia.svg';
-	import adLogo from '$lib/assets/adLogo-dia.svg';
-	import edLogo from '$lib/assets/edLogo-dia.svg';
-	import tubLogo from '$lib/assets/tubLogo-dia.svg';
-	import dsLogo from '$lib/assets/dsLogo-dia.svg';
-	import bndsLogo from '$lib/assets/bndsLogo-dia.svg';
-	import pzcLogo from '$lib/assets/pzcLogo-dia.svg';
+	// ✅ Import BEIDE varianten
+	import dgLogoDia from '$lib/assets/dgLogo-dia.svg';
+	import bdLogoDia from '$lib/assets/bdLogo-dia.svg';
+	import adLogoDia from '$lib/assets/adLogo-dia.svg';
+	import edLogoDia from '$lib/assets/edLogo-dia.svg';
+	import tubLogoDia from '$lib/assets/tubLogo-dia.svg';
+	import dsLogoDia from '$lib/assets/dsLogo-dia.svg';
+	import bndsLogoDia from '$lib/assets/bndsLogo-dia.svg';
+	import pzcLogoDia from '$lib/assets/pzcLogo-dia.svg';
 
-	const logoMap: Record<string, string> = {
-		'www.gelderlander.nl': dgLogo,
-		'www.bd.nl': bdLogo,
-		'www.ad.nl': adLogo,
-		'www.ed.nl': edLogo,
-		'www.tubantia.nl': tubLogo,
-		'www.destentor.nl': dsLogo,
-		'www.bndestem.nl': bndsLogo,
-		'www.pzc.nl': pzcLogo,
-		localhost: dgLogo
+	import dgLogoColor from '$lib/assets/dgLogo-color.svg';
+	import bdLogoColor from '$lib/assets/bdLogo-color.svg';
+	import adLogoColor from '$lib/assets/adLogo-color.svg';
+	import edLogoColor from '$lib/assets/edLogo-color.svg';
+	import tubLogoColor from '$lib/assets/tubLogo-color.svg';
+	import dsLogoColor from '$lib/assets/dsLogo-color.svg';
+	import bndsLogoColor from '$lib/assets/bndsLogo-color.svg';
+	import pzcLogoColor from '$lib/assets/pzcLogo-color.svg';
+
+	let { variant = 'dia' } = $props<{
+		variant?: 'color' | 'dia';
+	}>();
+
+	const logoMapDia: Record<string, string> = {
+		'www.gelderlander.nl': dgLogoDia,
+		'www.bd.nl': bdLogoDia,
+		'www.ad.nl': adLogoDia,
+		'www.ed.nl': edLogoDia,
+		'www.tubantia.nl': tubLogoDia,
+		'www.destentor.nl': dsLogoDia,
+		'www.bndestem.nl': bndsLogoDia,
+		'www.pzc.nl': pzcLogoDia,
+		localhost: dgLogoDia
+	};
+
+	const logoMapColor: Record<string, string> = {
+		'www.gelderlander.nl': dgLogoColor,
+		'www.bd.nl': bdLogoColor,
+		'www.ad.nl': adLogoColor,
+		'www.ed.nl': edLogoColor,
+		'www.tubantia.nl': tubLogoColor,
+		'www.destentor.nl': dsLogoColor,
+		'www.bndestem.nl': bndsLogoColor,
+		'www.pzc.nl': pzcLogoColor,
+		localhost: dgLogoColor
 	};
 
 	let logoSrc = $state<string | undefined>(undefined);
 
 	$effect(() => {
 		const currentHost = window.location.hostname;
+		const logoMap = variant === 'color' ? logoMapColor : logoMapDia;
 		logoSrc = logoMap[currentHost];
 	});
 </script>
@@ -43,10 +70,9 @@
 </div>
 
 <style>
-	/* De padding en border zijn weg, de rest is hetzelfde */
 	.logo-container {
 		text-align: center;
-		margin-bottom: var(--space-l); /* Zorgt voor ruimte tussen logo en colofon-items */
+		margin-bottom: var(--space-l);
 	}
 
 	.logo-container img {

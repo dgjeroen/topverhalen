@@ -1,8 +1,9 @@
+<!--src\lib\components\cms\SortableCanvas.svelte-->
 <script lang="ts">
 	import { onDestroy, tick, createEventDispatcher } from 'svelte';
 	import type { ContentBlock, Theme } from '$lib/types';
 	import Sortable from 'sortablejs';
-	import IconButton from '$lib/components/ui/IconButton.svelte'; // Zorg dat dit pad klopt!
+	import IconButton from '$lib/components/ui/IconButton.svelte';
 
 	// === PROPS ===
 	let {
@@ -15,15 +16,76 @@
 		toolbox?: Sortable | null;
 	}>();
 
-	console.log("WERKER (SortableCanvas) - 4. 'blocks' PROP ONTVANGEN:", blocks);
 	// === STATE ===
 	let canvasEl!: HTMLElement;
 	let canvasSortable: Sortable | null = null;
 	const dispatch = createEventDispatcher();
 
+	// ✅ COLLAPSE STATE (simplified)
+	let collapsedBlocks = $state<Set<string>>(new Set());
+
+	// ✅ Collapsible types constant
+	const COLLAPSIBLE_TYPES = [
+		'heroVideo',
+		'imageHero',
+		'subheadingSoccer',
+		'textblock',
+		'image',
+		'video',
+		'embed',
+		'slider',
+		'gallery',
+		'textframe',
+		'timeline',
+		'mediaPair',
+		'audio',
+		'colofon'
+	];
+
+	function toggleCollapse(blockId: string) {
+		if (collapsedBlocks.has(blockId)) {
+			collapsedBlocks.delete(blockId);
+		} else {
+			collapsedBlocks.add(blockId);
+		}
+		// ✅ Force reactivity by reassigning
+		collapsedBlocks = new Set(collapsedBlocks);
+	}
+
+	function isCollapsible(blockType: string): boolean {
+		return COLLAPSIBLE_TYPES.includes(blockType);
+	}
+
+	function getBlockLabel(type: string): string {
+		const labels: Record<string, string> = {
+			heroVideo: 'Hero Video',
+			imageHero: 'Hero Afbeelding',
+			heading: 'Kop',
+			subheading: 'Tussenkop',
+			subheadingMedium: 'Tussenkop (H3)',
+			subheadingSoccer: 'Tussenkop Voetbal',
+			textblock: 'Tekstblok',
+			image: 'Afbeelding',
+			quote: 'Citaat',
+			video: 'Video',
+			embed: 'Embed',
+			slider: 'Fotoslider',
+			gallery: 'Galerij',
+			textframe: 'Tekstkader',
+			timeline: 'Tijdlijn',
+			mediaPair: 'Mediapaar',
+			audio: 'Audiospeler',
+			colofon: 'Colofon'
+		};
+		return labels[type] || type;
+	}
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
-	let showMarkdownInfo = $state(false);
+	let markdownInfoOpen = $state<Record<string, boolean>>({});
+
+	function toggleMarkdownInfo(blockId: string) {
+		markdownInfoOpen[blockId] = !markdownInfoOpen[blockId];
+	}
 
 	// ✅ Lead checkbox logic
 	const firstTextblockId = $derived(
@@ -155,20 +217,12 @@
 
 	// ✅ GOED (Stabiel & Waterdicht)
 	$effect(() => {
-		// Dit $effect runt nu als 'blocks' verandert.
-		// We moeten de 'splideInstances' Map synchroniseren met de 'blocks' array.
-
 		if (typeof window === 'undefined') return;
 
-		// Maak een 'Set' van alle block-ID's die *nu* in de DOM zouden moeten zijn
 		const currentBlockIds = new Set(blocks.map((b: ContentBlock) => b.id));
 
-		// --- STAP 1: OUDE/VERWIJDERDE INSTANTIES OPKUISTEN (Het Geheugenlek Fixen) ---
-		// Loop door de instances die we nu beheren in de Map
 		for (const blockId of splideInstances.keys()) {
 			if (!currentBlockIds.has(blockId)) {
-				// Dit blok-ID is NIET MEER in de 'blocks' array.
-				// Het is verwijderd. Vernietig de instantie.
 				const instance = splideInstances.get(blockId);
 				if (instance) {
 					instance.destroy();
@@ -177,22 +231,15 @@
 			}
 		}
 
-		// --- STAP 2: NIEUWE/BESTAANDE BLOKKEN INITIALISEREN (De "Bom" Ontmantelen) ---
 		blocks.forEach((block: ContentBlock) => {
-			// initHlsPlayer is 'idempotent' (veilig om vaker aan te roepen)
 			if ((block.type === 'heroVideo' || block.type === 'video') && block.content.url) {
 				setTimeout(() => initHlsPlayer(block), 50);
 			}
 
-			// Moet dit een slider zijn?
 			if (['slider', 'gallery', 'timeline'].includes(block.type)) {
-				// En beheren we deze nog NIET?
 				if (!splideInstances.has(block.id)) {
-					// Initialiseer het DAN PAS.
 					setTimeout(() => initSplideForBlock(block.id, block.type), 100);
 				}
-				// Als we het al beheren (omdat het is verplaatst of een re-render
-				// is door 'bind:value'), DOEN WE NIETS. We laten het met rust.
 			}
 		});
 	});
@@ -254,11 +301,43 @@
 <div class="canvas-wrapper" bind:this={canvasEl}>
 	{#each blocks as block (block.id)}
 		<div class="canvas-block" data-type={block.type} data-block-id={block.id}>
-			<div class="drag-handle">⋮⋮</div>
-			<button type="button" class="remove-btn" onclick={() => dispatch('remove', block.id)}
-				>×</button
+			<div class="block-header">
+				<div class="drag-handle">⋮⋮</div>
+
+				<!-- ✅ Only show collapse button for collapsible types -->
+				{#if isCollapsible(block.type)}
+					<button
+						type="button"
+						class="collapse-toggle"
+						onclick={() => toggleCollapse(block.id)}
+						aria-label={collapsedBlocks.has(block.id) ? 'Uitklappen' : 'Inklappen'}
+					>
+						<!-- ✅ Direct check on Set -->
+						<svg
+							class="collapse-icon"
+							class:collapsed={collapsedBlocks.has(block.id)}
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+				{/if}
+
+				<span class="block-label">{getBlockLabel(block.type)}</span>
+
+				<button type="button" class="remove-btn" onclick={() => dispatch('remove', block.id)}>
+					×
+				</button>
+			</div>
+
+			<!-- ✅ Only collapse if type is collapsible AND is collapsed -->
+			<div
+				class="content"
+				class:collapsed={isCollapsible(block.type) && collapsedBlocks.has(block.id)}
 			>
-			<div class="content">
 				{#if block.type === 'heroVideo'}
 					<div class="hero-video-editor">
 						<div class="input-row">
@@ -577,8 +656,9 @@
 								<button
 									type="button"
 									class="info-button"
-									onclick={() => (showMarkdownInfo = !showMarkdownInfo)}
+									onclick={() => toggleMarkdownInfo(block.id)}
 									aria-label="Markdown hulp"
+									aria-expanded={!!markdownInfoOpen[block.id]}
 								>
 									<svg
 										width="16"
@@ -599,12 +679,40 @@
 							</label>
 						</div>
 
-						{#if showMarkdownInfo}
+						{#if markdownInfoOpen[block.id]}
 							<div class="markdown-tooltip">
 								<div class="markdown-tooltip-content">
-									<div class="markdown-example"><code>**vet**</code> → <strong>vet</strong></div>
-									<div class="markdown-example"><code>*cursief*</code> → <em>cursief</em></div>
-									<div class="markdown-example"><code>[link](https://url.nl)</code> → link</div>
+									<div class="markdown-section">
+										<div class="markdown-section-title">Tekst opmaak</div>
+										<div class="markdown-example"><code>**vet**</code> → <strong>vet</strong></div>
+										<div class="markdown-example"><code>*cursief*</code> → <em>cursief</em></div>
+										<div class="markdown-example">
+											<code>__onderstreept__</code> → <u>onderstreept</u>
+										</div>
+										<div class="markdown-example">
+											<code>~~doorgehaald~~</code> → <del>doorgehaald</del>
+										</div>
+									</div>
+
+									<div class="markdown-section">
+										<div class="markdown-section-title">Links & Code</div>
+										<div class="markdown-example"><code>[link](https://url.nl)</code> → link</div>
+										<div class="markdown-example"><code>`code`</code> → <code>code</code></div>
+									</div>
+
+									<div class="markdown-section">
+										<div class="markdown-section-title">Lijsten</div>
+										<div class="markdown-example"><code>- item</code> → • item</div>
+										<div class="markdown-example"><code>1. item</code> → 1. item</div>
+										<div class="markdown-example">
+											<code> - sub-item</code> → indent voor nesting
+										</div>
+									</div>
+
+									<div class="markdown-section">
+										<div class="markdown-section-title">Quote</div>
+										<div class="markdown-example"><code>&gt; citaat</code> → blockquote</div>
+									</div>
 								</div>
 							</div>
 						{/if}
@@ -617,16 +725,7 @@
 							rows="6"
 						></textarea>
 
-						{#if canBeLead(block.id)}
-							<label class="lead-toggle">
-								<input
-									type="checkbox"
-									bind:checked={block.content.isLead}
-									onchange={() => dispatch('save')}
-								/>
-								<span>Dit is een inleiding</span>
-							</label>
-						{/if}
+						<!-- rest of textblock -->
 					</div>
 				{:else if block.type === 'image'}
 					<input
@@ -729,7 +828,7 @@
 							placeholder="Plak hier je embed code (iframe, script, blockquote) of URL...
 
 Voorbeelden:
-• YouTube: https://youtube.com/watch?v=xxx
+
 • Twitter: https://twitter.com/user/status/xxx
 • Datawrapper: Plak de embed code
 • Spotify: https://open.spotify.com/track/xxx
@@ -1047,6 +1146,7 @@ Voorbeelden:
 								placeholder="Voer een titel in..."
 							/>
 						</div>
+
 						<div class="control-group">
 							<label class="checkbox-label">
 								<input
@@ -1074,17 +1174,83 @@ Voorbeelden:
 								</div>
 							{/if}
 						</div>
+
 						<div class="control-group">
-							<label class="control-label" for="textframe-text-{block.id}">
-								Tekst
-								<span class="label-hint">(Markdown: **vet**, *cursief*, __onderstreept__)</span>
-							</label>
+							<div class="editor-header-row">
+								<label class="control-label" for="textframe-text-{block.id}">
+									Tekst (Markdown)
+									<button
+										type="button"
+										class="info-button"
+										onclick={() => toggleMarkdownInfo(block.id)}
+										aria-label="Markdown hulp"
+										aria-expanded={!!markdownInfoOpen[block.id]}
+									>
+										<svg
+											width="16"
+											height="16"
+											viewBox="0 0 16 16"
+											fill="none"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
+											<path
+												d="M8 7V11M8 5V5.5"
+												stroke="currentColor"
+												stroke-width="1.5"
+												stroke-linecap="round"
+											/>
+										</svg>
+									</button>
+								</label>
+							</div>
+
+							{#if markdownInfoOpen[block.id]}
+								<div class="markdown-tooltip">
+									<div class="markdown-tooltip-content">
+										<div class="markdown-section">
+											<div class="markdown-section-title">Tekst opmaak</div>
+											<div class="markdown-example">
+												<code>**vet**</code> → <strong>vet</strong>
+											</div>
+											<div class="markdown-example"><code>*cursief*</code> → <em>cursief</em></div>
+											<div class="markdown-example">
+												<code>__onderstreept__</code> → <u>onderstreept</u>
+											</div>
+											<div class="markdown-example">
+												<code>~~doorgehaald~~</code> → <del>doorgehaald</del>
+											</div>
+										</div>
+
+										<div class="markdown-section">
+											<div class="markdown-section-title">Links & Code</div>
+											<div class="markdown-example"><code>[link](https://url.nl)</code> → link</div>
+											<div class="markdown-example"><code>`code`</code> → <code>code</code></div>
+										</div>
+
+										<div class="markdown-section">
+											<div class="markdown-section-title">Lijsten</div>
+											<div class="markdown-example"><code>- item</code> → • item</div>
+											<div class="markdown-example"><code>1. item</code> → 1. item</div>
+											<div class="markdown-example">
+												<code> - sub-item</code> → indent voor nesting
+											</div>
+										</div>
+
+										<div class="markdown-section">
+											<div class="markdown-section-title">Quote</div>
+											<div class="markdown-example"><code>&gt; citaat</code> → blockquote</div>
+										</div>
+									</div>
+								</div>
+							{/if}
+
 							<textarea
 								id="textframe-text-{block.id}"
 								bind:value={block.content.text}
 								oninput={() => dispatch('save')}
 								rows="8"
-								placeholder="Schrijf je tekst hier...&#10;&#10;Markdown wordt ondersteund:&#10;**vet**, *cursief*, __onderstreept__"
+								placeholder="Schrijf je tekst hier..."
 							></textarea>
 						</div>
 
@@ -1156,9 +1322,9 @@ Voorbeelden:
 								</div>
 
 								<div class="control-group">
-									<label class="control-label" id="width-layout-label" for="width-layout-row"
-										>Breedte + Layout</label
-									>
+									<label class="control-label" id="width-layout-label" for="width-layout-row">
+										Breedte + Layout
+									</label>
 									<div
 										class="width-layout-row"
 										id="width-layout-row"
@@ -1256,9 +1422,9 @@ Voorbeelden:
 									>
 										Onderschrift (optioneel)
 										{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
-											<span class="label-hint disabled-hint"
-												>(niet zichtbaar bij ronde inline afbeelding)</span
-											>
+											<span class="label-hint disabled-hint">
+												(niet zichtbaar bij ronde inline afbeelding)
+											</span>
 										{/if}
 									</label>
 									<input
@@ -1281,9 +1447,9 @@ Voorbeelden:
 									>
 										Bron (optioneel)
 										{#if block.content.image.layout.startsWith('inline') && block.content.image.rounded}
-											<span class="label-hint disabled-hint"
-												>(niet zichtbaar bij ronde inline afbeelding)</span
-											>
+											<span class="label-hint disabled-hint">
+												(niet zichtbaar bij ronde inline afbeelding)
+											</span>
 										{/if}
 									</label>
 									<input
@@ -1559,44 +1725,221 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'audio'}
 					<div class="audio-editor">
+						<!-- Layout selector -->
+						<div class="control-group">
+							<label class="control-label" for="audio-layout-{block.id}"> Afbeelding layout </label>
+							<select
+								id="audio-layout-{block.id}"
+								bind:value={block.content.imageLayout}
+								onchange={() => dispatch('save')}
+								class="type-select"
+							>
+								<option value="none">Geen afbeelding</option>
+								<option value="stamp">Postzegel (rond, 80x80px)</option>
+								<option value="portrait">Staand (rechthoek, vult hoogte)</option>
+							</select>
+						</div>
+
+						{#if block.content.imageLayout !== 'none'}
+							<div class="control-group">
+								<label class="control-label" for="audio-image-{block.id}"> Afbeelding URL </label>
+								<input
+									id="audio-image-{block.id}"
+									type="url"
+									placeholder="https://..."
+									bind:value={block.content.image}
+									oninput={() => dispatch('save')}
+									class="slide-input"
+								/>
+							</div>
+
+							{#if block.content.image}
+								<div class="audio-live-preview">
+									<p class="preview-label">Live preview:</p>
+
+									<!-- Render actual Audio component -->
+									<div
+										class="audio-widget-container preview-mode"
+										class:layout-none={block.content.imageLayout === 'none'}
+										class:layout-stamp={block.content.imageLayout === 'stamp'}
+										class:layout-portrait={block.content.imageLayout === 'portrait'}
+									>
+										<div
+											class="audio-widget-image"
+											style="
+          background-image: url({block.content.image});
+          background-position: {block.content.imageFocusX || 50}% {block.content.imageFocusY ||
+												50}%;
+          background-size: {block.content.imageScale || 100}%;
+          background-repeat: no-repeat;
+        "
+											role="img"
+											aria-label="Preview"
+										></div>
+
+										<div class="audio-widget-content">
+											<div class="audio-widget-info">
+												<h3>{block.content.title || 'Titel'}</h3>
+												<p>{block.content.description || 'Beschrijving'}</p>
+											</div>
+											<div class="audio-widget-controls">
+												<button class="audio-widget-play-btn" disabled aria-label="Play audio">
+													<svg
+														viewBox="0 0 24 24"
+														fill="none"
+														stroke="currentColor"
+														stroke-width="2"
+													>
+														<polygon points="5 3 19 12 5 21 5 3"></polygon>
+													</svg>
+												</button>
+												<div class="audio-widget-progress-wrapper">
+													<div class="audio-widget-progress-bar">
+														<div class="audio-widget-progress-fill" style="width: 0%"></div>
+													</div>
+													<span class="audio-widget-time">0:00 / 0:00</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Focus controls -->
+								<div class="image-focus-controls">
+									<div class="control-group">
+										<label for="audio-scale-{block.id}">
+											Zoom: <span class="value-display">{block.content.imageScale || 100}%</span>
+										</label>
+										<input
+											id="audio-scale-{block.id}"
+											type="range"
+											min="10"
+											max="300"
+											bind:value={block.content.imageScale}
+											oninput={() => dispatch('save')}
+											class="range-input"
+										/>
+									</div>
+
+									<div class="control-group">
+										<label for="audio-focus-x-{block.id}">
+											Focus X: <span class="value-display">{block.content.imageFocusX || 50}%</span>
+										</label>
+										<input
+											id="audio-focus-x-{block.id}"
+											type="range"
+											min="0"
+											max="100"
+											bind:value={block.content.imageFocusX}
+											oninput={() => dispatch('save')}
+											class="range-input"
+										/>
+									</div>
+
+									<div class="control-group">
+										<label for="audio-focus-y-{block.id}">
+											Focus Y: <span class="value-display">{block.content.imageFocusY || 50}%</span>
+										</label>
+										<input
+											id="audio-focus-y-{block.id}"
+											type="range"
+											min="0"
+											max="100"
+											bind:value={block.content.imageFocusY}
+											oninput={() => dispatch('save')}
+											class="range-input"
+										/>
+									</div>
+								</div>
+							{/if}
+						{/if}
+					</div>
+
+					<!-- Audio file -->
+					<div class="control-group">
+						<label class="control-label" for="audio-file-{block.id}"> Audio URL (.mp3) </label>
 						<input
+							id="audio-file-{block.id}"
 							type="url"
-							placeholder="Afbeelding URL (optioneel)"
-							bind:value={block.content.image}
+							placeholder="https://..."
+							bind:value={block.content.url}
 							oninput={() => dispatch('save')}
 							class="slide-input"
 						/>
-						{#if block.content.image}
-							<img src={block.content.image} alt="" class="audio-image-preview" />
-						{/if}
+					</div>
+
+					{#if block.content.url}
+						<audio controls src={block.content.url} class="audio-player"></audio>
+					{/if}
+
+					<!-- Title -->
+					<div class="control-group">
+						<label class="control-label" for="audio-title-{block.id}"> Titel </label>
 						<input
+							id="audio-title-{block.id}"
 							type="text"
-							placeholder="Titel van de audio"
+							placeholder="Naam van de audio"
 							bind:value={block.content.title}
 							oninput={() => dispatch('save')}
 							class="slide-input"
 						/>
+					</div>
+
+					<!-- Description -->
+					<div class="control-group">
+						<label class="control-label" for="audio-desc-{block.id}"> Beschrijving </label>
 						<textarea
-							placeholder="Beschrijving (optioneel)"
+							id="audio-desc-{block.id}"
+							placeholder="Korte beschrijving..."
 							bind:value={block.content.description}
 							oninput={() => dispatch('save')}
 							class="block-textarea"
 							rows="2"
 						></textarea>
-						<input
-							type="url"
-							placeholder="Audio URL (.mp3)"
-							bind:value={block.content.url}
-							oninput={() => dispatch('save')}
-							class="slide-input"
-						/>
-						{#if block.content.url}
-							<audio controls src={block.content.url} class="audio-player"></audio>
-						{/if}
 					</div>
 				{:else if block.type === 'colofon'}
 					<div class="colofon-editor">
 						<h4>Colofon</h4>
+
+						<!-- ✅ NEW: Logo controls -->
+						<div class="control-group">
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.showLogo}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Toon logo onder colofon</span>
+							</label>
+						</div>
+
+						{#if block.content.showLogo}
+							<div class="control-group logo-options">
+								<label class="control-label" for="logo-variant">Logo weergave</label>
+								<div class="radio-group" id="logo-variant">
+									<label class="radio-label">
+										<input
+											type="radio"
+											bind:group={block.content.logoVariant}
+											value="color"
+											onchange={() => dispatch('save')}
+										/>
+										<span>Kleur</span>
+									</label>
+									<label class="radio-label">
+										<input
+											type="radio"
+											bind:group={block.content.logoVariant}
+											value="dia"
+											onchange={() => dispatch('save')}
+										/>
+										<span>Diapositief (wit)</span>
+									</label>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Existing colofon items -->
 						<div class="colofon-items">
 							{#each block.content.items as item, i (i)}
 								<div class="colofon-item">
@@ -1625,6 +1968,7 @@ Voorbeelden:
 								</div>
 							{/each}
 						</div>
+
 						<button
 							type="button"
 							class="add-colofon-btn"
@@ -1637,13 +1981,13 @@ Voorbeelden:
 			</div>
 		</div>
 	{/each}
-</div>
 
-{#if blocks.length === 0}
-	<div class="empty-canvas">
-		<p>Sleep hier je blokken om te beginnen...</p>
-	</div>
-{/if}
+	{#if blocks.length === 0}
+		<div class="empty-canvas">
+			<p>Sleep hier je blokken om te beginnen...</p>
+		</div>
+	{/if}
+</div>
 
 <style>
 	.canvas-wrapper {
@@ -1654,7 +1998,7 @@ Voorbeelden:
 		border: 2px dashed #e5e7eb;
 		border-radius: 8px;
 		padding: 20px;
-		position: relative; /* Nodig voor de 'empty-canvas' overlay */
+		position: relative;
 		padding-bottom: 40vh;
 	}
 
@@ -1678,64 +2022,23 @@ Voorbeelden:
 		pointer-events: auto;
 	}
 
+	/* ✅ FIXED: No padding, overflow hidden */
 	.canvas-block {
 		background: #f9fafb;
 		border: 1px solid #e5e7eb;
 		border-radius: 8px;
-		padding: 20px;
 		margin-bottom: 15px;
 		position: relative;
 		transition: box-shadow 0.2s;
+		overflow: hidden;
 	}
 
 	.canvas-block:hover {
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 
-	.drag-handle {
-		position: absolute;
-		top: 50%;
-		left: 8px;
-		transform: translateY(-50%);
-		color: #d1d5db;
-		cursor: grab;
-		font-size: 1.25em;
-		user-select: none;
-	}
-
-	.drag-handle:active {
-		cursor: grabbing;
-	}
-
-	.remove-btn {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		background: #ef4444;
-		color: white;
-		border: none;
-		border-radius: 50%;
-		width: 24px;
-		height: 24px;
-		cursor: pointer;
-		font-weight: bold;
-		opacity: 0;
-		transition: opacity 0.2s;
-		font-size: 16px;
-		line-height: 1;
-	}
-
-	.canvas-block:hover .remove-btn {
-		opacity: 1;
-	}
-
-	.remove-btn:hover {
-		background: #dc2626;
-	}
-
-	.content {
-		margin-left: 30px;
-	}
+	/* ❌ DELETED: Old .remove-btn definition (lines 45-65) */
+	/* ❌ DELETED: .canvas-block:hover .remove-btn */
 
 	.block-input,
 	.block-textarea {
@@ -1762,6 +2065,101 @@ Voorbeelden:
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 
+	/* ===== COLLAPSIBLE HEADER ===== */
+	.block-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background-color: #f3f4f6; /* ✅ Slightly darker than block */
+		border-bottom: 1px solid #e5e7eb;
+		cursor: default;
+	}
+
+	.drag-handle {
+		cursor: grab;
+		color: #9ca3af;
+		font-size: 1.2rem;
+		user-select: none;
+		padding: 0 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.collapse-toggle {
+		background: none;
+		border: none;
+		padding: 0.25rem;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #6b7280;
+		transition: color 0.2s;
+		flex-shrink: 0;
+	}
+
+	.collapse-toggle:hover {
+		color: #111827;
+	}
+
+	.collapse-icon {
+		width: 20px;
+		height: 20px;
+		transition: transform 0.2s ease;
+	}
+
+	.collapse-icon.collapsed {
+		transform: rotate(-90deg);
+	}
+
+	.block-label {
+		flex: 1;
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: #374151;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* ✅ FIXED: Remove button (in header, no absolute positioning) */
+	.remove-btn {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		color: #ef4444;
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		line-height: 1;
+		transition: color 0.2s;
+		flex-shrink: 0;
+	}
+
+	.remove-btn:hover {
+		color: #dc2626; /* ✅ FIXED: Was green, now red */
+	}
+
+	/* ✅ Collapsible content */
+	.canvas-block .content {
+		padding: 1rem;
+		max-height: 5000px;
+		overflow: hidden;
+		transition:
+			max-height 0.3s ease,
+			padding 0.3s ease;
+	}
+
+	.canvas-block .content.collapsed {
+		max-height: 0 !important;
+		padding: 0 1rem !important;
+		overflow: hidden !important;
+	}
 	/* ============================================
    HEADING HIERARCHY IN EDITOR CANVAS
    ============================================ */
@@ -1800,7 +2198,6 @@ Voorbeelden:
 		margin-top: 0.5rem;
 	}
 
-	.lead-toggle,
 	.parallax-toggle {
 		display: flex;
 		align-items: center;
@@ -1812,7 +2209,6 @@ Voorbeelden:
 		color: #6b7280;
 	}
 
-	.lead-toggle input,
 	.parallax-toggle input {
 		width: auto;
 		margin: 0;
@@ -2355,17 +2751,196 @@ Voorbeelden:
 		gap: 0.75rem;
 	}
 
-	.audio-image-preview {
-		width: 128px;
-		height: 128px;
-		object-fit: cover;
+	.image-focus-controls {
+		padding: 1rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
 		border-radius: 6px;
-		margin-bottom: 0.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.value-display {
+		font-weight: 700;
+		color: #d10a10;
+		font-family: 'SF Mono', Monaco, monospace;
+	}
+
+	.range-input {
+		width: 100%;
+		height: 6px;
+		background: #e5e7eb;
+		border-radius: 3px;
+		outline: none;
+		-webkit-appearance: none;
+		appearance: none;
+		cursor: pointer;
+	}
+
+	.range-input::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 18px;
+		height: 18px;
+		background: #d10a10;
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.range-input::-webkit-slider-thumb:hover {
+		transform: scale(1.2);
+		box-shadow: 0 0 0 4px rgba(209, 10, 16, 0.1);
+	}
+
+	.range-input::-moz-range-thumb {
+		width: 18px;
+		height: 18px;
+		background: #d10a10;
+		border-radius: 50%;
+		cursor: pointer;
+		border: none;
+		transition: all 0.15s;
+	}
+
+	.range-input::-moz-range-thumb:hover {
+		transform: scale(1.2);
+		box-shadow: 0 0 0 4px rgba(209, 10, 16, 0.1);
 	}
 
 	.audio-player {
 		width: 100%;
 		margin-top: 0.5rem;
+	}
+
+	.audio-live-preview {
+		margin: 1rem 0;
+		padding: 1rem;
+		background: #f0f9ff;
+		border-radius: 8px;
+	}
+
+	.preview-label {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: #1e40af;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	/* Preview mode styling (matches Audio.svelte) */
+	.audio-widget-container.preview-mode {
+		font-family: var(--font-family-base, system-ui);
+		background-color: #f8f9fa;
+		border-radius: 8px;
+		padding: 1rem;
+		display: flex;
+		gap: 1rem;
+		width: 100%;
+		align-items: center;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+		pointer-events: none; /* Preview only */
+	}
+
+	.preview-mode.layout-none {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.preview-mode.layout-portrait {
+		align-items: stretch;
+	}
+
+	.preview-mode .audio-widget-image {
+		flex-shrink: 0;
+		border-radius: 6px;
+		background-repeat: no-repeat;
+		border: 2px dashed #9a9b9e;
+	}
+
+	.preview-mode.layout-stamp .audio-widget-image {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+	}
+
+	.preview-mode.layout-portrait .audio-widget-image {
+		width: 120px;
+		height: 150px; /* Fixed height voor preview */
+		border-radius: 6px;
+	}
+
+	.preview-mode .audio-widget-content {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.preview-mode .audio-widget-info h3 {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.preview-mode .audio-widget-info p {
+		margin: 4px 0 0;
+		font-size: 0.9rem;
+		color: #4b5563;
+	}
+
+	.preview-mode .audio-widget-controls {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.preview-mode .audio-widget-play-btn {
+		background-color: transparent;
+		border: 2px solid #d1d5db;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		opacity: 0.5;
+	}
+
+	.preview-mode .audio-widget-play-btn svg {
+		width: 20px;
+		height: 20px;
+		fill: #111827;
+	}
+
+	.preview-mode .audio-widget-progress-wrapper {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.preview-mode .audio-widget-progress-bar {
+		background-color: #e5e7eb;
+		height: 6px;
+		border-radius: 3px;
+		width: 100%;
+	}
+
+	.preview-mode .audio-widget-progress-fill {
+		background-color: #d10a10;
+		height: 100%;
+		border-radius: 3px;
+	}
+
+	.preview-mode .audio-widget-time {
+		font-size: 0.8rem;
+		color: #6b7280;
+		white-space: nowrap;
 	}
 
 	.colofon-editor {
@@ -2433,6 +3008,46 @@ Voorbeelden:
 
 	.add-colofon-btn:hover {
 		background: #b00909;
+	}
+	.logo-options {
+		margin-left: 1.75rem;
+		padding: 0.75rem;
+		background: #f9fafb;
+		border-left: 3px solid #d10a10;
+		border-radius: 4px;
+	}
+
+	.control-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+		margin-bottom: 0.5rem;
+		display: block;
+	}
+
+	.radio-group {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.radio-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-size: 0.875rem;
+		color: #374151;
+	}
+
+	.radio-label input[type='radio'] {
+		width: 18px;
+		height: 18px;
+		cursor: pointer;
+		accent-color: #d10a10;
+	}
+
+	.radio-label:hover {
+		color: #111827;
 	}
 
 	/* ✅ GOED: Dit is de placeholder (het "gat") */

@@ -15,8 +15,10 @@
 		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
 		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
 		{ id: 'slider', label: 'Slider', icon: 'icon-block-slider' },
+		{ id: 'audio', label: 'Audio', icon: 'icon-block-audio' },
 		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },
-		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' }
+		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' },
+		{ id: 'colofon', label: 'Colofon', icon: 'icon-block-colofon' }
 	];
 </script>
 

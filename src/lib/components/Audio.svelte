@@ -1,21 +1,41 @@
+<!--src\lib\components\Audio.svelte-->
 <script lang="ts">
-	import type { AudioContent } from '$lib/types'; // De runes worden NIET geimporteerd, de Svelte-compiler handelt dit af.
-	// Destructure de props direct uit de AudioContent interface
+	import type { AudioContent } from '$lib/types';
 
-	let { url, title, description, image }: AudioContent = $props(); // --- State Variabelen ---
+	let {
+		url,
+		title,
+		description,
+		image = '',
+		imageLayout = 'stamp',
+		imageScale = 100,
+		imageFocusX = 50,
+		imageFocusY = 50
+	}: AudioContent = $props();
 
 	let audioElement: HTMLAudioElement;
 	let isPlaying = $state(false);
 	let currentTime = $state(0);
 	let duration = $state(0);
-	let progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0); // --- Helper Functie voor Tijd Formatteren ---
+	let progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
+
+	// Image background style
+	const imageStyle = $derived(() => {
+		if (!image || imageLayout === 'none') return '';
+
+		return `
+      background-image: url(${image});
+      background-position: ${imageFocusX}% ${imageFocusY}%;
+      background-size: ${imageScale}%;
+    `;
+	});
 
 	function formatTime(seconds: number) {
 		if (isNaN(seconds) || seconds === 0) return '0:00';
 		const m = Math.floor(seconds / 60);
 		const s = Math.floor(seconds % 60);
 		return `${m}:${s.toString().padStart(2, '0')}`;
-	} // --- Event Handlers ---
+	}
 
 	function togglePlay() {
 		if (isPlaying) {
@@ -31,7 +51,7 @@
 		const rect = progressBar.getBoundingClientRect();
 		const percent = (event.clientX - rect.left) / rect.width;
 		audioElement.currentTime = duration * percent;
-	} // --- Svelte's Magie: Reactieve Bindingen ---
+	}
 
 	$effect(() => {
 		if (audioElement) {
@@ -44,13 +64,16 @@
 
 <audio bind:this={audioElement} bind:currentTime bind:duration src={url}></audio>
 
-<div class="audio-widget-container">
-	<div
-		class="audio-widget-image"
-		style="background-image: url({image})"
-		role="img"
-		aria-label={title}
-	></div>
+<div
+	class="audio-widget-container"
+	class:layout-none={imageLayout === 'none'}
+	class:layout-stamp={imageLayout === 'stamp'}
+	class:layout-portrait={imageLayout === 'portrait'}
+>
+	{#if image && imageLayout !== 'none'}
+		<div class="audio-widget-image" style={imageStyle()} role="img" aria-label={title}></div>
+	{/if}
+
 	<div class="audio-widget-content">
 		<div class="audio-widget-info">
 			<h3>{title}</h3>
@@ -71,9 +94,10 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"
-						></rect></svg
 					>
+						<rect x="6" y="4" width="4" height="16"></rect>
+						<rect x="14" y="4" width="4" height="16"></rect>
+					</svg>
 				{:else}
 					<svg
 						class="play-icon"
@@ -82,8 +106,10 @@
 						stroke="currentColor"
 						stroke-width="2"
 						stroke-linecap="round"
-						stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg
+						stroke-linejoin="round"
 					>
+						<polygon points="5 3 19 12 5 21 5 3"></polygon>
+					</svg>
 				{/if}
 			</button>
 			<div class="audio-widget-progress-wrapper">
@@ -107,73 +133,83 @@
 </div>
 
 <style>
-	/**
- * @component Audio
- * Een thematiseerbare audio speler die de globale stijlen volgt.
- *
- * @cssprop --audio-bg-color - De achtergrondkleur van de hele widget. Standaard: --color-background-light.
- * @cssprop --audio-accent-color - De kleur voor de progress bar. Standaard: --color-accent.
- * @cssprop --audio-text-heading - De kleur van de titel. Standaard: --color-text.
- * @cssprop --audio-text-body - De kleur van de subtitel en tijd. Standaard: --color-text-muted.
- * @cssprop --audio-border-color - De kleur van de rand van de play-knop. Standaard: --color-border.
- * @cssprop --audio-surface-color - De achtergrondkleur van de progress bar en button-hover.
- */
 	.audio-widget-container {
-		/* * DE COMPONENT STYLING API
-         * We definiëren lokale variabelen die proberen de globale 
-         * variabelen te gebruiken, met een veilige fallback voor als ze niet bestaan.
-         */
-		--_bg-color: var(--audio-bg-color, var(--color-background-light, #f3f3f3));
-		--_text-color-heading: var(--audio-text-heading, var(--color-text, #111827));
-		--_text-color-body: var(--audio-text-body, var(--color-text-muted, #4b5563));
-		--_accent-color: var(--audio-accent-color, var(--color-accent, #ef4444));
-		--_border-color: var(--audio-border-color, var(--color-border, #d1d5db));
-		--_surface-color: var(
-			--audio-surface-color,
-			#e5e7eb
-		); /* Kleur voor progress bar bg, hover, etc. */
-
-		/* Gebruik van de API in de rest van de component */
 		font-family: var(--font-family-base);
-		background-color: var(--_bg-color);
-		border-radius: var(--border-radius-base);
-		padding: var(--space-m);
+		background-color: var(--audio-bg-color, var(--color-background-light, #f8f9fa));
+		border-radius: var(--audio-border-radius, var(--border-radius-base, 8px));
+		padding: var(--audio-padding, var(--space-m, 1rem));
 		display: flex;
-		gap: var(--space-m);
+		gap: var(--audio-gap, var(--space-m, 1rem));
 		width: 100%;
+		align-items: center;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 	}
 
-	/* --- Structurele stijlen (meestal ongewijzigd) --- */
-	.audio-widget-image {
-		width: 80px;
-		border-radius: 6px; /* Kan ook een variabele worden: var(--border-radius-small, 6px) */
-		flex-shrink: 0;
-		background-size: cover;
-		background-position: center;
+	/* Layout variants */
+	.audio-widget-container.layout-none {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
 	}
+
+	.audio-widget-container.layout-none .audio-widget-info {
+		text-align: center;
+	}
+
+	.audio-widget-container.layout-portrait {
+		align-items: stretch;
+	}
+
+	/* Image */
+	.audio-widget-image {
+		flex-shrink: 0;
+		border-radius: var(--audio-image-border-radius, 6px);
+		background-repeat: no-repeat;
+		cursor: grab;
+	}
+
+	.audio-widget-image:active {
+		cursor: grabbing;
+	}
+
+	/* Stamp (rond, 80x80px) */
+	.layout-stamp .audio-widget-image {
+		width: var(--audio-image-size, 80px);
+		height: var(--audio-image-size, 80px);
+		border-radius: 50%;
+	}
+
+	/* Portrait (rechthoek, 120px breed, vult hoogte) */
+	.layout-portrait .audio-widget-image {
+		width: 120px;
+		align-self: stretch;
+		border-radius: var(--audio-image-border-radius, 6px);
+	}
+
 	.audio-widget-content {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: 8px;
 		min-width: 0;
 	}
+
 	.audio-widget-info {
 		margin-bottom: 4px;
 	}
 
-	/* --- Thematische stijlen (nu met variabelen) --- */
 	.audio-widget-info h3 {
 		margin: 0;
-		font-size: var(--font-size-m, 1.1rem);
-		font-weight: 600;
-		color: var(--_text-color-heading);
+		font-size: var(--audio-title-size, var(--font-size-m, 1.1rem));
+		font-weight: var(--audio-title-weight, 600);
+		color: var(--audio-title-color, var(--color-text, #111827));
 	}
 
 	.audio-widget-info p {
 		margin: 4px 0 0;
-		font-size: var(--font-size-s, 0.9rem);
-		color: var(--_text-color-body);
+		font-size: var(--audio-description-size, var(--font-size-s, 0.9rem));
+		color: var(--audio-description-color, var(--color-text-muted, #4b5563));
 	}
 
 	.audio-widget-controls {
@@ -184,10 +220,10 @@
 
 	.audio-widget-play-btn {
 		background-color: transparent;
-		border: 2px solid var(--_border-color);
+		border: 2px solid var(--audio-button-border-color, var(--color-border, #d1d5db));
 		border-radius: 50%;
-		width: 40px;
-		height: 40px;
+		width: var(--audio-button-size, 40px);
+		height: var(--audio-button-size, 40px);
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -196,14 +232,15 @@
 		flex-shrink: 0;
 		transition: background-color 0.2s;
 	}
+
 	.audio-widget-play-btn:hover {
-		background-color: var(--_surface-color);
+		background-color: var(--audio-button-hover-bg, #e5e7eb);
 	}
 
 	.audio-widget-play-btn svg {
 		width: 20px;
 		height: 20px;
-		fill: var(--_text-color-heading); /* SVG's stijlen we vaak met 'fill' */
+		fill: var(--audio-button-icon-color, var(--color-text, #111827));
 	}
 
 	.audio-widget-progress-wrapper {
@@ -214,22 +251,23 @@
 	}
 
 	.audio-widget-progress-bar {
-		background-color: var(--_surface-color);
-		height: 6px;
-		border-radius: 3px;
+		background-color: var(--audio-progress-bg, #e5e7eb);
+		height: var(--audio-progress-height, 6px);
+		border-radius: var(--audio-progress-border-radius, 3px);
 		width: 100%;
 		cursor: pointer;
 	}
 
 	.audio-widget-progress-fill {
-		background-color: var(--_accent-color);
+		background-color: var(--audio-progress-fill-color, #d10a10);
 		height: 100%;
-		border-radius: 3px;
+		border-radius: var(--audio-progress-border-radius, 3px);
+		transition: width 0.1s linear;
 	}
 
 	.audio-widget-time {
-		font-size: 0.8rem;
-		color: var(--_text-color-body);
+		font-size: var(--audio-time-size, 0.8rem);
+		color: var(--audio-time-color, var(--color-text-muted, #6b7280));
 		white-space: nowrap;
 	}
 </style>
