@@ -1,6 +1,8 @@
 <!-- src/lib/components/SwitchLogo.svelte -->
 <script lang="ts">
-	// ✅ Import BEIDE varianten (blijft hetzelfde)
+	import { browser } from '$app/environment'; // ✅ Import browser check
+
+	// ✅ Import BEIDE varianten
 	import dgLogoDia from '$lib/assets/dgLogo-dia.svg';
 	import bdLogoDia from '$lib/assets/bdLogo-dia.svg';
 	import adLogoDia from '$lib/assets/adLogo-dia.svg';
@@ -36,7 +38,7 @@
 
 		// Development & CMS
 		localhost: dgLogoDia,
-		'cms.topverhaal.nl': dgLogoDia, // ✅ CMS domain
+		'cms.topverhaal.nl': dgLogoDia,
 
 		// Vercel preview domains
 		'topverhalen.vercel.app': dgLogoDia,
@@ -57,7 +59,7 @@
 
 		// Development & CMS
 		localhost: dgLogoColor,
-		'cms.topverhaal.nl': dgLogoColor, // ✅ CMS domain
+		'cms.topverhaal.nl': dgLogoColor,
 
 		// Vercel preview domains
 		'topverhalen.vercel.app': dgLogoColor,
@@ -68,6 +70,9 @@
 	let logoSrc = $state<string | undefined>(undefined);
 
 	$effect(() => {
+		// ✅ Only run in browser
+		if (!browser) return;
+
 		const currentHost = window.location.hostname;
 		const logoMap = variant === 'color' ? logoMapColor : logoMapDia;
 		logoSrc = logoMap[currentHost];
@@ -91,7 +96,7 @@
 <div class="logo-container">
 	{#if logoSrc}
 		<a
-			href="https://{window.location.hostname}"
+			href="https://{browser ? window.location.hostname : ''}"
 			target="_blank"
 			rel="noopener noreferrer"
 			aria-label="Homepagina"
@@ -103,10 +108,6 @@
 				onerror={() => console.error('❌ Logo failed:', logoSrc)}
 			/>
 		</a>
-	{:else}
-		<p style="color: red; font-size: 12px; text-align: center;">
-			⚠️ DEBUG: Geen logo gevonden voor hostname: {window?.location?.hostname}
-		</p>
 	{/if}
 </div>
 
