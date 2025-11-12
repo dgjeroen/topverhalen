@@ -248,6 +248,38 @@ export type Theme = {
     'background-attachment'?: 'scroll' | 'fixed';
 
     // ============================================
+    // TIMELINE COMPONENT
+    // ============================================
+    'timeline-title-size'?: string;
+    'timeline-title-color'?: string;
+    // Desktop (vertical)
+    'timeline-vertical-line-color'?: string;
+    'timeline-vertical-marker-bg'?: string;
+    'timeline-vertical-marker-border'?: string;
+    'timeline-vertical-card-bg'?: string;
+    'timeline-vertical-card-shadow'?: string;
+    'timeline-vertical-year-color'?: string;
+    'timeline-vertical-text-color'?: string;
+
+    // Mobile (horizontal)
+    'timeline-horizontal-line-color'?: string;
+    'timeline-horizontal-marker-bg'?: string;
+    'timeline-horizontal-marker-border'?: string;
+    'timeline-horizontal-card-bg'?: string;
+    'timeline-horizontal-card-border'?: string;
+    'timeline-horizontal-card-shadow'?: string;
+    'timeline-horizontal-year-color'?: string;
+    'timeline-horizontal-year-bg'?: string;
+    'timeline-horizontal-text-color'?: string;
+    'timeline-horizontal-connector-color'?: string;
+
+    // Scroll buttons (mobile)
+    'timeline-scroll-btn-bg'?: string;
+    'timeline-scroll-btn-border'?: string;
+    'timeline-scroll-btn-color'?: string;
+    'timeline-scroll-btn-hover-bg'?: string;
+
+    // ============================================
     // OVERIG
     // ============================================
     'border-radius-base'?: string;
@@ -293,8 +325,11 @@ export interface HeroVideoContent {
     poster?: string;
     label?: string;
     title: string;
-    source: string;
+    source?: string;
     textAlign?: 'top' | 'center' | 'bottom';
+    focusX?: number;
+    focusY?: number;
+    videoScale?: number;
 }
 
 export interface ImageHeroContent {
@@ -303,6 +338,9 @@ export interface ImageHeroContent {
     title: string;
     source?: string;
     textAlign?: 'top' | 'center' | 'bottom';
+    focusX?: number;
+    focusY?: number;
+    imageScale?: number;
 }
 
 export interface GalleryContent {
@@ -313,6 +351,9 @@ export interface GalleryContent {
 export interface VideoContent {
     url: string;
     poster?: string;
+    focusX?: number;
+    focusY?: number;
+    videoScale?: number;
 }
 
 export interface SliderContent {
@@ -374,6 +415,7 @@ export interface TextFrameContent {
 }
 
 export interface TimelineContent {
+    title?: string;
     timelines: TimelineItem[];
 }
 

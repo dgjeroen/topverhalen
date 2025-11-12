@@ -1,8 +1,21 @@
+<!-- src/lib/components/Video.svelte -->
 <script lang="ts">
 	import Hls from 'hls.js';
 	import { dev } from '$app/environment';
 
-	let { url, poster } = $props<{ url: string; poster?: string }>();
+	let {
+		url,
+		poster,
+		focusX = 50,
+		focusY = 50,
+		videoScale = 100
+	} = $props<{
+		url: string;
+		poster?: string;
+		focusX?: number;
+		focusY?: number;
+		videoScale?: number;
+	}>();
 
 	let videoEl = $state<HTMLVideoElement | undefined>();
 	const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
@@ -23,7 +36,6 @@
 		isMuted = !isMuted;
 	}
 
-	// De stabiele functie die terugspoelt naar het begin.
 	function handleVideoEnd() {
 		hasPlayedOnce = true;
 		if (videoEl) {
@@ -38,23 +50,18 @@
 		}
 	});
 
-	// Dit effect zorgt ervoor dat de controls altijd aan gaan
-	// zodra de video een keer heeft gespeeld.
 	$effect(() => {
 		if (hasPlayedOnce && videoEl) {
 			videoEl.controls = true;
 		}
 	});
 
-	// Deze $effect voor de IntersectionObserver en HLS-player blijft ongewijzigd.
 	$effect(() => {
 		const video = videoEl;
-		// Deze controle blijft cruciaal
 		if (!video || isYoutube) return;
 
 		let hls: Hls | undefined;
 
-		// FIX: We geven 'video' nu als argument mee, zodat TypeScript weet dat het bestaat.
 		async function setupHls(videoEl: HTMLVideoElement) {
 			if (isHls) {
 				if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
@@ -67,7 +74,7 @@
 					if (Hls.isSupported()) {
 						hls = new Hls();
 						hls.loadSource(url);
-						hls.attachMedia(videoEl); // Nu veilig om te gebruiken
+						hls.attachMedia(videoEl);
 					}
 				} catch (e) {
 					console.error('Kon hls.js niet laden', e);
@@ -77,7 +84,6 @@
 			}
 		}
 
-		// Roep de functie aan met de 'video' variabele die hier gegarandeerd bestaat.
 		setupHls(video);
 
 		const onMetadataLoaded = () => {
@@ -134,6 +140,8 @@
 			{poster}
 			onended={handleVideoEnd}
 			style:aspect-ratio={aspectRatio || '16 / 9'}
+			style:object-position="{focusX}% {focusY}%"
+			style:transform="scale({videoScale / 100})"
 		>
 			<track kind="captions" />
 			Je browser ondersteunt de video-tag niet.
@@ -178,6 +186,8 @@
 		width: 100%;
 		background-color: #000;
 		aspect-ratio: 16 / 9;
+		transform-origin: center center;
+		transition: transform 0.3s ease;
 	}
 	.youtube-wrapper {
 		position: relative;

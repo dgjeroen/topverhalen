@@ -1,88 +1,222 @@
-<!--src\lib\components\cms\StyleComponentList.svelte-->
 <script lang="ts">
-	import BlockIcons from '$lib/assets/icons/BlockIcons.svelte';
-
-	let { selected = $bindable('general') } = $props<{
-		selected: string;
-	}>();
-
-	const components = [
-		{ id: 'general', label: 'Algemeen', icon: 'icon-style-general' },
-		{ id: 'heading', label: 'Kop (H2)', icon: 'icon-block-h2' },
-		{ id: 'subheading', label: 'Tussenkop (H4)', icon: 'icon-block-h4' },
-		{ id: 'text', label: 'Tekst', icon: 'icon-block-text' },
-		{ id: 'textframe', label: 'Tekstkader', icon: 'icon-block-text' },
-		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
-		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
-		{ id: 'slider', label: 'Slider', icon: 'icon-block-slider' },
-		{ id: 'audio', label: 'Audio', icon: 'icon-block-audio' },
-		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },
-		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' },
-		{ id: 'colofon', label: 'Colofon', icon: 'icon-block-colofon' }
-	];
+	let { selected = $bindable('general') } = $props<{ selected?: string }>();
 </script>
 
-<BlockIcons />
+<div class="style-components">
+	<h3>Componenten</h3>
 
-<div class="component-list">
-	{#each components as comp}
-		<button
-			class="component-item"
-			class:active={selected === comp.id}
-			onclick={() => (selected = comp.id)}
-		>
-			<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-				<use href="#{comp.icon}" />
-			</svg>
-			<span class="label">{comp.label}</span>
-		</button>
-	{/each}
+	<button
+		class="style-component-item"
+		class:active={selected === 'general'}
+		onclick={() => (selected = 'general')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<circle cx="12" cy="12" r="3" />
+			<path
+				d="M12 1v6m0 6v6m8.66-13.66l-4.24 4.24m-4.84 4.84l-4.24 4.24M23 12h-6m-6 0H1m20.66 8.66l-4.24-4.24m-4.84-4.84l-4.24-4.24"
+			/>
+		</svg>
+		<span>Algemeen</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'heading'}
+		onclick={() => (selected = 'heading')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-h2" />
+		</svg>
+		<span>Kop (H2)</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'subheading'}
+		onclick={() => (selected = 'subheading')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-h4" />
+		</svg>
+		<span>Tussenkop (H4)</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'subheadingMedium'}
+		onclick={() => (selected = 'subheadingMedium')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-h3" />
+		</svg>
+		<span>Tussenkop (H3)</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'subheadingSoccer'}
+		onclick={() => (selected = 'subheadingSoccer')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-soccer" />
+		</svg>
+		<span>Tussenkop Voetbal</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'text'}
+		onclick={() => (selected = 'text')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-text" />
+		</svg>
+		<span>Tekst</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'textframe'}
+		onclick={() => (selected = 'textframe')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-text-frame" />
+		</svg>
+		<span>Tekstkader</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'quote'}
+		onclick={() => (selected = 'quote')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-quote" />
+		</svg>
+		<span>Citaat</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'colofon'}
+		onclick={() => (selected = 'colofon')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-colofon" />
+		</svg>
+		<span>Colofon</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'audio'}
+		onclick={() => (selected = 'audio')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-audio" />
+		</svg>
+		<span>Audio</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'image'}
+		onclick={() => (selected = 'image')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-image" />
+		</svg>
+		<span>Afbeelding</span>
+	</button>
+
+	<button
+		class="style-component-item"
+		class:active={selected === 'slider'}
+		onclick={() => (selected = 'slider')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-slider" />
+		</svg>
+		<span>Slider</span>
+	</button>
+
+	<!-- ✅ TIMELINE BUTTON (EXACT SAME MARKUP) -->
+	<button
+		class="style-component-item"
+		class:active={selected === 'timeline'}
+		onclick={() => (selected = 'timeline')}
+	>
+		<svg class="component-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<use href="#icon-block-timeline" />
+		</svg>
+		<span>Tijdlijn</span>
+	</button>
 </div>
 
 <style>
-	.component-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.style-components {
+		padding: 1rem;
 	}
-	.component-item {
+
+	h3 {
+		margin: 0 0 1rem 0;
+		padding: 0 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #6b7280;
+	}
+
+	.style-component-item {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		background: #f9fafb;
+		gap: 0.75rem;
+		padding: 0.875rem 1rem;
+		background: white;
 		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		padding: 10px 12px;
+		border-radius: 8px;
 		cursor: pointer;
-		font-weight: 500;
-		font-size: 0.875rem;
-		transition: all 0.15s;
-		color: #374151;
-		width: 100%;
+		transition: all 0.15s ease;
 		text-align: left;
+		width: 100%;
+		margin-bottom: 0.5rem;
 	}
 
-	.component-item:hover {
-		background: #f3f4f6;
+	.style-component-item:hover {
+		background: #f9fafb;
 		border-color: #d1d5db;
-		transform: translateX(2px);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 	}
 
-	.component-item.active {
+	.style-component-item.active {
 		background: #fef2f2;
 		border-color: #d10a10;
-		color: #d10a10;
-		font-weight: 600;
+		box-shadow: 0 0 0 3px rgba(209, 10, 16, 0.1);
 	}
 
-	.icon {
+	.component-icon {
 		width: 20px;
 		height: 20px;
+		stroke-width: 2;
 		flex-shrink: 0;
-		color: currentColor;
+		color: #6b7280;
+		transition: color 0.15s ease;
 	}
 
-	.label {
-		flex: 1;
+	.style-component-item.active .component-icon {
+		color: #d10a10;
+	}
+
+	.style-component-item span {
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: #374151;
+	}
+
+	.style-component-item.active span {
+		color: #d10a10;
+		font-weight: 600;
 	}
 </style>

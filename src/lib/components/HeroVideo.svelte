@@ -1,11 +1,20 @@
-<!--src\lib\components\HeroVideo.svelte-->
+<!-- src/lib/components/HeroVideo.svelte -->
 <script lang="ts">
 	import SwitchLogo from './SwitchLogo.svelte';
 	import type { HeroVideoContent } from '$lib/types';
 	import Hls from 'hls.js';
 	import { onMount, onDestroy } from 'svelte';
 
-	let { url, label, title, source, textAlign = 'center' }: HeroVideoContent = $props();
+	let {
+		url,
+		label,
+		title,
+		source,
+		textAlign = 'center',
+		focusX = 50,
+		focusY = 50,
+		videoScale = 100
+	}: HeroVideoContent = $props();
 
 	let elementsVisible = $state(false);
 	let videoEl: HTMLVideoElement | undefined;
@@ -42,14 +51,10 @@
 		});
 	});
 
-	// ✅ FIX: Verbeterde scroll functie met fallback
 	function scrollToContent(event: Event) {
 		event.preventDefault();
-
-		// Probeer eerst #content-start
 		let element = document.getElementById('content-start');
 
-		// Fallback: scroll naar volgende sibling van hero container
 		if (!element && videoEl) {
 			const heroContainer = videoEl.closest('.hero-container');
 			if (heroContainer) {
@@ -57,7 +62,6 @@
 			}
 		}
 
-		// Fallback 2: scroll één viewport naar beneden
 		if (!element) {
 			window.scrollTo({
 				top: window.innerHeight,
@@ -82,6 +86,8 @@
 		loop
 		playsinline
 		class="background-video"
+		style:object-position="{focusX}% {focusY}%"
+		style:transform="scale({videoScale / 100})"
 	></video>
 	<div class="overlay"></div>
 
@@ -125,6 +131,7 @@
 		position: relative;
 		display: flex;
 		color: var(--color-white);
+		overflow: hidden;
 	}
 
 	.background-video {
@@ -135,6 +142,8 @@
 		height: 100%;
 		object-fit: cover;
 		z-index: -2;
+		transform-origin: center center;
+		transition: transform 0.3s ease;
 	}
 
 	.overlay {
@@ -176,7 +185,6 @@
 		transform: translateY(0);
 	}
 
-	/* Text alignment variants */
 	[data-text-align='top'] .title-container {
 		justify-content: flex-start;
 		padding-top: var(--space-xl);

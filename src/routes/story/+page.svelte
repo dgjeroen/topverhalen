@@ -1,4 +1,3 @@
-<!-- src/routes/story/+page.svelte -->
 <script lang="ts">
 	import type { PageData } from './$types';
 	import BlockRenderer from '$lib/components/BlockRenderer.svelte';
@@ -15,7 +14,7 @@
 	{/if}
 </svelte:head>
 
-<!-- ✅ FIX: Voeg index toe en pass isFirst prop -->
+<!-- ✅ FIXED: Voeg theme toe -->
 {#each project.data as block, i (block.id || block.type)}
-	<BlockRenderer {block} isFirst={i === 0} />
+	<BlockRenderer {block} isFirst={i === 0} theme={project.theme} />
 {/each}

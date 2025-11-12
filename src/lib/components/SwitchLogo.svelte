@@ -1,6 +1,6 @@
 <!-- src/lib/components/SwitchLogo.svelte -->
 <script lang="ts">
-	import { browser } from '$app/environment'; // ✅ Import browser check
+	import { browser } from '$app/environment';
 
 	// ✅ Import BEIDE varianten
 	import dgLogoDia from '$lib/assets/dgLogo-dia.svg';
@@ -68,18 +68,25 @@
 	};
 
 	let logoSrc = $state<string | undefined>(undefined);
+	let homeUrl = $state<string>('/'); // ✅ Default to root
 
 	$effect(() => {
 		// ✅ Only run in browser
 		if (!browser) return;
 
 		const currentHost = window.location.hostname;
+		const protocol = window.location.protocol; // http: or https:
 		const logoMap = variant === 'color' ? logoMapColor : logoMapDia;
 		logoSrc = logoMap[currentHost];
+
+		// ✅ Set home URL to root of current domain
+		homeUrl = `${protocol}//${currentHost}/`;
 
 		// ✅ DEBUG (kan later verwijderd worden)
 		console.log('🔍 SwitchLogo Debug:', {
 			hostname: currentHost,
+			protocol,
+			homeUrl,
 			variant,
 			logoSrc,
 			availableHosts: Object.keys(logoMap)
@@ -95,12 +102,7 @@
 
 <div class="logo-container">
 	{#if logoSrc}
-		<a
-			href="https://{browser ? window.location.hostname : ''}"
-			target="_blank"
-			rel="noopener noreferrer"
-			aria-label="Homepagina"
-		>
+		<a href={homeUrl} target="_blank" rel="noopener noreferrer" aria-label="Naar homepagina">
 			<img
 				src={logoSrc}
 				alt="Logo"

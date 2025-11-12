@@ -4,6 +4,14 @@
 	import SwitchLogo from './SwitchLogo.svelte';
 
 	let { items, showLogo = true, logoVariant = 'dia' }: ColofonContent = $props();
+	$effect(() => {
+		console.log('🔍 Colofon Debug:', {
+			itemsCount: items?.length,
+			showLogo,
+			logoVariant,
+			items
+		});
+	});
 </script>
 
 <div class="colofon-container" class:with-logo={showLogo}>

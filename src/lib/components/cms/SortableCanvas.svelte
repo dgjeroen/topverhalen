@@ -82,6 +82,7 @@
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
 	let markdownInfoOpen = $state<Record<string, boolean>>({});
+	let draggingBlockId = $state<string | null>(null);
 
 	function toggleMarkdownInfo(blockId: string) {
 		markdownInfoOpen[blockId] = !markdownInfoOpen[blockId];
@@ -384,7 +385,54 @@
 								{/if}
 							</div>
 						{/if}
+						<div class="video-focus-controls">
+							<h5 class="control-section-title">Video Positionering</h5>
 
+							<div class="control-group">
+								<label for="hero-video-scale-{block.id}">
+									Zoom: <span class="value-display">{block.content.videoScale || 100}%</span>
+								</label>
+								<input
+									id="hero-video-scale-{block.id}"
+									type="range"
+									min="100"
+									max="200"
+									bind:value={block.content.videoScale}
+									oninput={() => dispatch('save')}
+									class="range-input"
+								/>
+							</div>
+
+							<div class="control-group">
+								<label for="hero-video-focus-x-{block.id}">
+									Focus X: <span class="value-display">{block.content.focusX || 50}%</span>
+								</label>
+								<input
+									id="hero-video-focus-x-{block.id}"
+									type="range"
+									min="0"
+									max="100"
+									bind:value={block.content.focusX}
+									oninput={() => dispatch('save')}
+									class="range-input"
+								/>
+							</div>
+
+							<div class="control-group">
+								<label for="hero-video-focus-y-{block.id}">
+									Focus Y: <span class="value-display">{block.content.focusY || 50}%</span>
+								</label>
+								<input
+									id="hero-video-focus-y-{block.id}"
+									type="range"
+									min="0"
+									max="100"
+									bind:value={block.content.focusY}
+									oninput={() => dispatch('save')}
+									class="range-input"
+								/>
+							</div>
+						</div>
 						<div class="input-row-split">
 							<div class="input-col-left">
 								<div class="input-group">
@@ -485,6 +533,7 @@
 					</div>
 				{:else if block.type === 'imageHero'}
 					<div class="image-hero-editor">
+						<!-- 1️⃣ URL INPUT -->
 						<div class="input-row">
 							<div class="input-col">
 								<span class="input-label">Afbeelding URL</span>
@@ -497,14 +546,205 @@
 							</div>
 						</div>
 
+						<!-- 2️⃣ LIVE PREVIEW (alleen als URL ingevuld) -->
 						{#if block.content.url}
-							<div class="input-row">
-								<div class="preview-col">
-									<img src={block.content.url} alt="Hero preview" class="media-preview" />
+							<div class="hero-live-preview">
+								<p class="preview-label">
+									💡 Klik of sleep op de afbeelding om het focuspunt in te stellen
+								</p>
+								<div class="hero-preview-container">
+									<div
+										class="hero-preview-wrapper"
+										role="button"
+										tabindex="0"
+										aria-label="Click or drag to set focus point"
+										onmousedown={(e) => {
+											e.preventDefault();
+											draggingBlockId = block.id;
+
+											const wrapper = e.currentTarget as HTMLElement;
+											const rect = wrapper.getBoundingClientRect();
+
+											const updateFocus = (clientX: number, clientY: number) => {
+												const x = ((clientX - rect.left) / rect.width) * 100;
+												const y = ((clientY - rect.top) / rect.height) * 100;
+												block.content.focusX = Math.max(0, Math.min(100, Math.round(x)));
+												block.content.focusY = Math.max(0, Math.min(100, Math.round(y)));
+											};
+
+											updateFocus(e.clientX, e.clientY);
+
+											const onMouseMove = (moveEvent: MouseEvent) => {
+												moveEvent.preventDefault();
+												updateFocus(moveEvent.clientX, moveEvent.clientY);
+											};
+
+											const onMouseUp = () => {
+												draggingBlockId = null;
+												dispatch('save');
+												document.removeEventListener('mousemove', onMouseMove);
+												document.removeEventListener('mouseup', onMouseUp);
+											};
+
+											document.addEventListener('mousemove', onMouseMove);
+											document.addEventListener('mouseup', onMouseUp);
+										}}
+										ontouchstart={(e) => {
+											e.preventDefault();
+											draggingBlockId = block.id;
+
+											const wrapper = e.currentTarget as HTMLElement;
+											const rect = wrapper.getBoundingClientRect();
+
+											const updateFocus = (clientX: number, clientY: number) => {
+												const x = ((clientX - rect.left) / rect.width) * 100;
+												const y = ((clientY - rect.top) / rect.height) * 100;
+												block.content.focusX = Math.max(0, Math.min(100, Math.round(x)));
+												block.content.focusY = Math.max(0, Math.min(100, Math.round(y)));
+											};
+
+											const touch = e.touches[0];
+											updateFocus(touch.clientX, touch.clientY);
+
+											const onTouchMove = (moveEvent: TouchEvent) => {
+												moveEvent.preventDefault();
+												const moveTouch = moveEvent.touches[0];
+												updateFocus(moveTouch.clientX, moveTouch.clientY);
+											};
+
+											const onTouchEnd = () => {
+												draggingBlockId = null;
+												dispatch('save');
+												document.removeEventListener('touchmove', onTouchMove);
+												document.removeEventListener('touchend', onTouchEnd);
+											};
+
+											document.addEventListener('touchmove', onTouchMove);
+											document.addEventListener('touchend', onTouchEnd);
+										}}
+										onkeydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												block.content.focusX = 50;
+												block.content.focusY = 50;
+												dispatch('save');
+											}
+										}}
+									>
+										<img
+											src={block.content.url}
+											alt="Hero preview"
+											class="hero-preview-image clickable"
+											style:object-position="{block.content.focusX ?? 50}% {block.content.focusY ??
+												50}%"
+											style:transform="scale({(block.content.imageScale ?? 100) / 100})"
+											draggable="false"
+										/>
+
+										<div class="preview-grid">
+											<div class="grid-line grid-v" style="left: 33.33%"></div>
+											<div class="grid-line grid-v" style="left: 66.66%"></div>
+											<div class="grid-line grid-h" style="top: 33.33%"></div>
+											<div class="grid-line grid-h" style="top: 66.66%"></div>
+										</div>
+
+										<div
+											class="focus-point"
+											style:left="{block.content.focusX ?? 50}%"
+											style:top="{block.content.focusY ?? 50}%"
+										>
+											<div class="focus-point-inner"></div>
+											<div class="focus-point-ring"></div>
+										</div>
+									</div>
+
+									<div class="preview-overlay"></div>
+
+									<div class="preview-info">
+										<span class="preview-badge">Live Preview</span>
+										<span class="preview-values">
+											Zoom: {block.content.imageScale ?? 100}% | Focus: ({block.content.focusX ??
+												50}%, {block.content.focusY ?? 50}%)
+										</span>
+									</div>
 								</div>
 							</div>
 						{/if}
 
+						<!-- 3️⃣ CONTROLS -->
+						<div class="image-focus-controls">
+							<div class="control-header">
+								<h5 class="control-section-title">Afbeelding Positionering</h5>
+								<button
+									type="button"
+									class="reset-btn"
+									onclick={() => {
+										block.content.imageScale = 100;
+										block.content.focusX = 50;
+										block.content.focusY = 50;
+										dispatch('save');
+									}}
+								>
+									🔄 Reset
+								</button>
+							</div>
+
+							<div class="control-group">
+								<label for="image-hero-scale-{block.id}">
+									Zoom: <span class="value-display">{block.content.imageScale ?? 100}%</span>
+								</label>
+								<input
+									id="image-hero-scale-{block.id}"
+									type="range"
+									min="100"
+									max="200"
+									value={block.content.imageScale ?? 100}
+									oninput={(e) => {
+										block.content.imageScale = Number(e.currentTarget.value);
+										dispatch('save');
+									}}
+									class="range-input"
+								/>
+							</div>
+
+							<div class="control-group">
+								<label for="image-hero-focus-x-{block.id}">
+									Focus X: <span class="value-display">{block.content.focusX ?? 50}%</span>
+								</label>
+								<input
+									id="image-hero-focus-x-{block.id}"
+									type="range"
+									min="0"
+									max="100"
+									value={block.content.focusX ?? 50}
+									oninput={(e) => {
+										block.content.focusX = Number(e.currentTarget.value);
+										dispatch('save');
+									}}
+									class="range-input"
+								/>
+							</div>
+
+							<div class="control-group">
+								<label for="image-hero-focus-y-{block.id}">
+									Focus Y: <span class="value-display">{block.content.focusY ?? 50}%</span>
+								</label>
+								<input
+									id="image-hero-focus-y-{block.id}"
+									type="range"
+									min="0"
+									max="100"
+									value={block.content.focusY ?? 50}
+									oninput={(e) => {
+										block.content.focusY = Number(e.currentTarget.value);
+										dispatch('save');
+									}}
+									class="range-input"
+								/>
+							</div>
+						</div>
+
+						<!-- 4️⃣ TEXT INPUTS -->
 						<div class="input-row-split">
 							<div class="input-col-left">
 								<div class="input-group">
@@ -1467,6 +1707,20 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'timeline'}
 					<div class="timeline-editor">
+						<!-- ✅ NIEUW: Titel input BOVENAAN -->
+						<div class="control-group">
+							<label class="control-label" for="timeline-title-{block.id}"> Titel </label>
+							<input
+								id="timeline-title-{block.id}"
+								type="text"
+								bind:value={block.content.title}
+								oninput={() => dispatch('save')}
+								placeholder="Tijdlijn"
+								class="slide-input"
+							/>
+						</div>
+
+						<!-- ✅ BESTAANDE CODE: Item count -->
 						<h4>Tijdlijn ({block.content.timelines.length} items)</h4>
 
 						<div class="splide-container">
@@ -2161,6 +2415,232 @@ Voorbeelden:
 		overflow: hidden !important;
 	}
 	/* ============================================
+   HERO IMAGE LIVE PREVIEW (UPDATED)
+   ============================================ */
+
+	.hero-live-preview {
+		margin: 1rem 0;
+	}
+
+	.preview-label {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: #1e40af;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.hero-preview-container {
+		position: relative;
+		width: 100%;
+		height: 300px;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #000;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
+	.hero-preview-wrapper {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+	}
+
+	.hero-preview-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transform-origin: center center;
+		transition:
+			transform 0.3s ease,
+			object-position 0.05s ease;
+		user-select: none;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+
+		/* ✅ FIXED: Only vendor prefixes */
+		-webkit-user-drag: none;
+		-khtml-user-drag: none;
+		-moz-user-drag: none;
+		-o-user-drag: none;
+	}
+
+	.hero-preview-image.clickable {
+		cursor: crosshair;
+	}
+
+	.hero-preview-image.clickable:active {
+		cursor: grabbing;
+	}
+	/* Grid Overlay */
+	.preview-grid {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.hero-preview-container:hover .preview-grid {
+		opacity: 0.4;
+	}
+
+	.grid-line {
+		position: absolute;
+		background: white;
+	}
+
+	.grid-v {
+		width: 1px;
+		height: 100%;
+	}
+
+	.grid-h {
+		height: 1px;
+		width: 100%;
+	}
+
+	/* Focus Point Indicator */
+	.focus-point {
+		position: absolute;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		z-index: 10;
+	}
+
+	.focus-point-inner {
+		width: 12px;
+		height: 12px;
+		background: white;
+		border: 2px solid #d10a10;
+		border-radius: 50%;
+		box-shadow:
+			0 0 0 2px white,
+			0 2px 8px rgba(0, 0, 0, 0.5);
+	}
+
+	.focus-point-ring {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 40px;
+		height: 40px;
+		border: 2px solid white;
+		border-radius: 50%;
+		opacity: 0;
+		animation: pulse 2s ease-out infinite;
+	}
+
+	.hero-preview-container:active .focus-point-ring {
+		display: none;
+	}
+
+	@keyframes pulse {
+		0% {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(0.5);
+		}
+		100% {
+			opacity: 0;
+			transform: translate(-50%, -50%) scale(1.5);
+		}
+	}
+
+	.preview-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0.3) 0%,
+			transparent 50%,
+			rgba(0, 0, 0, 0.5) 100%
+		);
+		pointer-events: none;
+	}
+
+	.preview-info {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 1rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+		color: white;
+		font-size: 0.75rem;
+		pointer-events: none;
+	}
+
+	.preview-badge {
+		background: rgba(209, 10, 16, 0.9);
+		padding: 0.25rem 0.75rem;
+		border-radius: 4px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.preview-values {
+		font-family: 'SF Mono', Monaco, monospace;
+		font-size: 0.7rem;
+		opacity: 0.9;
+	}
+
+	/* Control Header */
+	.control-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	/* ✅ UPDATED: Grijze reset button */
+	.reset-btn {
+		background: #6b7280; /* ✅ Grijs i.p.v. blauw */
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.reset-btn:hover {
+		background: #4b5563; /* ✅ Donkerder grijs on hover */
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.reset-btn:active {
+		transform: translateY(0);
+		box-shadow: none;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.hero-preview-container {
+			height: 200px;
+		}
+
+		.preview-info {
+			flex-direction: column;
+			gap: 0.5rem;
+			align-items: flex-start;
+			padding: 0.75rem;
+		}
+
+		.preview-values {
+			font-size: 0.65rem;
+		}
+	}
+	/* ============================================
    HEADING HIERARCHY IN EDITOR CANVAS
    ============================================ */
 
@@ -2343,6 +2823,26 @@ Voorbeelden:
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+	}
+
+	.video-focus-controls {
+		padding: 1rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		margin-top: 0.75rem;
+	}
+
+	.control-section-title {
+		margin: 0 0 0.5rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.slider-editor,

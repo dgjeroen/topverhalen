@@ -3,7 +3,16 @@
 	import SwitchLogo from './SwitchLogo.svelte';
 	import type { ImageHeroContent } from '$lib/types';
 
-	let { url, label, title, source, textAlign = 'center' }: ImageHeroContent = $props();
+	let {
+		url,
+		label,
+		title,
+		source,
+		textAlign = 'center',
+		focusX = 50, // ✅ NIEUW: Default center
+		focusY = 50, // ✅ NIEUW: Default center
+		imageScale = 100 // ✅ NIEUW: Default no zoom
+	}: ImageHeroContent = $props();
 
 	let elementsVisible = $state(false);
 	let y = $state(0);
@@ -42,19 +51,15 @@
 		return () => clearTimeout(timeout);
 	});
 
-	// ✅ FIX: Verbeterde scroll functie met fallback
 	function scrollToContent(event: Event) {
 		event.preventDefault();
 
-		// Probeer eerst #content-start
 		let element = document.getElementById('content-start');
 
-		// Fallback: scroll naar volgende sibling van hero container
 		if (!element && containerEl) {
 			element = containerEl.nextElementSibling as HTMLElement;
 		}
 
-		// Fallback 2: scroll één viewport naar beneden
 		if (!element) {
 			window.scrollTo({
 				top: window.innerHeight,
@@ -79,7 +84,8 @@
 			src={url}
 			alt={title}
 			class="background-image"
-			style:transform="translateY({translateY}px)"
+			style:transform="translateY({translateY}px) scale({imageScale / 100})"
+			style:object-position="{focusX}% {focusY}%"
 			loading="eager"
 		/>
 	</div>
@@ -125,7 +131,7 @@
 		position: relative;
 		display: flex;
 		color: var(--color-white);
-		overflow: hidden;
+		overflow: hidden; /* ✅ BELANGRIJK: Voorkomt overflow bij zoom */
 	}
 
 	.image-wrapper {
@@ -135,6 +141,7 @@
 		width: 100%;
 		height: 100%;
 		z-index: -2;
+		overflow: hidden; /* ✅ Extra zekerheid voor zoom */
 	}
 
 	.background-image {
@@ -145,6 +152,7 @@
 		height: 120%;
 		object-fit: cover;
 		will-change: transform;
+		transform-origin: center center; /* ✅ Zoom vanuit center */
 	}
 
 	.overlay {
@@ -169,19 +177,18 @@
 		text-align: left;
 	}
 
-	/* ✅ FIX: Centreer de title-container horizontaal */
 	.title-container {
 		flex-grow: 1;
 		display: flex;
 		flex-direction: column;
-		align-items: center; /* ✅ Horizontale centrering */
+		align-items: center;
 		text-align: center;
 		opacity: 0;
 		transform: translateY(10px);
 		transition:
 			opacity 1.5s ease-out,
 			transform 1.5s ease-out;
-		width: 100%; /* ✅ Neem volledige breedte */
+		width: 100%;
 	}
 
 	.title-container.visible {
@@ -189,7 +196,6 @@
 		transform: translateY(0);
 	}
 
-	/* ✅ Text alignment variants */
 	[data-text-align='top'] .title-container {
 		justify-content: flex-start;
 		padding-top: var(--space-xl);
@@ -204,13 +210,12 @@
 		padding-bottom: var(--space-xl);
 	}
 
-	/* ✅ FIX: Zorg dat child elementen max-width respecteren */
 	.hero-title {
 		font-family: var(--font-family-quote);
 		font-weight: 700;
 		text-transform: uppercase;
 		max-width: 800px;
-		width: 100%; /* ✅ Neem beschikbare ruimte tot max-width */
+		width: 100%;
 		line-height: 1.2;
 		margin-block: var(--space-m);
 	}
@@ -223,7 +228,7 @@
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
 		position: relative;
-		width: 100%; /* ✅ Neem beschikbare ruimte */
+		width: 100%;
 		max-width: 800px;
 	}
 

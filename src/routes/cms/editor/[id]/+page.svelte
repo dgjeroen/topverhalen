@@ -19,6 +19,7 @@
 	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
 	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
+	import TimelineStyleEditor from '$lib/components/cms/editors/TimelineStyleEditor.svelte';
 
 	// ✅ NIEUW: Import save manager en localStorage utils
 	import { saveManager, rateLimitWarning } from '$lib/stores/saveManager';
@@ -284,6 +285,38 @@
 		await saveToServer();
 	}
 
+	function migrateMediaDefaults(inputBlocks: ContentBlock[]): ContentBlock[] {
+		return inputBlocks.map((block) => {
+			// Video types
+			if (block.type === 'heroVideo' || block.type === 'video') {
+				if (block.content.videoScale === undefined) {
+					block.content.videoScale = 100;
+				}
+				if (block.content.focusX === undefined) {
+					block.content.focusX = 50;
+				}
+				if (block.content.focusY === undefined) {
+					block.content.focusY = 50;
+				}
+			}
+
+			// Image hero type
+			if (block.type === 'imageHero') {
+				if (block.content.imageScale === undefined) {
+					block.content.imageScale = 100;
+				}
+				if (block.content.focusX === undefined) {
+					block.content.focusX = 50;
+				}
+				if (block.content.focusY === undefined) {
+					block.content.focusY = 50;
+				}
+			}
+
+			return block;
+		});
+	}
+
 	// ✅ Check for backup on mount
 	onMount(() => {
 		clearExpiredBackups();
@@ -291,12 +324,13 @@
 		if (hasBackup(data.gistId)) {
 			backupData = getBackup(data.gistId);
 
-			// Check if backup is newer than current data
 			if (backupData && backupData.timestamp > Date.now() - 300000) {
-				// 5 min threshold
 				showBackupDialog = true;
 			}
 		}
+
+		// ✅ UPDATED: Gebruik nieuwe functie naam
+		canvasBlocks = migrateMediaDefaults(canvasBlocks);
 	});
 
 	// ✅ Restore from backup
@@ -333,25 +367,65 @@
 	function getDefaultContent(type: string) {
 		switch (type) {
 			case 'heroVideo':
-				return { url: '', poster: '', label: '', title: '', source: '', textAlign: 'center' };
+				return {
+					url: '',
+					poster: '',
+					label: '',
+					title: '',
+					source: '',
+					textAlign: 'center',
+					videoScale: 100,
+					focusX: 50,
+					focusY: 50
+				};
+
 			case 'imageHero':
-				return { url: '', label: '', title: 'Hero titel', source: '', textAlign: 'center' };
+				return {
+					url: '',
+					label: '',
+					title: 'Hero titel',
+					source: '',
+					textAlign: 'center',
+					imageScale: 100,
+					focusX: 50,
+					focusY: 50
+				};
+
 			case 'heading':
 				return { text: '', level: 2 };
+
 			case 'subheadingMedium':
 				return { text: '', level: 3 };
+
 			case 'subheading':
 				return { text: '', level: 4 };
+
 			case 'subheadingSoccer':
 				return { text: '', level: 4 };
+
 			case 'textblock':
 				return { text: [''], isLead: false };
+
 			case 'quote':
 				return { text: '', author: '' };
+
 			case 'image':
-				return { url: '', caption: '', source: '', parallax: false };
+				return {
+					url: '',
+					caption: '',
+					source: '',
+					parallax: false
+				};
+
 			case 'video':
-				return { url: '', poster: '' };
+				return {
+					url: '',
+					poster: '',
+					videoScale: 100,
+					focusX: 50,
+					focusY: 50
+				};
+
 			case 'embed':
 				return {
 					code: '',
@@ -359,13 +433,24 @@
 					caption: '',
 					source: ''
 				};
+
 			case 'slider':
-				return { images: [{ url: '', caption: '', source: '' }] };
+				return {
+					images: [{ url: '', caption: '', source: '' }]
+				};
 
 			case 'gallery':
-				return { columns: 2, images: [] };
+				return {
+					columns: 2,
+					images: []
+				};
+
 			case 'timeline':
-				return { timelines: [] };
+				return {
+					title: 'Tijdlijn',
+					timelines: []
+				};
+
 			case 'mediaPair':
 				return {
 					verticalAlign: 'top',
@@ -374,6 +459,7 @@
 						{ type: 'video', orientation: 'landscape', url: '', poster: '', caption: '' }
 					]
 				};
+
 			case 'audio':
 				return {
 					url: '',
@@ -385,19 +471,26 @@
 					imageFocusX: 50,
 					imageFocusY: 50
 				};
+
 			case 'textframe':
-				return { width: 'narrow', heading: '', text: '', image: null };
+				return {
+					width: 'narrow',
+					heading: '',
+					text: '',
+					image: null
+				};
+
 			case 'colofon':
 				return {
 					items: [{ functie: '', namen: '' }],
 					showLogo: true,
 					logoVariant: 'dia'
 				};
+
 			default:
 				return {};
 		}
 	}
-
 	function removeBlock(blockId: string) {
 		if (splideInstances.has(blockId)) {
 			splideInstances.get(blockId).destroy();
@@ -933,6 +1026,8 @@
 						<ImageStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{:else if selectedStyleComponent === 'slider'}
 						<SliderStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+					{:else if selectedStyleComponent === 'timeline'}
+						<TimelineStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
 					{/if}
 				</div>
 			{/if}
