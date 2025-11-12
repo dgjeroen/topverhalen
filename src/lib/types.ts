@@ -248,36 +248,60 @@ export type Theme = {
     'background-attachment'?: 'scroll' | 'fixed';
 
     // ============================================
-    // TIMELINE COMPONENT
+    // TIMELINE COMPONENT (UNIFIED STYLING)
     // ============================================
+    // Titel
     'timeline-title-size'?: string;
     'timeline-title-color'?: string;
-    // Desktop (vertical)
-    'timeline-vertical-line-color'?: string;
-    'timeline-vertical-marker-bg'?: string;
-    'timeline-vertical-marker-border'?: string;
-    'timeline-vertical-card-bg'?: string;
-    'timeline-vertical-card-shadow'?: string;
-    'timeline-vertical-year-color'?: string;
-    'timeline-vertical-text-color'?: string;
 
-    // Mobile (horizontal)
-    'timeline-horizontal-line-color'?: string;
-    'timeline-horizontal-marker-bg'?: string;
-    'timeline-horizontal-marker-border'?: string;
-    'timeline-horizontal-card-bg'?: string;
-    'timeline-horizontal-card-border'?: string;
-    'timeline-horizontal-card-shadow'?: string;
-    'timeline-horizontal-year-color'?: string;
-    'timeline-horizontal-year-bg'?: string;
-    'timeline-horizontal-text-color'?: string;
-    'timeline-horizontal-connector-color'?: string;
+    // Tijdlijn lijn
+    'timeline-line-color'?: string;
+    'timeline-line-width'?: string;
 
-    // Scroll buttons (mobile)
+    // Markers (bolletjes)
+    'timeline-marker-bg'?: string;
+    'timeline-marker-border-color'?: string;
+    'timeline-marker-border-width'?: string;
+    'timeline-marker-size'?: string;
+
+    // Jaar/Datum badge
+    'timeline-year-color'?: string;
+    'timeline-year-bg'?: string;
+    'timeline-year-font-size'?: string;
+    'timeline-year-font-weight'?: string;
+    'timeline-year-padding'?: string;
+    'timeline-year-border-radius'?: string;
+
+    // Kaarten
+    'timeline-card-bg'?: string;
+    'timeline-card-border-color'?: string;
+    'timeline-card-border-width'?: string;
+    'timeline-card-border-radius'?: string;
+    'timeline-card-shadow'?: string;
+    'timeline-card-padding'?: string;
+
+    // Tekst in kaarten
+    'timeline-text-color'?: string;
+    'timeline-text-font-size'?: string;
+    'timeline-text-line-height'?: string;
+    'timeline-heading-color'?: string;
+    'timeline-heading-font-size'?: string;
+    'timeline-heading-font-weight'?: string;
+
+    // Afbeeldingen
+    'timeline-image-border-radius'?: string;
+    'timeline-image-shadow'?: string;
+
+    // Connector lijn (mobiel)
+    'timeline-connector-color'?: string;
+    'timeline-connector-width'?: string;
+
+    // Scroll buttons (mobiel)
     'timeline-scroll-btn-bg'?: string;
     'timeline-scroll-btn-border'?: string;
     'timeline-scroll-btn-color'?: string;
     'timeline-scroll-btn-hover-bg'?: string;
+    'timeline-scroll-btn-size'?: string;
 
     // ============================================
     // OVERIG

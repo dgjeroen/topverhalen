@@ -25,39 +25,61 @@
 		horizontalScrollPosition < horizontalScrollWidth - horizontalClientWidth - 5
 	);
 
-	// ✅ FIXED: Alle CSS variabelen in één string
+	// ✅ UNIFIED: Één set CSS variabelen voor beide layouts
 	const cssVars = $derived(
 		[
 			// Titel
 			`--timeline-title-size: ${theme['timeline-title-size'] || '2rem'}`,
 			`--timeline-title-color: ${theme['timeline-title-color'] || '#111827'}`,
 
-			// Desktop
-			`--timeline-vertical-line-color: ${theme['timeline-vertical-line-color'] || '#f59e0b'}`,
-			`--timeline-vertical-marker-bg: ${theme['timeline-vertical-marker-bg'] || '#fdf6e9'}`,
-			`--timeline-vertical-marker-border: ${theme['timeline-vertical-marker-border'] || '#2c5599'}`,
-			`--timeline-vertical-card-bg: ${theme['timeline-vertical-card-bg'] || '#fdf6e9'}`,
-			`--timeline-vertical-card-shadow: ${theme['timeline-vertical-card-shadow'] || '0 4px 6px rgba(0, 0, 0, 0.1)'}`,
-			`--timeline-vertical-year-color: ${theme['timeline-vertical-year-color'] || '#f59e0b'}`,
-			`--timeline-vertical-text-color: ${theme['timeline-vertical-text-color'] || '#111827'}`,
+			// Lijn
+			`--timeline-line-color: ${theme['timeline-line-color'] || '#f59e0b'}`,
+			`--timeline-line-width: ${theme['timeline-line-width'] || '4px'}`,
 
-			// Mobile
-			`--timeline-horizontal-line-color: ${theme['timeline-horizontal-line-color'] || '#f59e0b'}`,
-			`--timeline-horizontal-marker-bg: ${theme['timeline-horizontal-marker-bg'] || '#f59e0b'}`,
-			`--timeline-horizontal-marker-border: ${theme['timeline-horizontal-marker-border'] || '#ffffff'}`,
-			`--timeline-horizontal-card-bg: ${theme['timeline-horizontal-card-bg'] || '#fdf6e9'}`,
-			`--timeline-horizontal-card-border: ${theme['timeline-horizontal-card-border'] || '#e4b483'}`,
-			`--timeline-horizontal-card-shadow: ${theme['timeline-horizontal-card-shadow'] || '0 4px 10px rgba(0, 0, 0, 0.2)'}`,
-			`--timeline-horizontal-year-color: ${theme['timeline-horizontal-year-color'] || '#78350f'}`,
-			`--timeline-horizontal-year-bg: ${theme['timeline-horizontal-year-bg'] || '#fdf6e9'}`,
-			`--timeline-horizontal-text-color: ${theme['timeline-horizontal-text-color'] || '#111827'}`,
-			`--timeline-horizontal-connector-color: ${theme['timeline-horizontal-connector-color'] || '#f59e0b'}`,
+			// Markers
+			`--timeline-marker-bg: ${theme['timeline-marker-bg'] || '#fdf6e9'}`,
+			`--timeline-marker-border-color: ${theme['timeline-marker-border-color'] || '#2c5599'}`,
+			`--timeline-marker-border-width: ${theme['timeline-marker-border-width'] || '4px'}`,
+			`--timeline-marker-size: ${theme['timeline-marker-size'] || '1rem'}`,
+
+			// Jaar
+			`--timeline-year-color: ${theme['timeline-year-color'] || '#f59e0b'}`,
+			`--timeline-year-bg: ${theme['timeline-year-bg'] || 'transparent'}`,
+			`--timeline-year-font-size: ${theme['timeline-year-font-size'] || '1.125rem'}`,
+			`--timeline-year-font-weight: ${theme['timeline-year-font-weight'] || '700'}`,
+			`--timeline-year-padding: ${theme['timeline-year-padding'] || '0 0.5rem'}`,
+			`--timeline-year-border-radius: ${theme['timeline-year-border-radius'] || '4px'}`,
+
+			// Kaarten
+			`--timeline-card-bg: ${theme['timeline-card-bg'] || '#fdf6e9'}`,
+			`--timeline-card-border-color: ${theme['timeline-card-border-color'] || '#e4b483'}`,
+			`--timeline-card-border-width: ${theme['timeline-card-border-width'] || '1px'}`,
+			`--timeline-card-border-radius: ${theme['timeline-card-border-radius'] || '0.5rem'}`,
+			`--timeline-card-shadow: ${theme['timeline-card-shadow'] || '0 4px 6px rgba(0, 0, 0, 0.1)'}`,
+			`--timeline-card-padding: ${theme['timeline-card-padding'] || '1rem'}`,
+
+			// Tekst
+			`--timeline-text-color: ${theme['timeline-text-color'] || '#111827'}`,
+			`--timeline-text-font-size: ${theme['timeline-text-font-size'] || '0.875rem'}`,
+			`--timeline-text-line-height: ${theme['timeline-text-line-height'] || '1.6'}`,
+			`--timeline-heading-color: ${theme['timeline-heading-color'] || '#111827'}`,
+			`--timeline-heading-font-size: ${theme['timeline-heading-font-size'] || '1.125rem'}`,
+			`--timeline-heading-font-weight: ${theme['timeline-heading-font-weight'] || '700'}`,
+
+			// Afbeeldingen
+			`--timeline-image-border-radius: ${theme['timeline-image-border-radius'] || '0.25rem'}`,
+			`--timeline-image-shadow: ${theme['timeline-image-shadow'] || '0 1px 3px rgba(0, 0, 0, 0.1)'}`,
+
+			// Connector
+			`--timeline-connector-color: ${theme['timeline-connector-color'] || '#f59e0b'}`,
+			`--timeline-connector-width: ${theme['timeline-connector-width'] || '2px'}`,
 
 			// Scroll buttons
 			`--timeline-scroll-btn-bg: ${theme['timeline-scroll-btn-bg'] || 'rgba(255, 255, 255, 0.9)'}`,
 			`--timeline-scroll-btn-border: ${theme['timeline-scroll-btn-border'] || '#ddd'}`,
 			`--timeline-scroll-btn-color: ${theme['timeline-scroll-btn-color'] || '#78350f'}`,
-			`--timeline-scroll-btn-hover-bg: ${theme['timeline-scroll-btn-hover-bg'] || 'rgba(255, 255, 255, 1)'}`
+			`--timeline-scroll-btn-hover-bg: ${theme['timeline-scroll-btn-hover-bg'] || 'rgba(255, 255, 255, 1)'}`,
+			`--timeline-scroll-btn-size: ${theme['timeline-scroll-btn-size'] || '40px'}`
 		].join(';')
 	);
 
@@ -236,25 +258,27 @@
 	h2,
 	h3 {
 		font-family: var(--font-family-base, 'Inter', sans-serif);
-		font-weight: 700;
 	}
 
 	h2 {
 		font-size: var(--timeline-title-size, 2rem);
 		color: var(--timeline-title-color, #111827);
 		margin-bottom: 2rem;
+		font-weight: 700;
 	}
 
 	h3 {
-		font-size: 1.125rem;
+		font-size: var(--timeline-heading-font-size, 1.125rem);
+		font-weight: var(--timeline-heading-font-weight, 700);
+		color: var(--timeline-heading-color, #111827);
 		margin-bottom: 0.5rem;
-		color: inherit;
 	}
 
 	p {
-		font-size: 0.875rem;
-		line-height: 1.6;
-		color: inherit;
+		font-size: var(--timeline-text-font-size, 0.875rem);
+		line-height: var(--timeline-text-line-height, 1.6);
+		color: var(--timeline-text-color, #111827);
+		margin: 0;
 	}
 
 	/* ==================================== */
@@ -264,7 +288,6 @@
 		.timeline-section {
 			max-width: 720px;
 			margin-inline: auto;
-			color: var(--timeline-vertical-text-color, #111827);
 		}
 
 		.text-center {
@@ -283,8 +306,8 @@
 			transform: translateX(-50%);
 			top: 0;
 			bottom: 0;
-			width: 4px;
-			background-color: var(--timeline-vertical-line-color, #f59e0b);
+			width: var(--timeline-line-width, 4px);
+			background-color: var(--timeline-line-color, #f59e0b);
 		}
 
 		.timeline-event {
@@ -323,10 +346,11 @@
 		.timeline-marker {
 			position: absolute;
 			top: 1.5rem;
-			width: 1rem;
-			height: 1rem;
-			background-color: var(--timeline-vertical-marker-bg, #fdf6e9);
-			border: 4px solid var(--timeline-vertical-marker-border, #2c5599);
+			width: var(--timeline-marker-size, 1rem);
+			height: var(--timeline-marker-size, 1rem);
+			background-color: var(--timeline-marker-bg, #fdf6e9);
+			border: var(--timeline-marker-border-width, 4px) solid
+				var(--timeline-marker-border-color, #2c5599);
 			border-radius: 50%;
 			z-index: 2;
 		}
@@ -342,10 +366,12 @@
 		}
 
 		.timeline-event-content {
-			background-color: var(--timeline-vertical-card-bg, #fdf6e9);
-			padding: 1rem;
-			border-radius: 0.5rem;
-			box-shadow: var(--timeline-vertical-card-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+			background-color: var(--timeline-card-bg, #fdf6e9);
+			padding: var(--timeline-card-padding, 1rem);
+			border-radius: var(--timeline-card-border-radius, 0.5rem);
+			box-shadow: var(--timeline-card-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+			border: var(--timeline-card-border-width, 1px) solid
+				var(--timeline-card-border-color, #e4b483);
 			position: relative;
 			z-index: 1;
 		}
@@ -359,31 +385,34 @@
 		}
 
 		.timeline-event-year {
-			font-weight: 700;
-			font-size: 1.125rem;
-			color: var(--timeline-vertical-year-color, #f59e0b);
-			/* ✅ NIEUW: Default links uitlijnen */
+			font-weight: var(--timeline-year-font-weight, 700);
+			font-size: var(--timeline-year-font-size, 1.125rem);
+			color: var(--timeline-year-color, #f59e0b);
+			background-color: var(--timeline-year-bg, transparent);
+			padding: var(--timeline-year-padding, 0 0.5rem);
+			border-radius: var(--timeline-year-border-radius, 4px);
 			text-align: left;
+			display: block;
+			width: fit-content;
 		}
 
-		/* ✅ NIEUW: Rechter items (odd) krijgen rechts uitlijning */
 		.is-odd .timeline-event-year {
 			text-align: right;
+			margin-left: auto;
 		}
 
 		.timeline-event-image {
-			/* ✅ FIXED: Full width i.p.v. max-width: 80px */
 			width: 100%;
 			max-width: 100%;
 			height: auto;
-			border-radius: 0.25rem;
-			margin: 0.5rem 0; /* ✅ FIXED: Verticale margin alleen */
+			border-radius: var(--timeline-image-border-radius, 0.25rem);
+			margin: 0.5rem 0;
 			display: block;
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+			box-shadow: var(--timeline-image-shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
 		}
 
 		.timeline-event-desc {
-			color: var(--timeline-vertical-text-color, #111827);
+			color: var(--timeline-text-color, #111827);
 		}
 	}
 
@@ -404,8 +433,8 @@
 			left: 0;
 			right: 0;
 			top: 3.5rem;
-			height: 4px;
-			background-color: var(--timeline-horizontal-line-color, #f59e0b);
+			height: var(--timeline-line-width, 4px);
+			background-color: var(--timeline-line-color, #f59e0b);
 			z-index: 1;
 		}
 
@@ -446,11 +475,12 @@
 			top: 1.5rem;
 			left: 50%;
 			transform: translateX(-50%);
-			font-weight: 700;
-			color: var(--timeline-horizontal-year-color, #78350f);
-			background-color: var(--timeline-horizontal-year-bg, #fdf6e9);
-			padding: 0 0.5rem;
-			border-radius: 4px;
+			font-weight: var(--timeline-year-font-weight, 700);
+			font-size: var(--timeline-year-font-size, 1.125rem);
+			color: var(--timeline-year-color, #78350f);
+			background-color: var(--timeline-year-bg, #fdf6e9);
+			padding: var(--timeline-year-padding, 0 0.5rem);
+			border-radius: var(--timeline-year-border-radius, 4px);
 			z-index: 3;
 		}
 
@@ -459,10 +489,11 @@
 			top: 3.5rem;
 			left: 50%;
 			transform: translate(-50%, -50%);
-			width: 1rem;
-			height: 1rem;
-			background-color: var(--timeline-horizontal-marker-bg, #f59e0b);
-			border: 2px solid var(--timeline-horizontal-marker-border, #ffffff);
+			width: var(--timeline-marker-size, 1rem);
+			height: var(--timeline-marker-size, 1rem);
+			background-color: var(--timeline-marker-bg, #f59e0b);
+			border: var(--timeline-marker-border-width, 2px) solid
+				var(--timeline-marker-border-color, #ffffff);
 			border-radius: 50%;
 			z-index: 2;
 		}
@@ -472,43 +503,31 @@
 			top: 3.5rem;
 			left: 50%;
 			transform: translateX(-50%);
-			width: 2px;
-			background-color: var(--timeline-horizontal-connector-color, #f59e0b);
+			width: var(--timeline-connector-width, 2px);
+			background-color: var(--timeline-connector-color, #f59e0b);
 			bottom: 0;
 		}
 
 		.timeline-card {
-			background-color: var(--timeline-horizontal-card-bg, #fdf6e9);
-			padding: 1rem;
+			background-color: var(--timeline-card-bg, #fdf6e9);
+			padding: var(--timeline-card-padding, 1rem);
 			margin-top: 4px;
-			border-radius: 0.5rem;
-			box-shadow: var(--timeline-horizontal-card-shadow, 0 4px 10px rgba(0, 0, 0, 0.2));
-			border: 1px solid var(--timeline-horizontal-card-border, #e4b483);
+			border-radius: var(--timeline-card-border-radius, 0.5rem);
+			box-shadow: var(--timeline-card-shadow, 0 4px 10px rgba(0, 0, 0, 0.2));
+			border: var(--timeline-card-border-width, 1px) solid
+				var(--timeline-card-border-color, #e4b483);
 			width: 100%;
 			position: relative;
 		}
 
-		.timeline-card h3 {
-			color: var(--timeline-horizontal-text-color, #111827);
-			font-size: 1.125rem;
-			margin-bottom: 0.5rem;
-		}
-
-		.timeline-card p {
-			color: var(--timeline-horizontal-text-color, #111827);
-			font-size: 0.875rem;
-			line-height: 1.6;
-			margin: 0;
-		}
-
-		/* ✅ FIXED: Full width afbeelding */
 		.card-image {
 			width: 100%;
-			height: auto; /* ✅ CHANGED: Auto height i.p.v. fixed 120px */
-			max-height: 200px; /* ✅ NIEUW: Max height om te grote foto's te voorkomen */
+			height: auto;
+			max-height: 200px;
 			object-fit: cover;
-			border-radius: 4px;
+			border-radius: var(--timeline-image-border-radius, 4px);
 			margin-bottom: 0.5rem;
+			box-shadow: var(--timeline-image-shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
 		}
 
 		.scroll-button {
@@ -518,8 +537,8 @@
 			background-color: var(--timeline-scroll-btn-bg, rgba(255, 255, 255, 0.9));
 			border: 1px solid var(--timeline-scroll-btn-border, #ddd);
 			border-radius: 50%;
-			width: 40px;
-			height: 40px;
+			width: var(--timeline-scroll-btn-size, 40px);
+			height: var(--timeline-scroll-btn-size, 40px);
 			display: flex;
 			align-items: center;
 			justify-content: center;
