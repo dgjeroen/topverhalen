@@ -1,4 +1,3 @@
-<!-- src/lib/components/ThemeLoader.svelte -->
 <script lang="ts">
 	import type { Theme } from '$lib/types';
 
@@ -7,9 +6,32 @@
 	$effect(() => {
 		if (!theme || Object.keys(theme).length === 0) return;
 
+		// ✅ FIX: Handle ALL value types (string, number, boolean)
 		const cssVars = Object.entries(theme)
-			.filter(([_, value]) => typeof value === 'string' && value.trim() !== '')
-			.map(([key, value]) => `  --${key}: ${value};`)
+			.filter(([_, value]) => {
+				// Accept strings, numbers, and booleans
+				return (
+					(typeof value === 'string' && value.trim() !== '') ||
+					typeof value === 'number' ||
+					typeof value === 'boolean'
+				);
+			})
+			.map(([key, value]) => {
+				// ✅ FIX: Special handling voor specifieke keys
+
+				// Overlay opacity: convert percentage (0-100) to decimal (0-1)
+				if (key === 'hero-video-overlay-opacity' && typeof value === 'number') {
+					return `  --${key}: ${value / 100};`;
+				}
+
+				// Uppercase title: convert boolean to CSS value
+				if (key === 'hero-video-uppercase-title' && typeof value === 'boolean') {
+					return `  --${key}: ${value ? 'uppercase' : 'none'};`;
+				}
+
+				// Default: direct value
+				return `  --${key}: ${value};`;
+			})
 			.join('\n');
 
 		const bgImage = theme['background-image'];
@@ -23,8 +45,6 @@
   --background-attachment: ${theme['background-attachment'] || 'scroll'};`
 			: `
   --background-image: none;`;
-
-		// ❌ REMOVED: textColorOverride (niet meer nodig)
 
 		const allVars = cssVars + bgVars;
 
@@ -51,7 +71,6 @@ body {
   overflow: visible;
   min-height: 100vh;
   height: auto;
-  /* ❌ REMOVED: color override (TextStyleEditor doet dit) */
 }
 
 @media (min-width: 769px) {

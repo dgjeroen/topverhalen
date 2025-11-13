@@ -1,11 +1,18 @@
-<!--src\lib\components\HeroVideo.svelte-->
 <script lang="ts">
 	import SwitchLogo from './SwitchLogo.svelte';
 	import type { HeroVideoContent } from '$lib/types';
 	import Hls from 'hls.js';
 	import { onMount, onDestroy } from 'svelte';
 
-	let { url, label, title, source, textAlign = 'center' }: HeroVideoContent = $props();
+	let {
+		url,
+		label,
+		title,
+		source,
+		textAlign = 'center',
+		focusX = 50,
+		focusY = 50
+	}: HeroVideoContent = $props();
 
 	let elementsVisible = $state(false);
 	let videoEl: HTMLVideoElement | undefined;
@@ -42,22 +49,15 @@
 		});
 	});
 
-	// ✅ FIX: Verbeterde scroll functie met fallback
 	function scrollToContent(event: Event) {
 		event.preventDefault();
-
-		// Probeer eerst #content-start
 		let element = document.getElementById('content-start');
-
-		// Fallback: scroll naar volgende sibling van hero container
 		if (!element && videoEl) {
 			const heroContainer = videoEl.closest('.hero-container');
 			if (heroContainer) {
 				element = heroContainer.nextElementSibling as HTMLElement;
 			}
 		}
-
-		// Fallback 2: scroll één viewport naar beneden
 		if (!element) {
 			window.scrollTo({
 				top: window.innerHeight,
@@ -65,7 +65,6 @@
 			});
 			return;
 		}
-
 		element.scrollIntoView({
 			behavior: 'smooth',
 			block: 'start'
@@ -82,6 +81,7 @@
 		loop
 		playsinline
 		class="background-video"
+		style:object-position="{focusX}% {focusY}%"
 	></video>
 	<div class="overlay"></div>
 
@@ -124,7 +124,7 @@
 		width: 100%;
 		position: relative;
 		display: flex;
-		color: var(--color-white);
+		color: var(--hero-video-title-color, var(--color-white));
 	}
 
 	.background-video {
@@ -140,7 +140,7 @@
 	.overlay {
 		position: absolute;
 		inset: 0;
-		background-color: rgba(var(--color-text-rgb), 0.5);
+		background-color: rgba(var(--color-text-rgb), var(--hero-video-overlay-opacity, 0.5));
 		z-index: -1;
 	}
 
@@ -176,7 +176,6 @@
 		transform: translateY(0);
 	}
 
-	/* Text alignment variants */
 	[data-text-align='top'] .title-container {
 		justify-content: flex-start;
 		padding-top: var(--space-xl);
@@ -192,17 +191,18 @@
 	}
 
 	.hero-title {
-		font-family: var(--font-family-quote);
+		font-family: var(--hero-video-title-font, var(--font-family-quote));
 		font-weight: 700;
-		text-transform: uppercase;
+		text-transform: var(--hero-video-uppercase-title, uppercase); /* ✅ Dynamic */
 		max-width: 800px;
 		line-height: 1.2;
 		margin: var(--space-m) auto;
+		color: var(--hero-video-title-color, var(--color-white));
 	}
 
 	.label,
 	.source {
-		font-family: var(--font-family-quote);
+		font-family: var(--hero-video-label-font, var(--font-family-quote));
 		font-size: 1.5rem;
 		font-weight: 400;
 		text-transform: uppercase;
@@ -211,6 +211,7 @@
 		width: 100%;
 		max-width: 800px;
 		margin-inline: auto;
+		color: var(--hero-video-title-color, var(--color-white));
 	}
 
 	.label {
@@ -227,7 +228,7 @@
 		position: absolute;
 		width: 50px;
 		height: 1px;
-		background-color: var(--color-white);
+		background-color: currentColor;
 		opacity: 0.5;
 	}
 
@@ -252,7 +253,7 @@
 		gap: 4px;
 		font-size: var(--font-size-s);
 		text-decoration: none;
-		color: var(--color-white);
+		color: currentColor;
 		opacity: 0.7;
 		background: none;
 		border: none;
