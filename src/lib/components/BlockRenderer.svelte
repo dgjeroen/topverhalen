@@ -1,3 +1,4 @@
+<!-- src/lib/components/BlockRenderer.svelte -->
 <script lang="ts">
 	import TextBlock from './TextBlock.svelte';
 	import Heading from './Heading.svelte';
@@ -28,29 +29,6 @@
 		theme?: Theme;
 	}>();
 
-	const componentMap: Record<string, any> = {
-		heroVideo: HeroVideo,
-		imageHero: ImageHero,
-		textblock: TextBlock,
-		heading: Heading,
-		subheading: Heading,
-		subheadingMedium: Heading,
-		subheadingSoccer: SubheadingSoccer,
-		image: Image,
-		quote: Quote,
-		audio: Audio,
-		video: Video,
-		colofon: Colofon,
-		slider: ImageSlider,
-		gallery: ImageGrid,
-		timeline: Timeline,
-		mediaPair: MediaPair,
-		textframe: TextFrame,
-		embed: Embed
-	};
-
-	const ComponentToRender = componentMap[block.type] || Unsupported;
-
 	const noWrapperBlocks = ['heroVideo', 'imageHero'];
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 	const heroBlocks = ['heroVideo', 'imageHero'];
@@ -77,14 +55,104 @@
 	});
 </script>
 
-{#if noWrapperBlocks.includes(block.type)}
-	<ComponentToRender {...block.content} level={headingLevel} {theme} />
-
-	{#if isFirst && heroBlocks.includes(block.type)}
+<!-- ✅ HERO BLOCKS (no wrapper, expliciete props) -->
+{#if block.type === 'heroVideo'}
+	<HeroVideo
+		url={block.content.url}
+		poster={block.content.poster}
+		label={block.content.label}
+		title={block.content.title}
+		source={block.content.source}
+		textAlign={block.content.textAlign}
+		focusX={block.content.focusX}
+		focusY={block.content.focusY}
+		videoScale={block.content.videoScale}
+	/>
+	{#if isFirst}
 		<div id="content-start"></div>
 	{/if}
-{:else}
+{:else if block.type === 'imageHero'}
+	<ImageHero
+		url={block.content.url}
+		label={block.content.label}
+		title={block.content.title}
+		source={block.content.source}
+		textAlign={block.content.textAlign}
+		focusX={block.content.focusX}
+		focusY={block.content.focusY}
+		imageScale={block.content.imageScale}
+	/>
+	{#if isFirst}
+		<div id="content-start"></div>
+	{/if}
+
+	<!-- ✅ STANDARD BLOCKS (met wrapper, spread OK) -->
+{:else if block.type === 'textblock'}
+	<div class="wrapper-standard">
+		<TextBlock {...block.content} />
+	</div>
+{:else if block.type === 'heading' || block.type === 'subheading' || block.type === 'subheadingMedium'}
+	<div class="wrapper-standard">
+		<Heading {...block.content} level={headingLevel} />
+	</div>
+{:else if block.type === 'subheadingSoccer'}
+	<div class="wrapper-standard">
+		<SubheadingSoccer {...block.content} {theme} />
+	</div>
+{:else if block.type === 'image'}
+	<div class="wrapper-standard">
+		<Image {...block.content} />
+	</div>
+{:else if block.type === 'quote'}
+	<div class="wrapper-standard">
+		<Quote {...block.content} />
+	</div>
+{:else if block.type === 'video'}
+	<div class="wrapper-wide">
+		<Video
+			url={block.content.url}
+			poster={block.content.poster}
+			focusX={block.content.focusX}
+			focusY={block.content.focusY}
+			videoScale={block.content.videoScale}
+		/>
+	</div>
+{:else if block.type === 'audio'}
+	<div class="wrapper-standard">
+		<Audio {...block.content} />
+	</div>
+{:else if block.type === 'slider'}
+	<div class="wrapper-wide">
+		<ImageSlider {...block.content} />
+	</div>
+{:else if block.type === 'gallery'}
+	<div class="wrapper-wide">
+		<ImageGrid {...block.content} />
+	</div>
+{:else if block.type === 'timeline'}
+	<div class="wrapper-wide">
+		<Timeline {...block.content} {theme} />
+		<!-- ✅ FIXED: theme toegevoegd -->
+	</div>
+{:else if block.type === 'mediaPair'}
+	<div class="wrapper-wide">
+		<MediaPair {...block.content} />
+	</div>
+{:else if block.type === 'textframe'}
 	<div class={wrapperClass()}>
-		<ComponentToRender {...block.content} level={headingLevel} {theme} />
+		<TextFrame {...block.content} />
+	</div>
+{:else if block.type === 'embed'}
+	<div class="wrapper-standard">
+		<Embed {...block.content} />
+	</div>
+{:else if block.type === 'colofon'}
+	<div class="wrapper-standard">
+		<Colofon {...block.content} {theme} />
+		<!-- ✅ Check of Colofon theme nodig heeft -->
+	</div>
+{:else}
+	<div class="wrapper-standard">
+		<Unsupported type={block.type} />
 	</div>
 {/if}
