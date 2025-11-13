@@ -31,13 +31,27 @@
 		<text x="3" y="19" font-family="sans-serif" font-size="16" fill="currentColor">H4</text>
 	</symbol>
 
-	<!-- Hero Video -->
+	<!-- Hero Video Icon -->
 	<symbol id="icon-block-hero-video" viewBox="0 0 24 24">
-		<path
-			stroke-linecap="round"
-			stroke-linejoin="round"
+		<rect
+			x="2"
+			y="3"
+			width="20"
+			height="14"
+			rx="2"
+			stroke="currentColor"
 			stroke-width="2"
-			d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+			fill="none"
+		/>
+		<polygon points="10 8 10 14 15 11" fill="currentColor" />
+		<line
+			x1="6"
+			y1="20"
+			x2="18"
+			y2="20"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
 		/>
 	</symbol>
 

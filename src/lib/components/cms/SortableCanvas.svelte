@@ -372,6 +372,8 @@
 											muted
 											loop
 											class="media-preview"
+											style:object-position="{block.content.focusX || 50}% {block.content.focusY ||
+												50}%"
 										>
 											<track kind="captions" />
 										</video>
@@ -379,9 +381,78 @@
 								{/if}
 								{#if block.content.poster}
 									<div class="preview-col">
-										<img src={block.content.poster} alt="Poster" class="media-preview" />
+										<img
+											src={block.content.poster}
+											alt="Poster"
+											class="media-preview"
+											style:object-position="{block.content.focusX || 50}% {block.content.focusY ||
+												50}%"
+										/>
 									</div>
 								{/if}
+							</div>
+
+							<!-- ✅ NIEUW: Focus Point Controls -->
+							<div class="focus-controls">
+								<h5>Video Focus Point</h5>
+								<p class="control-hint">
+									Bepaal welk deel van de video altijd zichtbaar blijft (vooral belangrijk bij
+									mobiel)
+								</p>
+
+								<div class="focus-slider-group">
+									<label for="hero-focus-x-{block.id}">
+										Horizontaal (Links ← → Rechts)
+										<span class="value-display">{block.content.focusX || 50}%</span>
+									</label>
+									<input
+										id="hero-focus-x-{block.id}"
+										type="range"
+										min="0"
+										max="100"
+										bind:value={block.content.focusX}
+										oninput={() => dispatch('save')}
+										class="range-input"
+									/>
+									<div class="range-labels">
+										<span>Links</span>
+										<span>Midden</span>
+										<span>Rechts</span>
+									</div>
+								</div>
+
+								<div class="focus-slider-group">
+									<label for="hero-focus-y-{block.id}">
+										Verticaal (Boven ↑ ↓ Onder)
+										<span class="value-display">{block.content.focusY || 50}%</span>
+									</label>
+									<input
+										id="hero-focus-y-{block.id}"
+										type="range"
+										min="0"
+										max="100"
+										bind:value={block.content.focusY}
+										oninput={() => dispatch('save')}
+										class="range-input"
+									/>
+									<div class="range-labels">
+										<span>Boven</span>
+										<span>Midden</span>
+										<span>Onder</span>
+									</div>
+								</div>
+
+								<button
+									type="button"
+									class="reset-focus-btn"
+									onclick={() => {
+										block.content.focusX = 50;
+										block.content.focusY = 50;
+										dispatch('save');
+									}}
+								>
+									↻ Reset naar midden
+								</button>
 							</div>
 						{/if}
 
@@ -2337,6 +2408,108 @@ Voorbeelden:
 	.hero-align-picker label.active .hero-align-icon svg {
 		opacity: 1;
 		color: #d10a10;
+	}
+
+	/* Focus Controls */
+	.focus-controls {
+		margin-top: 1.5rem;
+		padding: 1rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+	}
+
+	.focus-controls h5 {
+		margin: 0 0 0.5rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.focus-slider-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.focus-slider-group:last-of-type {
+		margin-bottom: 1rem;
+	}
+
+	.focus-slider-group label {
+		display: block;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		margin-bottom: 0.5rem;
+	}
+
+	.range-input {
+		width: 100%;
+		height: 6px;
+		border-radius: 3px;
+		background: #e5e7eb;
+		outline: none;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.range-input::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #d10a10;
+		cursor: pointer;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.range-input::-moz-range-thumb {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #d10a10;
+		cursor: pointer;
+		border: none;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.range-labels {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 0.5rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+
+	.reset-focus-btn {
+		width: 100%;
+		padding: 0.5rem;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.reset-focus-btn:hover {
+		background: #f9fafb;
+		border-color: #d1d5db;
+	}
+
+	.value-display {
+		float: right;
+		color: #d10a10;
+		font-weight: 600;
+	}
+
+	.control-hint {
+		font-size: 0.75rem;
+		color: #6b7280;
+		margin: 0 0 1rem 0;
+		line-height: 1.4;
 	}
 
 	.video-editor {

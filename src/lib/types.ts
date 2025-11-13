@@ -295,6 +295,8 @@ export interface HeroVideoContent {
     title: string;
     source: string;
     textAlign?: 'top' | 'center' | 'bottom';
+    focusX?: number;
+    focusY?: number;
 }
 
 export interface ImageHeroContent {

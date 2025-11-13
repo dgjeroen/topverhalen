@@ -9,6 +9,7 @@
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 	import SortableCanvas from '$lib/components/cms/SortableCanvas.svelte';
 	import StyleComponentList from '$lib/components/cms/StyleComponentList.svelte';
+	import HeroVideoStyleEditor from '$lib/components/cms/editors/HeroVideoStyleEditor.svelte';
 	import GeneralStyleEditor from '$lib/components/cms/editors/GeneralStyleEditor.svelte';
 	import HeadingStyleEditor from '$lib/components/cms/editors/HeadingStyleEditor.svelte';
 	import TextStyleEditor from '$lib/components/cms/editors/TextStyleEditor.svelte';
@@ -31,6 +32,18 @@
 	} from '$lib/utils/localStorage';
 
 	let { data } = $props<{ data: PageData }>();
+
+	let currentTheme = $state(data.project.theme || {});
+
+	// ✅ Sync data → lokale state
+	$effect(() => {
+		currentTheme = data.project.theme || {};
+	});
+
+	// ✅ Sync lokale state → data (voor save)
+	$effect(() => {
+		data.project.theme = currentTheme;
+	});
 
 	let canvasBlocks = $state<ContentBlock[]>(data.project.data || []);
 	let splideInstances = new Map<string, any>();
@@ -167,12 +180,6 @@
 		}
 	});
 
-	$effect(() => {
-		if (!data.project.theme) {
-			data.project.theme = {};
-		}
-	});
-
 	// ✅ NIEUW: Debounced save met adaptive delay
 	function debouncedSave() {
 		saveManager.setUnsavedChanges(true);
@@ -192,6 +199,11 @@
 		saveTimeout = setTimeout(() => {
 			saveToServer();
 		}, delay);
+	}
+
+	async function handleStyleSave() {
+		debouncedSave();
+		return Promise.resolve();
 	}
 
 	// ✅ NIEUW: Manual save (bypasses debounce)
@@ -910,29 +922,31 @@
 			{:else}
 				<div class="styling-canvas">
 					{#if selectedStyleComponent === 'general'}
-						<GeneralStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<GeneralStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'heroVideo'}
+						<HeroVideoStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'heading'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h2" />
+						<HeadingStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} level="h2" />
 					{:else if selectedStyleComponent === 'subheading'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h4" />
+						<HeadingStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} level="h4" />
 					{:else if selectedStyleComponent === 'subheadingMedium'}
-						<HeadingStyleEditor bind:theme={data.project.theme} onsave={forceSave} level="h3" />
+						<HeadingStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} level="h3" />
 					{:else if selectedStyleComponent === 'subheadingSoccer'}
-						<SubheadingSoccerStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<SubheadingSoccerStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'text'}
-						<TextStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<TextStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'textframe'}
-						<TextFrameStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<TextFrameStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'quote'}
-						<QuoteStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
-					{:else if selectedStyleComponent === 'colofon'}
-						<ColofonStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
-					{:else if selectedStyleComponent === 'audio'}
-						<AudioStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<QuoteStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'image'}
-						<ImageStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<ImageStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'slider'}
-						<SliderStyleEditor bind:theme={data.project.theme} onsave={forceSave} />
+						<SliderStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'audio'}
+						<AudioStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'colofon'}
+						<ColofonStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{/if}
 				</div>
 			{/if}
