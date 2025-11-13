@@ -1,6 +1,6 @@
 <!--src\lib\components\cms\SortableCanvas.svelte-->
 <script lang="ts">
-	import { onDestroy, tick, createEventDispatcher } from 'svelte';
+	import { onDestroy, tick, createEventDispatcher, untrack } from 'svelte';
 	import type { ContentBlock, Theme } from '$lib/types';
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
@@ -216,32 +216,37 @@
 		return false;
 	}
 
-	// ✅ GOED (Stabiel & Waterdicht)
+	// ✅ NIEUWE CODE:
 	$effect(() => {
 		if (typeof window === 'undefined') return;
 
-		const currentBlockIds = new Set(blocks.map((b: ContentBlock) => b.id));
+		// ✅ Wrap in untrack() to prevent infinite loop
+		untrack(() => {
+			const currentBlockIds = new Set(blocks.map((b: ContentBlock) => b.id));
 
-		for (const blockId of splideInstances.keys()) {
-			if (!currentBlockIds.has(blockId)) {
-				const instance = splideInstances.get(blockId);
-				if (instance) {
-					instance.destroy();
-				}
-				splideInstances.delete(blockId);
-			}
-		}
-
-		blocks.forEach((block: ContentBlock) => {
-			if ((block.type === 'heroVideo' || block.type === 'video') && block.content.url) {
-				setTimeout(() => initHlsPlayer(block), 50);
-			}
-
-			if (['slider', 'gallery', 'timeline'].includes(block.type)) {
-				if (!splideInstances.has(block.id)) {
-					setTimeout(() => initSplideForBlock(block.id, block.type), 100);
+			// Cleanup removed blocks
+			for (const blockId of splideInstances.keys()) {
+				if (!currentBlockIds.has(blockId)) {
+					const instance = splideInstances.get(blockId);
+					if (instance) {
+						instance.destroy();
+					}
+					splideInstances.delete(blockId);
 				}
 			}
+
+			// Initialize new blocks
+			blocks.forEach((block: ContentBlock) => {
+				if ((block.type === 'heroVideo' || block.type === 'video') && block.content.url) {
+					setTimeout(() => initHlsPlayer(block), 50);
+				}
+
+				if (['slider', 'gallery', 'timeline'].includes(block.type)) {
+					if (!splideInstances.has(block.id)) {
+						setTimeout(() => initSplideForBlock(block.id, block.type), 100);
+					}
+				}
+			});
 		});
 	});
 
