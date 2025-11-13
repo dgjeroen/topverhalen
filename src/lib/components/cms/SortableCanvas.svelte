@@ -96,16 +96,17 @@
 	function canBeLead(blockId: string): boolean {
 		return blockId === firstTextblockId;
 	}
-
-	// ✅ Cleanup lead status
+	// ✅ FIXED CODE:
 	$effect(() => {
-		blocks.forEach((block: ContentBlock) => {
-			if (block.type === 'textblock' && block.id !== firstTextblockId) {
-				if (block.content.isLead) {
-					block.content.isLead = false;
-					dispatch('save');
+		untrack(() => {
+			blocks.forEach((block: ContentBlock) => {
+				if (block.type === 'textblock' && block.id !== firstTextblockId) {
+					if (block.content.isLead) {
+						block.content.isLead = false;
+						dispatch('save');
+					}
 				}
-			}
+			});
 		});
 	});
 
