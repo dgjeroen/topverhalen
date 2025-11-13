@@ -13,7 +13,8 @@
 		textAlign = 'center',
 		focusX = 50,
 		focusY = 50,
-		videoScale = 100
+		videoScale = 100,
+		poster
 	}: HeroVideoContent = $props();
 
 	let elementsVisible = $state(false);

@@ -70,7 +70,7 @@
 			video: 'Video',
 			embed: 'Embed',
 			slider: 'Fotoslider',
-			gallery: 'Galerij',
+			gallery: 'Fotogrid',
 			textframe: 'Tekstkader',
 			timeline: 'Tijdlijn',
 			mediaPair: 'Mediapaar',
