@@ -262,27 +262,33 @@
 
 <style>
 	/* ==================================== */
-	/* 1. GLOBALE STIJLEN MET CSS VARS     */
+	/* 1. GLOBALE STIJLEN - SCOPED!        */
 	/* ==================================== */
-	section {
+	.timeline-section,
+	.horizontal-timeline-section {
 		margin-block: var(--timeline-section-margin, 4rem);
 	}
-	h2,
-	h3 {
+
+	/* ✅ SCOPED: Alleen binnen timeline sections */
+	.timeline-section h2,
+	.horizontal-timeline-section h2 {
 		font-family: var(--font-family-base, 'Inter', sans-serif);
-	}
-	h2 {
 		font-size: var(--timeline-title-size, 2rem);
 		color: var(--timeline-title-color, #111827);
 		font-weight: var(--timeline-title-weight, 700);
 		margin-bottom: 2rem;
 	}
-	h3 {
+
+	.timeline-section h3,
+	.horizontal-timeline-section h3 {
+		font-family: var(--font-family-base, 'Inter', sans-serif);
 		font-size: 1.125rem;
 		font-weight: 700;
 		margin-bottom: 0.5rem;
 	}
-	p {
+
+	.timeline-section p,
+	.horizontal-timeline-section p {
 		font-size: var(--timeline-text-size, 0.875rem);
 		line-height: var(--timeline-text-line-height, 1.6);
 		color: var(--timeline-text-color, #111827);
