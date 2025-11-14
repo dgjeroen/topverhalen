@@ -1,4 +1,5 @@
 <script lang="ts">
+	// cache bust
 	import { browser } from '$app/environment';
 	import type { TimelineItem, Theme } from '$lib/types';
 	import { onMount } from 'svelte';
