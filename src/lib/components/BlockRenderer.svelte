@@ -1,4 +1,3 @@
-<!-- src/lib/components/BlockRenderer.svelte -->
 <script lang="ts">
 	import TextBlock from './TextBlock.svelte';
 	import Heading from './Heading.svelte';
@@ -17,11 +16,16 @@
 	import Embed from './Embed.svelte';
 	import SubheadingSoccer from './SubheadingSoccer.svelte';
 	import Unsupported from './Unsupported.svelte';
-	import type { ContentBlock } from '$lib/types';
+	import type { ContentBlock, Theme } from '$lib/types'; // ✅ ADD Theme import
 
-	let { block, isFirst = false } = $props<{
+	let {
+		block,
+		isFirst = false,
+		theme = {} // ✅ ADD theme prop
+	} = $props<{
 		block: ContentBlock;
 		isFirst?: boolean;
+		theme?: Theme; // ✅ ADD this
 	}>();
 
 	const componentMap: Record<string, any> = {
@@ -51,7 +55,6 @@
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 	const heroBlocks = ['heroVideo', 'imageHero'];
 
-	// ✅ Helper functie voor heading levels
 	function getHeadingLevel(type: string): number | undefined {
 		if (type === 'heading') return 2;
 		if (type === 'subheading') return 4;
@@ -61,14 +64,11 @@
 
 	const headingLevel = $derived(getHeadingLevel(block.type));
 
-	// ✅ NIEUW: Bepaal wrapper class (inclusief textframe width)
 	const wrapperClass = $derived(() => {
-		// Standaard wide blocks
 		if (wideBlocks.includes(block.type)) {
 			return 'wrapper-wide';
 		}
 
-		// ✅ TextFrame: check width property ('narrow' | 'wide')
 		if (block.type === 'textframe') {
 			return block.content?.width === 'wide' ? 'wrapper-wide' : 'wrapper-standard';
 		}
@@ -78,13 +78,15 @@
 </script>
 
 {#if noWrapperBlocks.includes(block.type)}
-	<ComponentToRender {...block.content} level={headingLevel} />
+	<ComponentToRender {...block.content} level={headingLevel} {theme} />
+	<!-- ✅ ADD {theme} -->
 
 	{#if isFirst && heroBlocks.includes(block.type)}
 		<div id="content-start"></div>
 	{/if}
 {:else}
 	<div class={wrapperClass()}>
-		<ComponentToRender {...block.content} level={headingLevel} />
+		<ComponentToRender {...block.content} level={headingLevel} {theme} />
+		<!-- ✅ ADD {theme} -->
 	</div>
 {/if}

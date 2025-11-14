@@ -20,6 +20,7 @@
 	import ImageStyleEditor from '$lib/components/cms/editors/ImageStyleEditor.svelte';
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
 	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
+	import TimelineStyleEditor from '$lib/components/cms/editors/TimelineStyleEditor.svelte';
 
 	// ✅ NIEUW: Import save manager en localStorage utils
 	import { saveManager, rateLimitWarning } from '$lib/stores/saveManager';
@@ -373,11 +374,21 @@
 				};
 			case 'slider':
 				return { images: [{ url: '', caption: '', source: '' }] };
-
 			case 'gallery':
 				return { columns: 2, images: [] };
 			case 'timeline':
-				return { timelines: [] };
+				return {
+					title: 'Tijdlijn',
+					timelines: [
+						{
+							year: '2020',
+							title: 'Start',
+							imageSrc: null,
+							imageAlt: '',
+							description: 'Beschrijving van gebeurtenis in 2020'
+						}
+					]
+				};
 			case 'mediaPair':
 				return {
 					verticalAlign: 'top',
@@ -947,6 +958,8 @@
 						<AudioStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'colofon'}
 						<ColofonStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'timeline'}
+						<TimelineStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{/if}
 				</div>
 			{/if}
