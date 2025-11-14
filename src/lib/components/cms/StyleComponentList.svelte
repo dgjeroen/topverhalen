@@ -19,7 +19,8 @@
 		{ id: 'audio', label: 'Audio', icon: 'icon-block-audio' },
 		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },
 		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' },
-		{ id: 'colofon', label: 'Colofon', icon: 'icon-block-colofon' }
+		{ id: 'colofon', label: 'Colofon', icon: 'icon-block-colofon' },
+		{ id: 'timeline', label: 'Tijdlijn', icon: 'icon-block-timeline' }
 	];
 </script>
 

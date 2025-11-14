@@ -57,7 +57,7 @@
 	.quote-block {
 		position: relative;
 		margin: 0;
-		padding: var(--quote-padding, var(--space-xl) var(--space-xl) var(--space-xl) var(--space-xxl));
+		padding: var(--quote-padding, var(--space-xxl) var(--space-xl) var(--space-m) var(--space-xxl));
 		border-left: var(--quote-border-width, 10px) solid var(--quote-border-color, #ffd302);
 		background-color: var(--quote-background, #ffffff);
 		border-radius: var(--quote-border-radius, var(--border-radius-base));
@@ -110,9 +110,9 @@
 	.quote-author {
 		position: relative;
 		z-index: 1;
-		margin-top: var(--space-m);
+		margin-top: -1.5rem;
 		font-size: var(--quote-author-font-size, 1.5rem);
-		font-family: var(--quote-font-family, var(--font-family-quote)); /* ✅ ZELFDE ALS QUOTE TEKST */
+		font-family: var(--quote-font-family, var(--font-family-quote));
 		font-weight: var(--quote-author-font-weight, 500);
 		color: var(--quote-author-color, var(--color-text-muted));
 		text-align: var(--quote-author-align, right);

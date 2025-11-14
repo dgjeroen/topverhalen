@@ -20,5 +20,5 @@
 
 <!-- ✅ FIX: Voeg index toe en pass isFirst prop -->
 {#each project.data as block, i (block.id || block.type)}
-	<BlockRenderer {block} isFirst={i === 0} />
+	<BlockRenderer {block} isFirst={i === 0} theme={project.theme} />
 {/each}
