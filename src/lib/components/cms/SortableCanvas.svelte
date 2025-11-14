@@ -1540,6 +1540,29 @@ Voorbeelden:
 					<div class="timeline-editor">
 						<h4>Tijdlijn ({block.content.timelines.length} items)</h4>
 
+						<div style="margin-bottom: 1.5rem;">
+							<label
+								for="timeline-title-{block.id}"
+								style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.5rem; color: #374151;"
+							>
+								Titel van de tijdlijn
+							</label>
+							<input
+								id="timeline-title-{block.id}"
+								type="text"
+								placeholder="Tijdlijn"
+								bind:value={block.content.title}
+								oninput={() => dispatch('save')}
+								class="slide-input"
+							/>
+							<span
+								style="display: block; font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;"
+							>
+								Deze titel wordt getoond boven de tijdlijn
+							</span>
+						</div>
+
+						<!-- TIMELINE ITEMS -->
 						<div class="splide-container">
 							<div id="splide-{block.id}" class="splide">
 								<div class="splide__track">

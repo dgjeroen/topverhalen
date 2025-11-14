@@ -248,6 +248,59 @@ export type Theme = {
     'background-attachment'?: 'scroll' | 'fixed';
 
     // ============================================
+    // TIMELINE COMPONENT
+    // ============================================
+    'timeline-sync-mobile-desktop'?: 'true' | '';
+    'timeline-title'?: string;
+    // Desktop (Vertical)
+    'timeline-section-margin'?: string;
+    'timeline-title-color'?: string;
+    'timeline-title-size'?: string;
+    'timeline-title-weight'?: string;
+    'timeline-line-color'?: string;
+    'timeline-line-width'?: string;
+    'timeline-marker-size'?: string;
+    'timeline-marker-bg'?: string;
+    'timeline-marker-border-color'?: string;
+    'timeline-marker-border-width'?: string;
+    'timeline-card-bg'?: string;
+    'timeline-card-padding'?: string;
+    'timeline-card-border-radius'?: string;
+    'timeline-card-shadow'?: string;
+    'timeline-year-color'?: string;
+    'timeline-year-size'?: string;
+    'timeline-year-weight'?: string;
+    'timeline-text-color'?: string;
+    'timeline-text-size'?: string;
+    'timeline-text-line-height'?: string;
+    'timeline-image-max-width'?: string;
+    'timeline-image-border-radius'?: string;
+
+    // Mobile (Horizontal)
+    'timeline-mobile-title-align'?: string;
+    'timeline-mobile-line-color'?: string;
+    'timeline-mobile-line-height'?: string;
+    'timeline-mobile-marker-size'?: string;
+    'timeline-mobile-marker-bg'?: string;
+    'timeline-mobile-marker-border-color'?: string;
+    'timeline-mobile-marker-border-width'?: string;
+    'timeline-mobile-card-width'?: string;
+    'timeline-mobile-card-bg'?: string;
+    'timeline-mobile-card-padding'?: string;
+    'timeline-mobile-card-border-radius'?: string;
+    'timeline-mobile-card-shadow'?: string;
+    'timeline-mobile-card-border-color'?: string;
+    'timeline-mobile-year-color'?: string;
+    'timeline-mobile-year-bg'?: string;
+    'timeline-mobile-connector-color'?: string;
+    'timeline-mobile-connector-width'?: string;
+    'timeline-mobile-image-height'?: string;
+    'timeline-mobile-button-bg'?: string;
+    'timeline-mobile-button-border'?: string;
+    'timeline-mobile-button-icon-color'?: string;
+    'timeline-mobile-button-size'?: string;
+
+    // ============================================
     // OVERIG
     // ============================================
     'border-radius-base'?: string;
@@ -376,6 +429,7 @@ export interface TextFrameContent {
 }
 
 export interface TimelineContent {
+    title?: string;
     timelines: TimelineItem[];
 }
 
