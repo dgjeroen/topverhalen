@@ -2,14 +2,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import dgFavicon from '$lib/assets/favicon-dg.svg';
-	import bdFavicon from '$lib/assets/favicon-bd.svg';
-	import adFavicon from '$lib/assets/favicon-ad.svg';
-	import edFavicon from '$lib/assets/favicon-ed.svg';
-	import tubFavicon from '$lib/assets/favicon-tub.svg';
-	import dsFavicon from '$lib/assets/favicon-ds.svg';
-	import bndsFavicon from '$lib/assets/favicon-bnds.svg';
-	import pzcFavicon from '$lib/assets/favicon-pzc.svg';
+	import dgFavicon from '$lib/assets/favicons/favicon-dg.svg';
+	import bdFavicon from '$lib/assets/favicons/favicon-bd.svg';
+	import adFavicon from '$lib/assets/favicons/favicon-ad.svg';
+	import edFavicon from '$lib/assets/favicons/favicon-ed.svg';
+	import tubFavicon from '$lib/assets/favicons/favicon-tub.svg';
+	import dsFavicon from '$lib/assets/favicons/favicon-ds.svg';
+	import bndsFavicon from '$lib/assets/favicons/favicon-bnds.svg';
+	import pzcFavicon from '$lib/assets/favicons/favicon-pzc.svg';
 
 	const faviconMap: Record<string, string> = {
 		'www.gelderlander.nl': dgFavicon,
