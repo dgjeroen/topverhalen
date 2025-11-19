@@ -45,6 +45,7 @@
 </div>
 
 <style>
+	/* Basis styling voor het blok */
 	.textblock {
 		font-size: var(--text-font-size, var(--font-size-base, 1rem));
 		line-height: var(--text-line-height, var(--line-height-base, 1.6));
@@ -52,13 +53,38 @@
 		font-weight: var(--text-font-weight, 400);
 	}
 
+	/* ✅ DE FIX VOOR DE LEAD 
+       We passen de stijlen toe op de container...
+    */
 	.textblock.is-lead {
 		font-size: var(--text-lead-font-size, var(--font-size-l, 1.2rem));
 		font-weight: var(--text-lead-font-weight, 500);
-		color: var(--text-lead-color, var(--color-text));
 		line-height: var(--text-lead-line-height, 1.5);
+		color: var(--text-lead-color, var(--color-text));
 	}
 
+	/* ...MAAR we forceren ze ook op de paragraaf (<p>).
+       Dit overschrijft globale resets die zeggen "p is altijd 1rem".
+    */
+	.textblock.is-lead :global(p) {
+		font-size: var(--text-lead-font-size, var(--font-size-l, 1.2rem)) !important;
+		font-weight: var(--text-lead-font-weight, 500) !important;
+		line-height: var(--text-lead-line-height, 1.5) !important;
+		color: var(--text-lead-color, var(--color-text)) !important;
+		margin-bottom: 0.5em; /* Leads hebben vaak minder witruimte nodig */
+	}
+
+	/* Zorg dat strong/em/span in een lead ook de kleur en grootte erven */
+	.textblock.is-lead :global(span),
+	.textblock.is-lead :global(strong),
+	.textblock.is-lead :global(em),
+	.textblock.is-lead :global(a) {
+		font-size: inherit !important;
+		color: inherit !important;
+		/* Let op: font-weight doen we niet inherit bij strong, anders is het niet meer dikgedrukt */
+	}
+
+	/* Standaard paragraaf spacing */
 	.textblock :global(p) {
 		margin: 0 0 1em 0;
 	}
@@ -67,11 +93,13 @@
 		margin-bottom: 0;
 	}
 
+	/* Dikgedrukt (Bold) */
 	.textblock :global(strong) {
 		font-weight: var(--text-bold-weight, 700);
 		color: var(--text-bold-color, inherit);
 	}
 
+	/* Cursief (Italic) */
 	.textblock :global(em) {
 		font-style: italic;
 		color: var(--text-italic-color, inherit);
@@ -93,6 +121,7 @@
 		opacity: 0.7;
 	}
 
+	/* Links */
 	.textblock :global(a) {
 		color: var(--text-link-color, var(--color-accent, #ef4444));
 		text-decoration: var(--text-link-decoration, underline);

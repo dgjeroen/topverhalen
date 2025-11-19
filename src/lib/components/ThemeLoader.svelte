@@ -1,3 +1,4 @@
+<!--src\lib\components\ThemeLoader.svelte-->
 <script lang="ts">
 	import type { Theme } from '$lib/types';
 

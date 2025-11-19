@@ -16,40 +16,17 @@
 	import Embed from './Embed.svelte';
 	import SubheadingSoccer from './SubheadingSoccer.svelte';
 	import Unsupported from './Unsupported.svelte';
-	import type { ContentBlock, Theme } from '$lib/types'; // ✅ ADD Theme import
+	import type { ContentBlock, Theme } from '$lib/types';
 
 	let {
 		block,
 		isFirst = false,
-		theme = {} // ✅ ADD theme prop
+		theme = {}
 	} = $props<{
 		block: ContentBlock;
 		isFirst?: boolean;
-		theme?: Theme; // ✅ ADD this
+		theme?: Theme;
 	}>();
-
-	const componentMap: Record<string, any> = {
-		heroVideo: HeroVideo,
-		imageHero: ImageHero,
-		textblock: TextBlock,
-		heading: Heading,
-		subheading: Heading,
-		subheadingMedium: Heading,
-		subheadingSoccer: SubheadingSoccer,
-		image: Image,
-		quote: Quote,
-		audio: Audio,
-		video: Video,
-		colofon: Colofon,
-		slider: ImageSlider,
-		gallery: ImageGrid,
-		timeline: Timeline,
-		mediaPair: MediaPair,
-		textframe: TextFrame,
-		embed: Embed
-	};
-
-	const ComponentToRender = componentMap[block.type] || Unsupported;
 
 	const noWrapperBlocks = ['heroVideo', 'imageHero'];
 	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
@@ -68,25 +45,51 @@
 		if (wideBlocks.includes(block.type)) {
 			return 'wrapper-wide';
 		}
-
 		if (block.type === 'textframe') {
 			return block.content?.width === 'wide' ? 'wrapper-wide' : 'wrapper-standard';
 		}
-
 		return 'wrapper-standard';
 	});
 </script>
 
-{#if noWrapperBlocks.includes(block.type)}
-	<ComponentToRender {...block.content} level={headingLevel} {theme} />
-	<!-- ✅ ADD {theme} -->
-
-	{#if isFirst && heroBlocks.includes(block.type)}
-		<div id="content-start"></div>
-	{/if}
+{#if block.type === 'heroVideo'}
+	<HeroVideo {...block.content} {theme} />
+	{#if isFirst}<div id="content-start"></div>{/if}
+{:else if block.type === 'imageHero'}
+	<ImageHero {...block.content} {theme} />
+	{#if isFirst}<div id="content-start"></div>{/if}
 {:else}
 	<div class={wrapperClass()}>
-		<ComponentToRender {...block.content} level={headingLevel} {theme} />
-		<!-- ✅ ADD {theme} -->
+		{#if block.type === 'textblock'}
+			<TextBlock text={block.content.text} isLead={block.content.isLead} />
+		{:else if block.type === 'heading' || block.type === 'subheading' || block.type === 'subheadingMedium'}
+			<Heading {...block.content} level={headingLevel} {theme} />
+		{:else if block.type === 'subheadingSoccer'}
+			<SubheadingSoccer {...block.content} {theme} />
+		{:else if block.type === 'image'}
+			<Image {...block.content} {theme} />
+		{:else if block.type === 'quote'}
+			<Quote {...block.content} {theme} />
+		{:else if block.type === 'textframe'}
+			<TextFrame {...block.content} {theme} />
+		{:else if block.type === 'slider'}
+			<ImageSlider {...block.content} {theme} />
+		{:else if block.type === 'gallery'}
+			<ImageGrid {...block.content} {theme} />
+		{:else if block.type === 'timeline'}
+			<Timeline {...block.content} {theme} />
+		{:else if block.type === 'mediaPair'}
+			<MediaPair {...block.content} {theme} />
+		{:else if block.type === 'audio'}
+			<Audio {...block.content} {theme} />
+		{:else if block.type === 'video'}
+			<Video {...block.content} {theme} />
+		{:else if block.type === 'embed'}
+			<Embed {...block.content} {theme} />
+		{:else if block.type === 'colofon'}
+			<Colofon {...block.content} {theme} />
+		{:else}
+			<Unsupported type={block.type} />
+		{/if}
 	</div>
 {/if}
