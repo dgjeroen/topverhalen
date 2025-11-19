@@ -53,29 +53,22 @@
 		'cms.topverhaal.nl': dgLogoColor
 	};
 
-	// State voor de hostname
 	let currentHost = $state('');
 
-	// Haal de hostname 1x op zodra de component in de browser mount
 	onMount(() => {
 		currentHost = window.location.hostname;
 	});
 
-	// Bereken (derive) het logo. Dit runt automatisch als variant of currentHost verandert.
-	// Dit voorkomt de infinite loop omdat we geen state updaten, maar een waarde berekenen.
 	let logoSrc = $derived.by(() => {
-		if (!currentHost) return undefined; // Server-side of nog niet gemount
+		if (!currentHost) return undefined;
 
 		const map = variant === 'color' ? logoMapColor : logoMapDia;
 		const foundLogo = map[currentHost];
 
-		// Hebben we een logo voor dit domein?
 		if (foundLogo) {
 			return foundLogo;
 		}
 
-		// Geen logo gevonden (bv. Vercel Preview)? Gebruik Fallback.
-		// Console warn mag hier veilig, want het update geen state.
 		console.warn(`⚠️ Hostname '${currentHost}' not in logoMap, using default.`);
 		return variant === 'color' ? dgLogoColor : dgLogoDia;
 	});

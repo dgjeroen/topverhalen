@@ -4,10 +4,11 @@
 	import type { ContentBlock, Theme } from '$lib/types';
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
+	import TextBlock from '$lib/components/TextBlock.svelte';
 
 	// === PROPS ===
 	let {
-		blocks = [],
+		blocks = $bindable([]),
 		theme = {},
 		toolbox = null
 	} = $props<{
@@ -41,6 +42,11 @@
 		'audio',
 		'colofon'
 	];
+
+	// ✅ Expliciet type toevoegen aan (b)
+	const hasActiveLead = $derived(
+		blocks.some((b: ContentBlock) => b.type === 'textblock' && b.content.isLead)
+	);
 
 	function toggleCollapse(blockId: string) {
 		if (collapsedBlocks.has(blockId)) {
@@ -83,30 +89,21 @@
 	let splideInstances = new Map<string, any>();
 	let markdownInfoOpen = $state<Record<string, boolean>>({});
 
+	const themeStyles = $derived.by(() => {
+		if (!theme) return '';
+
+		return Object.entries(theme)
+			.map(([key, value]) => {
+				// Filter lege waardes eruit
+				if (value === '' || value === null || value === undefined) return '';
+				return `--${key}: ${value}`;
+			})
+			.join(';');
+	});
+
 	function toggleMarkdownInfo(blockId: string) {
 		markdownInfoOpen[blockId] = !markdownInfoOpen[blockId];
 	}
-
-	// ✅ Lead checkbox logic
-	const firstTextblockId = $derived(
-		blocks.find((b: ContentBlock) => b.type === 'textblock')?.id || null
-	);
-
-	function canBeLead(blockId: string): boolean {
-		return blockId === firstTextblockId;
-	}
-
-	// ✅ Cleanup lead status
-	$effect(() => {
-		blocks.forEach((block: ContentBlock) => {
-			if (block.type === 'textblock' && block.id !== firstTextblockId) {
-				if (block.content.isLead) {
-					block.content.isLead = false;
-					dispatch('save');
-				}
-			}
-		});
-	});
 
 	function initHlsPlayer(block: ContentBlock) {
 		// <-- ': ContentBlock' toegevoegd
@@ -298,7 +295,7 @@
 	});
 </script>
 
-<div class="canvas-wrapper" bind:this={canvasEl}>
+<div class="canvas-wrapper" bind:this={canvasEl} style={themeStyles}>
 	{#each blocks as block (block.id)}
 		<div class="canvas-block" data-type={block.type} data-block-id={block.id}>
 			<div class="block-header">
@@ -721,6 +718,23 @@
 					</div>
 				{:else if block.type === 'textblock'}
 					<div class="textblock-editor">
+						{#if block.content.isLead || !hasActiveLead}
+							<div class="control-group" style="margin-bottom: 1rem;">
+								<label class="checkbox-label lead-toggle">
+									<input
+										type="checkbox"
+										bind:checked={block.content.isLead}
+										onchange={() => dispatch('save')}
+									/>
+									<span style="font-weight: 600; color: var(--color-accent);">
+										Markeer als inleiding (Lead)
+									</span>
+								</label>
+								{#if block.content.isLead}
+									<p class="control-hint">Dit blok wordt groter weergegeven.</p>
+								{/if}
+							</div>
+						{/if}
 						<div class="editor-header-row">
 							<label class="input-label">
 								Tekst (Markdown)
@@ -793,10 +807,21 @@
 							bind:value={block.content.text[0]}
 							oninput={() => dispatch('save')}
 							class="block-textarea"
+							class:is-lead-preview={block.content.isLead}
 							rows="6"
+							style:font-size={block.content.isLead
+								? 'var(--text-lead-font-size, 1.2rem)'
+								: 'var(--text-font-size, 1rem)'}
+							style:line-height={block.content.isLead
+								? 'var(--text-lead-line-height, 1.5)'
+								: 'var(--text-line-height, 1.6)'}
+							style:font-weight={block.content.isLead
+								? 'var(--text-lead-font-weight, 500)'
+								: 'var(--text-font-weight, 400)'}
+							style:color={block.content.isLead
+								? 'var(--text-lead-color, var(--color-text))'
+								: 'var(--text-color, var(--color-text))'}
 						></textarea>
-
-						<!-- rest of textblock -->
 					</div>
 				{:else if block.type === 'image'}
 					<input
@@ -2129,34 +2154,6 @@ Voorbeelden:
 
 	.canvas-block:hover {
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-	}
-
-	/* ❌ DELETED: Old .remove-btn definition (lines 45-65) */
-	/* ❌ DELETED: .canvas-block:hover .remove-btn */
-
-	.block-input,
-	.block-textarea {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-family: inherit;
-		font-size: 0.9375rem;
-		margin-bottom: 0.5rem;
-		box-sizing: border-box;
-		transition: all 0.15s;
-	}
-
-	.block-textarea {
-		resize: vertical;
-		min-height: 80px;
-	}
-
-	.block-input:focus,
-	.block-textarea:focus {
-		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 
 	/* ===== COLLAPSIBLE HEADER ===== */
@@ -3645,5 +3642,40 @@ Voorbeelden:
 		flex-shrink: 0;
 		color: #3b82f6;
 		margin-top: 2px;
+	}
+
+	.lead-toggle {
+		background-color: #f0fdf4; /* Lichtgroen achtergrondje om op te vallen */
+		padding: 0.5rem;
+		border-radius: 4px;
+		border: 1px solid #bbf7d0;
+	}
+
+	.block-input,
+	.block-textarea {
+		width: 100%;
+		padding: 0.75rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		font-family: inherit;
+		font-size: 0.9375rem;
+		margin-bottom: 0.5rem;
+		box-sizing: border-box;
+		transition: all 0.15s;
+	}
+
+	.block-textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+
+	.block-input:focus,
+	.block-textarea:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+	.block-textarea.is-lead-preview {
+		border-left: 4px solid var(--color-accent, #667eea);
 	}
 </style>

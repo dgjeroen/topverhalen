@@ -919,7 +919,7 @@
 		<main class="canvas">
 			{#if activeTab === 'blocks'}
 				<SortableCanvas
-					blocks={canvasBlocks}
+					bind:blocks={canvasBlocks}
 					theme={data.project.theme}
 					on:save={debouncedSave}
 					on:remove={handleBlockRemove}

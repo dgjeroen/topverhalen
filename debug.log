@@ -1,0 +1,2 @@
+[1119/140907.262:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[1119/140907.326:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
