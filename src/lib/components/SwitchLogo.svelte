@@ -1,8 +1,9 @@
 <!-- src/lib/components/SwitchLogo.svelte -->
 <script lang="ts">
-	import { browser } from '$app/environment'; // ✅ Import browser check
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
-	// ✅ Import BEIDE varianten
+	// Images imports
 	import dgLogoDia from '$lib/assets/dgLogo-dia.svg';
 	import bdLogoDia from '$lib/assets/bdLogo-dia.svg';
 	import adLogoDia from '$lib/assets/adLogo-dia.svg';
@@ -25,8 +26,8 @@
 		variant?: 'color' | 'dia';
 	}>();
 
+	// Definieer de maps
 	const logoMapDia: Record<string, string> = {
-		// Production domains
 		'www.gelderlander.nl': dgLogoDia,
 		'www.bd.nl': bdLogoDia,
 		'www.ad.nl': adLogoDia,
@@ -35,19 +36,11 @@
 		'www.destentor.nl': dsLogoDia,
 		'www.bndestem.nl': bndsLogoDia,
 		'www.pzc.nl': pzcLogoDia,
-
-		// Development & CMS
 		localhost: dgLogoDia,
-		'cms.topverhaal.nl': dgLogoDia,
-
-		// Vercel preview domains
-		'topverhalen.vercel.app': dgLogoDia,
-		'topverhalen-git-develop-dgjeroen.vercel.app': dgLogoDia,
-		'topverhalen-git-main-dgjeroen.vercel.app': dgLogoDia
+		'cms.topverhaal.nl': dgLogoDia
 	};
 
 	const logoMapColor: Record<string, string> = {
-		// Production domains
 		'www.gelderlander.nl': dgLogoColor,
 		'www.bd.nl': bdLogoColor,
 		'www.ad.nl': adLogoColor,
@@ -56,57 +49,47 @@
 		'www.destentor.nl': dsLogoColor,
 		'www.bndestem.nl': bndsLogoColor,
 		'www.pzc.nl': pzcLogoColor,
-
-		// Development & CMS
 		localhost: dgLogoColor,
-		'cms.topverhaal.nl': dgLogoColor,
-
-		// Vercel preview domains
-		'topverhalen.vercel.app': dgLogoColor,
-		'topverhalen-git-develop-dgjeroen.vercel.app': dgLogoColor,
-		'topverhalen-git-main-dgjeroen.vercel.app': dgLogoColor
+		'cms.topverhaal.nl': dgLogoColor
 	};
 
-	let logoSrc = $state<string | undefined>(undefined);
+	// State voor de hostname
+	let currentHost = $state('');
 
-	$effect(() => {
-		// ✅ Only run in browser
-		if (!browser) return;
+	// Haal de hostname 1x op zodra de component in de browser mount
+	onMount(() => {
+		currentHost = window.location.hostname;
+	});
 
-		const currentHost = window.location.hostname;
-		const logoMap = variant === 'color' ? logoMapColor : logoMapDia;
-		logoSrc = logoMap[currentHost];
+	// Bereken (derive) het logo. Dit runt automatisch als variant of currentHost verandert.
+	// Dit voorkomt de infinite loop omdat we geen state updaten, maar een waarde berekenen.
+	let logoSrc = $derived.by(() => {
+		if (!currentHost) return undefined; // Server-side of nog niet gemount
 
-		// ✅ DEBUG (kan later verwijderd worden)
-		console.log('🔍 SwitchLogo Debug:', {
-			hostname: currentHost,
-			variant,
-			logoSrc,
-			availableHosts: Object.keys(logoMap)
-		});
+		const map = variant === 'color' ? logoMapColor : logoMapDia;
+		const foundLogo = map[currentHost];
 
-		// ✅ Fallback als hostname niet gevonden
-		if (!logoSrc) {
-			console.warn('⚠️ Hostname not in logoMap, using Gelderlander as fallback');
-			logoSrc = variant === 'color' ? dgLogoColor : dgLogoDia;
+		// Hebben we een logo voor dit domein?
+		if (foundLogo) {
+			return foundLogo;
 		}
+
+		// Geen logo gevonden (bv. Vercel Preview)? Gebruik Fallback.
+		// Console warn mag hier veilig, want het update geen state.
+		console.warn(`⚠️ Hostname '${currentHost}' not in logoMap, using default.`);
+		return variant === 'color' ? dgLogoColor : dgLogoDia;
 	});
 </script>
 
 <div class="logo-container">
 	{#if logoSrc}
 		<a
-			href="https://{browser ? window.location.hostname : ''}"
+			href="https://{currentHost}"
 			target="_blank"
 			rel="noopener noreferrer"
 			aria-label="Homepagina"
 		>
-			<img
-				src={logoSrc}
-				alt="Logo"
-				onload={() => console.log('✅ Logo loaded:', logoSrc)}
-				onerror={() => console.error('❌ Logo failed:', logoSrc)}
-			/>
+			<img src={logoSrc} alt="Logo" />
 		</a>
 	{/if}
 </div>

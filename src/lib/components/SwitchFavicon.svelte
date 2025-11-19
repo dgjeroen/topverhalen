@@ -1,5 +1,7 @@
 <!-- src/lib/components/SwitchFavicon.svelte -->
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import dgFavicon from '$lib/assets/favicon-dg.svg';
 	import bdFavicon from '$lib/assets/favicon-bd.svg';
 	import adFavicon from '$lib/assets/favicon-ad.svg';
@@ -21,15 +23,14 @@
 		localhost: dgFavicon
 	};
 
-	let faviconSrc = $state<string | undefined>(undefined);
+	let currentHost = $state('');
 
-	$effect(() => {
-		const currentHost = window.location.hostname;
-		faviconSrc = faviconMap[currentHost];
+	onMount(() => {
+		currentHost = window.location.hostname;
 	});
 
-	// Export voor gebruik in +layout.svelte
+	// Gebruik derived state. Als het host niet bestaat, pakken we standaard DG.
+	let faviconSrc = $derived(faviconMap[currentHost] || dgFavicon);
+
 	export { faviconSrc };
 </script>
-
-<!-- Geen HTML nodig - dit is alleen logica -->
