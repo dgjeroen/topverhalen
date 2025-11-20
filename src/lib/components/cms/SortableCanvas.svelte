@@ -405,11 +405,11 @@
 									<input
 										id="hero-focus-x-{block.id}"
 										type="range"
+										class="range-input"
 										min="0"
 										max="100"
 										bind:value={block.content.focusX}
 										oninput={() => dispatch('save')}
-										class="range-input"
 									/>
 									<div class="range-labels">
 										<span>Links</span>
@@ -426,11 +426,11 @@
 									<input
 										id="hero-focus-y-{block.id}"
 										type="range"
+										class="range-input"
 										min="0"
 										max="100"
 										bind:value={block.content.focusY}
 										oninput={() => dispatch('save')}
-										class="range-input"
 									/>
 									<div class="range-labels">
 										<span>Boven</span>
@@ -857,20 +857,43 @@
 						<span>Parallax-effect toepassen</span>
 					</label>
 				{:else if block.type === 'quote'}
-					<textarea
-						placeholder="Citaat tekst..."
-						bind:value={block.content.text}
-						oninput={() => dispatch('save')}
-						class="block-textarea"
-						rows="3"
-					></textarea>
-					<input
-						type="text"
-						placeholder="Auteur..."
-						bind:value={block.content.author}
-						oninput={() => dispatch('save')}
-						class="slide-input"
-					/>
+					<div class="quote-editor">
+						<textarea
+							placeholder="Citaat tekst..."
+							bind:value={block.content.text}
+							oninput={() => dispatch('save')}
+							class="block-textarea"
+							rows="3"
+						></textarea>
+
+						<input
+							type="text"
+							placeholder="Auteur..."
+							bind:value={block.content.author}
+							oninput={() => dispatch('save')}
+							class="slide-input"
+						/>
+
+						<div class="control-group-row" style="display: flex; gap: 1.5rem; margin-top: 0.75rem;">
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.typewriter}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Typewriter effect</span>
+							</label>
+
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.italic}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Cursief</span>
+							</label>
+						</div>
+					</div>
 				{:else if block.type === 'video'}
 					<div class="video-editor">
 						<div class="input-row">
@@ -1932,11 +1955,11 @@ Voorbeelden:
 										<input
 											id="audio-scale-{block.id}"
 											type="range"
+											class="range-input"
 											min="10"
 											max="300"
 											bind:value={block.content.imageScale}
 											oninput={() => dispatch('save')}
-											class="range-input"
 										/>
 									</div>
 
@@ -1947,11 +1970,11 @@ Voorbeelden:
 										<input
 											id="audio-focus-x-{block.id}"
 											type="range"
+											class="range-input"
 											min="0"
 											max="100"
 											bind:value={block.content.imageFocusX}
 											oninput={() => dispatch('save')}
-											class="range-input"
 										/>
 									</div>
 
@@ -1962,11 +1985,11 @@ Voorbeelden:
 										<input
 											id="audio-focus-y-{block.id}"
 											type="range"
+											class="range-input"
 											min="0"
 											max="100"
 											bind:value={block.content.imageFocusY}
 											oninput={() => dispatch('save')}
-											class="range-input"
 										/>
 									</div>
 								</div>
@@ -2460,45 +2483,6 @@ Voorbeelden:
 		font-weight: 500;
 		color: #374151;
 		margin-bottom: 0.5rem;
-	}
-
-	.range-input {
-		width: 100%;
-		height: 6px;
-		border-radius: 3px;
-		background: #e5e7eb;
-		outline: none;
-		-webkit-appearance: none;
-		appearance: none;
-	}
-
-	.range-input::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		background: #d10a10;
-		cursor: pointer;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.range-input::-moz-range-thumb {
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		background: #d10a10;
-		cursor: pointer;
-		border: none;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.range-labels {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 0.5rem;
-		font-size: 0.75rem;
-		color: #6b7280;
 	}
 
 	.reset-focus-btn {

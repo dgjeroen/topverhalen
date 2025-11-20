@@ -23,20 +23,6 @@
 		<div class="section-header">Tekst</div>
 
 		<div class="control-group">
-			<label for="quote-color">Tekstkleur</label>
-			<div class="color-control">
-				<input id="quote-color" type="color" bind:value={theme['quote-color']} onchange={onsave} />
-				<input
-					type="text"
-					class="color-value"
-					bind:value={theme['quote-color']}
-					onchange={onsave}
-					placeholder="Gebruik standaard"
-				/>
-			</div>
-		</div>
-
-		<div class="control-group">
 			<label for="quote-font">Lettertype</label>
 			<select id="quote-font" bind:value={theme['quote-font-family']} onchange={onsave}>
 				<option value="">Gebruik standaard (Heading font)</option>
@@ -143,6 +129,35 @@
 		<div class="section-header">Aanhalingsteken (")</div>
 
 		<div class="control-group">
+			<label for="quote-mark-top">Verticale Positie</label>
+			<div class="range-control-wrapper" style="display: flex; align-items: center; gap: 10px;">
+				<input
+					id="quote-mark-top"
+					type="range"
+					class="range-input"
+					min="-1.0"
+					max="0.5"
+					step="0.1"
+					bind:value={theme['quote-mark-top']}
+					oninput={() => {
+						// Als slider beweegt, update de text input
+						onsave();
+					}}
+					style="flex: 1;"
+				/>
+				<input
+					type="text"
+					bind:value={theme['quote-mark-top']}
+					onchange={onsave}
+					placeholder="-0.2em"
+					class="text-input"
+					style="width: 10px;"
+				/>
+			</div>
+			<span class="hint">Afstand tot bovenkant (default: -0.2em)</span>
+		</div>
+
+		<div class="control-group">
 			<label for="quote-mark-color">Kleur</label>
 			<div class="color-control">
 				<input
@@ -165,11 +180,12 @@
 			<label for="quote-mark-font">Lettertype</label>
 			<select id="quote-mark-font" bind:value={theme['quote-mark-font-family']} onchange={onsave}>
 				<option value="">Gebruik standaard (Heading font)</option>
+				<option value="'Catamaran', sans-serif">Catamaran (Modern)</option>
+				<option value="'Playfair Display', serif">Playfair Display (Elegant)</option>
+				<option value="'Abril Fatface', serif">Abril Fatface (Dik & Sierlijk)</option>
 				<option value="'Georgia', serif">Georgia</option>
 				<option value="'Inter', sans-serif">Inter</option>
 				<option value="var(--font-family-base)">Body Font</option>
-				<option value="'Courier New', monospace">Courier New</option>
-				<option value="'Times New Roman', serif">Times New Roman</option>
 				<option value="'Arial Black', sans-serif">Arial Black</option>
 			</select>
 		</div>

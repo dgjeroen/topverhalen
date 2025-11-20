@@ -2,13 +2,31 @@
 <script lang="ts">
 	import type { QuoteContent } from '$lib/types';
 
-	let { text, author }: QuoteContent = $props();
+	// ✅ Props uitbreiden met defaults
+	let {
+		text,
+		author,
+		typewriter = true,
+		italic = true,
+		markSpacing = undefined
+	}: QuoteContent = $props();
 
 	let typingProgress = $state(0);
 	let showAuthor = $state(false);
 	let blockquoteEl = $state<HTMLElement | undefined>();
 
 	$effect(() => {
+		// ✅ Als typewriter UIT staat: toon alles direct en stop.
+		if (!typewriter) {
+			typingProgress = text.length;
+			showAuthor = true;
+			return;
+		}
+
+		// Reset state als tekst verandert en typewriter staat AAN
+		typingProgress = 0;
+		showAuthor = false;
+
 		const element = blockquoteEl;
 		if (!element) return;
 
@@ -41,13 +59,21 @@
 
 		return () => {
 			observer.disconnect();
-			clearInterval(typingTimer);
+			if (typingTimer) clearInterval(typingTimer);
 		};
 	});
 </script>
 
-<blockquote class="quote-block" bind:this={blockquoteEl}>
-	<p class="quote-text" class:typing={typingProgress < text.length}>
+<blockquote
+	class="quote-block"
+	bind:this={blockquoteEl}
+	style:--local-mark-top={markSpacing !== undefined ? `${markSpacing}em` : undefined}
+>
+	<p
+		class="quote-text"
+		class:typing={typewriter && typingProgress < text.length}
+		class:is-italic={italic}
+	>
 		{text.substring(0, typingProgress)}
 	</p>
 	<footer class="quote-author" class:visible={showAuthor}>— {author}</footer>
@@ -67,7 +93,8 @@
 	.quote-block::before {
 		content: '"';
 		position: absolute;
-		top: -0.2em;
+		/* ✅ Gebruik variabele voor top-positie (default -0.2em) */
+		top: var(--local-mark-top, calc(var(--quote-mark-top, -0.2) * 1em));
 		left: 0.3em;
 		font-size: var(--quote-mark-size, 10em);
 		font-family: var(--quote-mark-font-family, var(--font-family-quote)), sans-serif;
@@ -75,6 +102,7 @@
 		opacity: var(--quote-mark-opacity, 1);
 		z-index: 10;
 		line-height: 1;
+		transition: top 0.2s ease;
 	}
 
 	.quote-text {
@@ -83,10 +111,18 @@
 		font-family: var(--quote-font-family, var(--font-family-quote));
 		font-size: var(--quote-font-size, 2rem);
 		font-weight: var(--quote-font-weight, 800);
-		font-style: var(--quote-font-style, italic);
+
+		/* ✅ Standaard normal, italic via class */
+		font-style: normal;
+
 		color: var(--quote-color, var(--color-text));
 		line-height: var(--quote-line-height, 1);
 		min-height: 1.6em;
+	}
+
+	/* ✅ Style voor italic toggle */
+	.quote-text.is-italic {
+		font-style: italic; /* Of var(--quote-font-style, italic) als je die nog wilt supporten */
 	}
 
 	.quote-text.typing::after {
@@ -117,20 +153,18 @@
 		color: var(--quote-author-color, var(--color-text-muted));
 		text-align: var(--quote-author-align, right);
 		opacity: 0;
+		/* ✅ Transition toegevoegd voor als typewriter uit staat (smooth fade in) */
+		transition:
+			opacity 0.6s ease,
+			transform 0.6s ease;
 	}
 
 	.quote-author.visible {
-		animation: slideAndFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+		opacity: 1;
+		transform: translateX(0);
+		/* Animation alleen gebruiken als we fancy doen, anders via transition */
+		/* animation: slideAndFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; */
 	}
 
-	@keyframes slideAndFadeIn {
-		from {
-			opacity: 0;
-			transform: translateX(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
+	/* Oorspronkelijke keyframes behouden indien nodig, maar transition is vaak soepeler in Svelte updates */
 </style>

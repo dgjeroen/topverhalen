@@ -360,7 +360,7 @@
 			case 'textblock':
 				return { text: [''], isLead: false };
 			case 'quote':
-				return { text: '', author: '' };
+				return { text: '', author: '', typewriter: true, italic: true };
 			case 'image':
 				return { url: '', caption: '', source: '', parallax: false };
 			case 'video':
