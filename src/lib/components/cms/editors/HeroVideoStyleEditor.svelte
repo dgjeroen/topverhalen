@@ -239,45 +239,6 @@
 		cursor: pointer;
 	}
 
-	.range-input {
-		width: 100%;
-		height: 6px;
-		border-radius: 3px;
-		background: #e5e7eb;
-		outline: none;
-		-webkit-appearance: none;
-		appearance: none;
-	}
-
-	.range-input::-webkit-slider-thumb {
-		appearance: none;
-		-webkit-appearance: none;
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		background: #d10a10;
-		cursor: pointer;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.range-input::-moz-range-thumb {
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		background: #d10a10;
-		cursor: pointer;
-		border: none;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	.range-labels {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 0.5rem;
-		font-size: 0.75rem;
-		color: #6b7280;
-	}
-
 	.preview-box {
 		margin-top: 1rem;
 		padding: 2rem;
