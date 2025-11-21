@@ -9,7 +9,7 @@
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 	import SortableCanvas from '$lib/components/cms/SortableCanvas.svelte';
 	import StyleComponentList from '$lib/components/cms/StyleComponentList.svelte';
-	import HeroVideoStyleEditor from '$lib/components/cms/editors/HeroVideoStyleEditor.svelte';
+	import HeroStyleEditor from '$lib/components/cms/editors/HeroStyleEditor.svelte';
 	import GeneralStyleEditor from '$lib/components/cms/editors/GeneralStyleEditor.svelte';
 	import HeadingStyleEditor from '$lib/components/cms/editors/HeadingStyleEditor.svelte';
 	import TextStyleEditor from '$lib/components/cms/editors/TextStyleEditor.svelte';
@@ -52,6 +52,9 @@
 	let selectedStyleComponent = $state<string>('general');
 	let toolboxEl = $state<HTMLElement>();
 	let toolboxSortable = $state<any>(null);
+	let firstHeroBlock = $derived(
+		canvasBlocks.find((b) => b.type === 'heroVideo' || b.type === 'imageHero')
+	);
 
 	// ✅ NIEUW: Save management state
 	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -934,8 +937,12 @@
 				<div class="styling-canvas">
 					{#if selectedStyleComponent === 'general'}
 						<GeneralStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
-					{:else if selectedStyleComponent === 'heroVideo'}
-						<HeroVideoStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'hero'}
+						<HeroStyleEditor
+							bind:theme={currentTheme}
+							activeBlock={firstHeroBlock}
+							onsave={handleStyleSave}
+						/>
 					{:else if selectedStyleComponent === 'heading'}
 						<HeadingStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} level="h2" />
 					{:else if selectedStyleComponent === 'subheading'}

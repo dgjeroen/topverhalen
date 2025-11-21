@@ -1,3 +1,4 @@
+<!--src\lib\components\Heading.svelte-->
 <script lang="ts">
 	import type { HeadingContent, Theme } from '$lib/types';
 	import { getContext } from 'svelte';

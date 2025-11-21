@@ -345,13 +345,48 @@ export interface AudioContent {
 	imageFocusY?: number;
 }
 
-export interface HeroVideoContent {
+export interface HeroStyleProps {
+	titleFont?: string;
+	titleSize?: string;
+	titleSizeMobile?: string;
+	titleColor?: string;
+	titleTransform?: string;
+	titleStyle?: string;
+	titleAlign?: string; // Toegevoegd
+
+	labelFont?: string;
+	labelSize?: string;
+	labelSizeMobile?: string;
+	labelColor?: string;
+	labelTransform?: string;
+	labelStyle?: string;
+	labelAlign?: string;
+
+	sourceAlign?: string;
+
+	posX?: number;
+	posY?: number;
+	posXMobile?: number;
+	posYMobile?: number;
+
+	overlayOpacity?: number;
+}
+
+export interface ImageHeroContent extends HeroStyleProps {
+	url: string;
+	label?: string;
+	title: string;
+	source?: string;
+	focusX?: number;
+	focusY?: number;
+}
+
+export interface HeroVideoContent extends HeroStyleProps {
 	url: string;
 	poster?: string;
 	label?: string;
 	title: string;
-	source: string;
-	textAlign?: 'top' | 'center' | 'bottom';
+	source?: string;
 	focusX?: number;
 	focusY?: number;
 }

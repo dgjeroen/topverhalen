@@ -8,7 +8,7 @@
 
 	const components = [
 		{ id: 'general', label: 'Algemeen', icon: 'icon-style-general' },
-		{ id: 'heroVideo', label: 'Hero video', icon: 'icon-block-hero-video' },
+		{ id: 'hero', label: 'Hero (video & foto)', icon: 'icon-block-hero-video' },
 		{ id: 'heading', label: 'Kop (H2)', icon: 'icon-block-h2' },
 		{ id: 'subheading', label: 'Tussenkop (H4)', icon: 'icon-block-h4' },
 		{ id: 'text', label: 'Tekst', icon: 'icon-block-text' },
