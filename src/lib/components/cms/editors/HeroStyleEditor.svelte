@@ -12,7 +12,7 @@
 		{ value: 'var(--font-family-base)', label: 'Standaard (Algemeen)' },
 		{ value: 'var(--font-family-quote)', label: 'Quote Font (Algemeen)' },
 		{ value: '"acumin-pro-extra-condensed", Helvetica, Arial, sans-serif', label: 'Acumin Pro' },
-		{ value: '"Flama", "Verdana", sans-serif', label: 'Flama' },
+		{ value: '"Flama Semi Condensed", "Verdana", sans-serif', label: 'Flama' },
 		{ value: 'Georgia, serif', label: 'Georgia' },
 		{ value: '"Courier New", monospace', label: 'Courier New' }
 	];

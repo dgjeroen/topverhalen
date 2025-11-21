@@ -19,7 +19,7 @@
 			value: '"Acumin Pro", "Acumin", "Helvetica Neue", Helvetica, Arial, sans-serif',
 			label: 'Acumin'
 		},
-		{ value: '"Flama", "Verdana", sans-serif', label: 'Flama' },
+		{ value: '"Flama Semi Condensed", "Verdana", sans-serif', label: 'Flama' },
 		{ value: 'Georgia, serif', label: 'Georgia' },
 		{ value: '"Courier New", monospace', label: 'Courier New' }
 	];
