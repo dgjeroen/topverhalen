@@ -1,4 +1,3 @@
-<!--src/lib/components/cms/editors/HeroStyleEditor.svelte-->
 <script lang="ts">
 	import type { Theme, ContentBlock } from '$lib/types';
 
@@ -9,10 +8,10 @@
 	}>();
 
 	const fontOptions = [
-		{ value: 'var(--font-family-base)', label: 'Standaard (Algemeen)' },
-		{ value: 'var(--font-family-quote)', label: 'Quote Font (Algemeen)' },
-		{ value: '"acumin-pro-extra-condensed", Helvetica, Arial, sans-serif', label: 'Acumin Pro' },
-		{ value: '"Flama Semi Condensed", "Verdana", sans-serif', label: 'Flama' },
+		{ value: 'var(--font-family-quote)', label: 'Standaard Koppen (Flama SC)' },
+		{ value: 'var(--font-family-acumin)', label: 'Acumin Pro (Extra Condensed)' },
+		{ value: 'var(--font-family-base)', label: 'Standaard Tekst (Arial)' },
+		{ value: 'Inter, sans-serif', label: 'Inter' },
 		{ value: 'Georgia, serif', label: 'Georgia' },
 		{ value: '"Courier New", monospace', label: 'Courier New' }
 	];
@@ -43,7 +42,18 @@
 		onsave();
 	}
 
-	// Icons
+	// ✅ NIEUW: Toggle mobiele kleur
+	function toggleMobileColor(keyMobile: string, keyDesktop: string, isChecked: boolean) {
+		if (isChecked) {
+			// Als aangevinkt: kopieer desktop kleur als startpunt
+			theme[keyMobile] = theme[keyDesktop] || '#ffffff';
+		} else {
+			// Als uitgevinkt: verwijder mobiele kleur (activeert fallback)
+			theme[keyMobile] = undefined;
+		}
+		handleChange();
+	}
+
 	const icons = {
 		alignLeft:
 			'<path d="M21 6H3M15 12H3M17 18H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -62,8 +72,9 @@
 
 <div class="style-editor">
 	<div class="section">
-		<h3>Verticale tekstpositie op het scherm</h3>
+		<h3>Positie op het scherm</h3>
 		<div class="control-group">
+			<span class="input-label">Verticale Positie (Gehele blok)</span>
 			<div class="icon-group">
 				<button
 					class:active={theme['hero-position-y'] === 'flex-start'}
@@ -144,7 +155,7 @@
 		</div>
 
 		<div class="control-group">
-			<label class="input-label" for="hero-title-font">Font</label>
+			<span class="input-label">Font</span>
 			<select
 				id="hero-title-font"
 				bind:value={theme['hero-title-font']}
@@ -159,7 +170,7 @@
 
 		<div class="control-row-grid">
 			<div class="control-group">
-				<label class="input-label" for="hero-title-size">Grootte desktop</label>
+				<label class="input-label" for="hero-title-size">Grootte Desktop</label>
 				<input
 					id="hero-title-size"
 					type="number"
@@ -170,7 +181,7 @@
 				/>
 			</div>
 			<div class="control-group">
-				<label class="input-label" for="hero-title-size-mobile">Grootte mobiel</label>
+				<label class="input-label" for="hero-title-size-mobile">Grootte Mobiel</label>
 				<input
 					id="hero-title-size-mobile"
 					type="number"
@@ -183,7 +194,7 @@
 		</div>
 
 		<div class="control-group">
-			<label class="input-label" for="hero-title-color">Kleur</label>
+			<span class="input-label">Kleur</span>
 			<div class="color-input-group">
 				<input
 					type="color"
@@ -199,6 +210,42 @@
 				/>
 			</div>
 		</div>
+
+		<div class="control-group" style="margin-top: 0.5rem;">
+			<label class="checkbox-label">
+				<input
+					type="checkbox"
+					checked={!!theme['hero-title-color-mobile']}
+					onchange={(e) =>
+						toggleMobileColor(
+							'hero-title-color-mobile',
+							'hero-title-color',
+							e.currentTarget.checked
+						)}
+				/>
+				<span>Aparte kleur mobiel</span>
+			</label>
+		</div>
+
+		{#if theme['hero-title-color-mobile']}
+			<div class="control-group indent">
+				<span class="input-label">Kleur Mobiel</span>
+				<div class="color-input-group">
+					<input
+						type="color"
+						bind:value={theme['hero-title-color-mobile']}
+						oninput={handleChange}
+						class="color-picker"
+					/>
+					<input
+						type="text"
+						bind:value={theme['hero-title-color-mobile']}
+						oninput={handleChange}
+						class="input-field"
+					/>
+				</div>
+			</div>
+		{/if}
 
 		<div class="checkbox-row">
 			<label class="checkbox-label">
@@ -230,7 +277,7 @@
 		<h3>Label Styling</h3>
 
 		<div class="control-group">
-			<span class="input-label">Uitlijning t.o.v. kop</span>
+			<span class="input-label">Uitlijning (t.o.v. Kop)</span>
 			<div class="icon-group">
 				<button
 					class:active={theme['hero-label-align'] === 'flex-start'}
@@ -267,7 +314,7 @@
 
 		<div class="control-row-grid">
 			<div class="control-group">
-				<label class="input-label" for="hero-label-font">Font</label>
+				<span class="input-label">Font</span>
 				<select
 					id="hero-label-font"
 					bind:value={theme['hero-label-font']}
@@ -280,7 +327,7 @@
 				</select>
 			</div>
 			<div class="control-group">
-				<label class="input-label" for="hero-label-size">Grootte desktop</label>
+				<label class="input-label" for="hero-label-size">Grootte (rem)</label>
 				<input
 					id="hero-label-size"
 					type="number"
@@ -293,7 +340,7 @@
 		</div>
 
 		<div class="control-group">
-			<label class="input-label" for="hero-label-color">Kleur</label>
+			<span class="input-label">Kleur</span>
 			<div class="color-input-group">
 				<input
 					type="color"
@@ -309,6 +356,42 @@
 				/>
 			</div>
 		</div>
+
+		<div class="control-group" style="margin-top: 0.5rem;">
+			<label class="checkbox-label">
+				<input
+					type="checkbox"
+					checked={!!theme['hero-label-color-mobile']}
+					onchange={(e) =>
+						toggleMobileColor(
+							'hero-label-color-mobile',
+							'hero-label-color',
+							e.currentTarget.checked
+						)}
+				/>
+				<span>Aparte kleur mobiel</span>
+			</label>
+		</div>
+
+		{#if theme['hero-label-color-mobile']}
+			<div class="control-group indent">
+				<span class="input-label">Kleur Mobiel</span>
+				<div class="color-input-group">
+					<input
+						type="color"
+						bind:value={theme['hero-label-color-mobile']}
+						oninput={handleChange}
+						class="color-picker"
+					/>
+					<input
+						type="text"
+						bind:value={theme['hero-label-color-mobile']}
+						oninput={handleChange}
+						class="input-field"
+					/>
+				</div>
+			</div>
+		{/if}
 
 		<div class="checkbox-row">
 			<label class="checkbox-label">
@@ -340,7 +423,7 @@
 		<h3>Bron Styling</h3>
 
 		<div class="control-group">
-			<span class="input-label">Uitlijning t.o.v. kop</span>
+			<span class="input-label">Uitlijning (t.o.v. Kop)</span>
 			<div class="icon-group">
 				<button
 					class:active={theme['hero-source-align'] === 'flex-start'}
@@ -374,13 +457,67 @@
 				</button>
 			</div>
 		</div>
+
+		<div class="control-group" style="margin-top: 1rem;">
+			<span class="input-label">Kleur</span>
+			<div class="color-input-group">
+				<input
+					type="color"
+					bind:value={theme['hero-source-color']}
+					oninput={handleChange}
+					class="color-picker"
+				/>
+				<input
+					type="text"
+					bind:value={theme['hero-source-color']}
+					oninput={handleChange}
+					class="input-field"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group" style="margin-top: 0.5rem;">
+			<label class="checkbox-label">
+				<input
+					type="checkbox"
+					checked={!!theme['hero-source-color-mobile']}
+					onchange={(e) =>
+						toggleMobileColor(
+							'hero-source-color-mobile',
+							'hero-source-color',
+							e.currentTarget.checked
+						)}
+				/>
+				<span>Aparte kleur mobiel</span>
+			</label>
+		</div>
+
+		{#if theme['hero-source-color-mobile']}
+			<div class="control-group indent">
+				<span class="input-label">Kleur Mobiel</span>
+				<div class="color-input-group">
+					<input
+						type="color"
+						bind:value={theme['hero-source-color-mobile']}
+						oninput={handleChange}
+						class="color-picker"
+					/>
+					<input
+						type="text"
+						bind:value={theme['hero-source-color-mobile']}
+						oninput={handleChange}
+						class="input-field"
+					/>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<div class="section">
 		<h3>Sfeer</h3>
 		<div class="control-group">
 			<label class="input-label" for="hero-overlay-opacity"
-				>Overlay opacity ({Math.round((theme['hero-overlay-opacity'] ?? 0.5) * 100)}%)</label
+				>Overlay Opacity ({Math.round((theme['hero-overlay-opacity'] ?? 0.5) * 100)}%)</label
 			>
 			<input
 				id="hero-overlay-opacity"
@@ -428,6 +565,12 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 0.75rem;
+	}
+
+	.indent {
+		margin-left: 1.5rem;
+		border-left: 2px solid #e5e7eb;
+		padding-left: 1rem;
 	}
 
 	.input-label {
@@ -494,7 +637,6 @@
 		cursor: pointer;
 	}
 
-	/* Icon Buttons Grid */
 	.icon-group {
 		display: flex;
 		background: white;

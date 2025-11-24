@@ -3470,7 +3470,4 @@ Voorbeelden:
 		border-color: #667eea;
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
-	.block-textarea.is-lead-preview {
-		border-left: 4px solid var(--color-accent, #667eea);
-	}
 </style>

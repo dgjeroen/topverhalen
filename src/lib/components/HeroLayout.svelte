@@ -47,6 +47,15 @@
 		style:--d-label-size={t('hero-label-size', '1.5rem')}
 		style:--m-title-size={t('hero-title-size-mobile', '2.5rem')}
 		style:--m-label-size={t('hero-label-size-mobile', '1rem')}
+		style:--d-title-color={t('hero-title-color', '#ffffff')}
+		style:--m-title-color={t('hero-title-color-mobile', t('hero-title-color', '#ffffff'))}
+		style:--d-label-color={t('hero-label-color', '#ffffff')}
+		style:--m-label-color={t('hero-label-color-mobile', t('hero-label-color', '#ffffff'))}
+		style:--d-source-color={t('hero-source-color', t('hero-label-color', '#ffffff'))}
+		style:--m-source-color={t(
+			'hero-source-color-mobile',
+			t('hero-source-color', t('hero-label-color', '#ffffff'))
+		)}
 	>
 		<header class="header-zone">
 			<div class="logo-wrapper">
@@ -58,14 +67,13 @@
 			class="content-zone"
 			class:visible={elementsVisible}
 			style:justify-content={t('hero-position-y', 'center')}
-			style:align-items={t('hero-align-items', 'center')}
+			style:align-items="center"
 		>
 			<main class="text-wrapper" style:text-align={t('hero-text-align', 'center')}>
 				{#if label}
 					<span
 						class="label"
 						style:font-family={t('hero-label-font', 'var(--font-family-quote)')}
-						style:color={t('hero-label-color', '#ffffff')}
 						style:text-transform={t('hero-label-transform', 'uppercase')}
 						style:font-style={t('hero-label-style', 'normal')}
 						style:align-self={t('hero-label-align', 'center')}
@@ -77,7 +85,6 @@
 				<h1
 					class="hero-title"
 					style:font-family={t('hero-title-font', 'var(--font-family-quote)')}
-					style:color={t('hero-title-color', '#ffffff')}
 					style:text-transform={t('hero-title-transform', 'none')}
 					style:font-style={t('hero-title-style', 'normal')}
 				>
@@ -88,7 +95,6 @@
 					<span
 						class="source"
 						style:font-family={t('hero-label-font', 'var(--font-family-quote)')}
-						style:color={t('hero-label-color', '#ffffff')}
 						style:text-transform={t('hero-label-transform', 'uppercase')}
 						style:font-style={t('hero-label-style', 'normal')}
 						style:align-self={t('hero-source-align', 'center')}
@@ -122,15 +128,13 @@
 		width: 100%;
 		overflow: hidden;
 		background-color: #000;
+		color: white;
 	}
-
-	/* Achtergrond vult alles absoluut */
 	.background-layer {
 		position: absolute;
 		inset: 0;
 		z-index: 0;
 	}
-
 	:global(.hero-background) {
 		position: absolute;
 		inset: 0;
@@ -138,68 +142,63 @@
 		height: 100%;
 		object-fit: cover;
 	}
-
 	.overlay {
 		position: absolute;
 		inset: 0;
 		z-index: 1;
 	}
 
-	/* UI Laag: Flex kolom over de hele hoogte */
 	.ui-layer {
 		position: absolute;
 		inset: 0;
 		z-index: 2;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between; /* Verdeel: Top - Midden - Bottom */
-		pointer-events: none; /* Laat kliks door naar video controls indien nodig */
+		justify-content: space-between;
+		pointer-events: none;
 
 		/* Desktop Defaults */
 		--current-title-size: var(--d-title-size);
+		--current-title-color: var(--d-title-color); /* ✅ NIEUW */
+
 		--current-label-size: var(--d-label-size);
+		--current-label-color: var(--d-label-color);
+
+		--current-source-color: var(--d-source-color);
 	}
 
-	/* --- A. HEADER ZONE --- */
 	.header-zone {
-		flex: 0 0 auto; /* Krimp niet */
-		padding: 2rem 1rem 1rem 1rem; /* Ruimte bovenin */
+		flex: 0 0 auto;
+		padding: 2rem 1rem 1rem 1rem;
 		display: flex;
 		justify-content: center;
 		pointer-events: auto;
 	}
 
-	/* --- B. CONTENT ZONE --- */
 	.content-zone {
-		flex: 1; /* Pak alle beschikbare ruimte tussen header en footer */
-		display: flex; /* Flexbox voor verticale uitlijning tekst (boven/midden/onder) */
+		flex: 1;
+		display: flex;
 		flex-direction: column;
-
-		/* Padding zodat tekst nooit tegen logo of scroll aan komt */
 		padding: 1rem 2rem;
-
 		opacity: 0;
 		transition: opacity 1s ease-out;
-		min-height: 0; /* Fix voor flex overflow issues */
+		min-height: 0;
 	}
 	.content-zone.visible {
 		opacity: 1;
 	}
 
-	/* De eigenlijke tekst container */
 	.text-wrapper {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
-		max-width: 1100px;
+		max-width: 900px;
 		pointer-events: auto;
-		/* Zorg dat de wrapper zelf niet breder is dan de content als dat niet hoeft */
-		width: fit-content;
-		max-width: 100%;
 	}
 
 	.hero-title {
 		font-size: var(--current-title-size);
+		color: var(--current-title-color); /* ✅ GEBRUIKT NU VARIABELE */
 		font-weight: 700;
 		line-height: 1.1;
 		margin: 0.5rem 0;
@@ -208,26 +207,26 @@
 
 	.label {
 		font-size: var(--current-label-size);
+		color: var(--current-label-color);
 		font-weight: 400;
 		letter-spacing: 0.05em;
 	}
 
 	.source {
 		font-size: var(--current-label-size);
+		color: var(--current-source-color);
 		font-weight: 400;
 		letter-spacing: 0.05em;
 		margin-top: 0.5rem;
 	}
 
-	/* --- C. FOOTER ZONE --- */
 	.footer-zone {
-		flex: 0 0 auto; /* Krimp niet */
-		padding: 1rem 1rem 2rem 1rem; /* Ruimte onderin */
+		flex: 0 0 auto;
+		padding: 1rem 1rem 2rem 1rem;
 		display: flex;
 		justify-content: center;
 		pointer-events: auto;
 	}
-
 	.scroll-indicator {
 		display: flex;
 		flex-direction: column;
@@ -243,7 +242,6 @@
 	.scroll-indicator svg {
 		animation: bounce 2s infinite;
 	}
-
 	@keyframes bounce {
 		0%,
 		20%,
@@ -262,13 +260,21 @@
 
 	@media (max-width: 768px) {
 		.ui-layer {
+			/* Switch naar mobiele variabelen */
 			--current-title-size: var(--m-title-size);
+			--current-title-color: var(--m-title-color); /* ✅ MOBIELE SWITCH */
+
 			--current-label-size: var(--m-label-size);
+			--current-label-color: var(--m-label-color);
+
+			--current-source-color: var(--m-source-color);
 		}
 		.header-zone {
 			padding-top: 1.5rem;
 		}
-		/* Zorg dat het logo niet te groot is op mobiel */
+		.content-zone {
+			padding: 1rem;
+		}
 		:global(.header-zone svg),
 		:global(.header-zone img) {
 			max-width: 100px;

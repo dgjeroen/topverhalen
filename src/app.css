@@ -59,7 +59,7 @@ body {
 
 	/* Typography */
 	--font-family-flama: 'Flama Semi Condensed', 'Arial Narrow', sans-serif;
-	--font-family-acumin: 'acumin-pro', sans-serif;
+	--font-family-acumin: 'acumin-pro-extra-condensed', sans-serif;
 	--font-family-arial: 'Arial', sans-serif;
 	--font-family-base: var(--font-family-arial);
 	--font-family-quote: var(--font-family-flama);
