@@ -85,6 +85,20 @@
 		};
 		return labels[type] || type;
 	}
+
+	function handleFocusClick(event: MouseEvent, block: ContentBlock) {
+		const target = event.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+		const x = ((event.clientX - rect.left) / rect.width) * 100;
+		const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+		// ✅ FIX: We casten naar 'any' zodat TypeScript niet klaagt
+		(block.content as any).focusX = Math.round(x * 10) / 10;
+		(block.content as any).focusY = Math.round(y * 10) / 10;
+
+		dispatch('save');
+	}
+
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
 	let markdownInfoOpen = $state<Record<string, boolean>>({});
@@ -359,104 +373,73 @@
 						</div>
 
 						{#if block.content.url || block.content.poster}
-							<div class="input-row">
-								{#if block.content.url}
-									<div class="preview-col">
-										<video
-											id="hero-video-{block.id}"
-											poster={block.content.poster || ''}
-											controls
-											muted
-											loop
-											class="media-preview"
-											style:object-position="{block.content.focusX || 50}% {block.content.focusY ||
-												50}%"
-										>
-											<track kind="captions" />
-										</video>
-									</div>
-								{/if}
-								{#if block.content.poster}
-									<div class="preview-col">
+							<div
+								class="focus-controls"
+								style="background: #f9fafb; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 0.5rem;"
+							>
+								<div
+									style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
+								>
+									<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
+										Focuspunt Instellen
+									</h5>
+									<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+										X: {block.content.focusX || 50}% Y: {block.content.focusY || 50}%
+									</span>
+								</div>
+
+								<div
+									role="button"
+									tabindex="0"
+									class="focus-interactive-wrapper"
+									onclick={(e) => handleFocusClick(e, block)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+									}}
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+								>
+									{#if block.content.poster}
 										<img
 											src={block.content.poster}
-											alt="Poster"
-											class="media-preview"
-											style:object-position="{block.content.focusX || 50}% {block.content.focusY ||
-												50}%"
+											alt="Focus preview"
+											style="width: 100%; height: auto; display: block; object-fit: contain;"
 										/>
-									</div>
-								{/if}
-							</div>
+									{:else}
+										<video
+											src={block.content.url}
+											muted
+											loop
+											playsinline
+											autoplay
+											style="width: 100%; height: auto; display: block;"
+										></video>
+									{/if}
 
-							<!-- ✅ NIEUW: Focus Point Controls -->
-							<div class="focus-controls">
-								<h5>Video Focus Point</h5>
-								<p class="control-hint">
-									Bepaal welk deel van de video altijd zichtbaar blijft (vooral belangrijk bij
-									mobiel)
-								</p>
-
-								<div class="focus-slider-group">
-									<label for="hero-focus-x-{block.id}">
-										Horizontaal (Links ← → Rechts)
-										<span class="value-display">{block.content.focusX || 50}%</span>
-									</label>
-									<input
-										id="hero-focus-x-{block.id}"
-										type="range"
-										class="range-input"
-										min="0"
-										max="100"
-										bind:value={block.content.focusX}
-										oninput={() => dispatch('save')}
-									/>
-									<div class="range-labels">
-										<span>Links</span>
-										<span>Midden</span>
-										<span>Rechts</span>
-									</div>
+									<div
+										class="focus-dot"
+										style:left="{block.content.focusX || 50}%"
+										style:top="{block.content.focusY || 50}%"
+									></div>
 								</div>
-
-								<div class="focus-slider-group">
-									<label for="hero-focus-y-{block.id}">
-										Verticaal (Boven ↑ ↓ Onder)
-										<span class="value-display">{block.content.focusY || 50}%</span>
-									</label>
-									<input
-										id="hero-focus-y-{block.id}"
-										type="range"
-										class="range-input"
-										min="0"
-										max="100"
-										bind:value={block.content.focusY}
-										oninput={() => dispatch('save')}
-									/>
-									<div class="range-labels">
-										<span>Boven</span>
-										<span>Midden</span>
-										<span>Onder</span>
-									</div>
-								</div>
-
-								<button
-									type="button"
-									class="reset-focus-btn"
-									onclick={() => {
-										block.content.focusX = 50;
-										block.content.focusY = 50;
-										dispatch('save');
-									}}
+								<p
+									class="control-hint"
+									style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
 								>
-									↻ Reset naar midden
-								</button>
+									Klik op het focuspunt (toegepast op zowel video als poster)
+								</p>
 							</div>
 						{/if}
 
-						<div class="input-row-split">
-							<div class="input-col-left">
+						<div
+							class="input-row-split"
+							style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;"
+						>
+							<div
+								class="input-col-left"
+								style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; grid-column: span 2;"
+							>
 								<div class="input-group">
-									<span class="input-label">Label (optioneel)</span>
+									<span class="input-label">Label</span>
 									<input
 										type="text"
 										placeholder="SPECIAL"
@@ -474,79 +457,13 @@
 									/>
 								</div>
 								<div class="input-group">
-									<span class="input-label">Bron (verplicht)</span>
+									<span class="input-label">Bron</span>
 									<input
 										type="text"
-										placeholder="ANP"
+										placeholder="Bronvermelding"
 										bind:value={block.content.source}
 										oninput={() => dispatch('save')}
 									/>
-								</div>
-							</div>
-
-							<div class="input-col-right">
-								<span class="input-label">Tekstpositie</span>
-								<div class="hero-align-picker">
-									<label class:active={block.content.textAlign === 'top'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="top"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="8"
-													text-anchor="middle"
-													font-size="7"
-													font-weight="600"
-													fill="currentColor">TOP</text
-												>
-											</svg>
-										</div>
-									</label>
-									<label class:active={block.content.textAlign === 'center'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="center"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="14"
-													text-anchor="middle"
-													font-size="6"
-													font-weight="600"
-													fill="currentColor">CENTER</text
-												>
-											</svg>
-										</div>
-									</label>
-									<label class:active={block.content.textAlign === 'bottom'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="bottom"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="21"
-													text-anchor="middle"
-													font-size="6"
-													font-weight="600"
-													fill="currentColor">BOTTOM</text
-												>
-											</svg>
-										</div>
-									</label>
 								</div>
 							</div>
 						</div>
@@ -566,17 +483,60 @@
 						</div>
 
 						{#if block.content.url}
-							<div class="input-row">
-								<div class="preview-col">
-									<img src={block.content.url} alt="Hero preview" class="media-preview" />
+							<div
+								class="focus-controls"
+								style="background: #f9fafb; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 0.5rem;"
+							>
+								<div
+									style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
+								>
+									<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
+										Focuspunt Instellen
+									</h5>
+									<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+										X: {block.content.focusX || 50}% Y: {block.content.focusY || 50}%
+									</span>
 								</div>
+								<div
+									role="button"
+									tabindex="0"
+									class="focus-interactive-wrapper"
+									onclick={(e) => handleFocusClick(e, block)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+									}}
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+								>
+									<img
+										src={block.content.url}
+										alt="Focus preview"
+										style="width: 100%; height: auto; display: block; object-fit: contain;"
+									/>
+									<div
+										class="focus-dot"
+										style:left="{block.content.focusX || 50}%"
+										style:top="{block.content.focusY || 50}%"
+									></div>
+								</div>
+								<p
+									class="control-hint"
+									style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+								>
+									Klik op het belangrijkste deel van de foto
+								</p>
 							</div>
 						{/if}
 
-						<div class="input-row-split">
-							<div class="input-col-left">
+						<div
+							class="input-row-split"
+							style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;"
+						>
+							<div
+								class="input-col-left"
+								style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; grid-column: span 2;"
+							>
 								<div class="input-group">
-									<span class="input-label">Label (optioneel)</span>
+									<span class="input-label">Label</span>
 									<input
 										type="text"
 										placeholder="SPECIAL"
@@ -594,79 +554,13 @@
 									/>
 								</div>
 								<div class="input-group">
-									<span class="input-label">Bron (optioneel)</span>
+									<span class="input-label">Bron</span>
 									<input
 										type="text"
 										placeholder="Foto: Naam Fotograaf"
 										bind:value={block.content.source}
 										oninput={() => dispatch('save')}
 									/>
-								</div>
-							</div>
-
-							<div class="input-col-right">
-								<span class="input-label">Tekstpositie</span>
-								<div class="hero-align-picker">
-									<label class:active={block.content.textAlign === 'top'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="top"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="8"
-													text-anchor="middle"
-													font-size="7"
-													font-weight="600"
-													fill="currentColor">TOP</text
-												>
-											</svg>
-										</div>
-									</label>
-									<label class:active={block.content.textAlign === 'center'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="center"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="14"
-													text-anchor="middle"
-													font-size="6"
-													font-weight="600"
-													fill="currentColor">CENTER</text
-												>
-											</svg>
-										</div>
-									</label>
-									<label class:active={block.content.textAlign === 'bottom'}>
-										<input
-											type="radio"
-											bind:group={block.content.textAlign}
-											value="bottom"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="hero-align-icon">
-											<svg viewBox="0 0 24 24" fill="none">
-												<text
-													x="12"
-													y="21"
-													text-anchor="middle"
-													font-size="6"
-													font-weight="600"
-													fill="currentColor">BOTTOM</text
-												>
-											</svg>
-										</div>
-									</label>
 								</div>
 							</div>
 						</div>
@@ -807,20 +701,7 @@
 							bind:value={block.content.text[0]}
 							oninput={() => dispatch('save')}
 							class="block-textarea"
-							class:is-lead-preview={block.content.isLead}
 							rows="6"
-							style:font-size={block.content.isLead
-								? 'var(--text-lead-font-size, 1.2rem)'
-								: 'var(--text-font-size, 1rem)'}
-							style:line-height={block.content.isLead
-								? 'var(--text-lead-line-height, 1.5)'
-								: 'var(--text-line-height, 1.6)'}
-							style:font-weight={block.content.isLead
-								? 'var(--text-lead-font-weight, 500)'
-								: 'var(--text-font-weight, 400)'}
-							style:color={block.content.isLead
-								? 'var(--text-lead-color, var(--color-text))'
-								: 'var(--text-color, var(--color-text))'}
 						></textarea>
 					</div>
 				{:else if block.type === 'image'}
@@ -2349,8 +2230,7 @@ Voorbeelden:
 	}
 
 	.input-col,
-	.input-col-left,
-	.input-col-right {
+	.input-col-left {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
@@ -2378,15 +2258,6 @@ Voorbeelden:
 		background: #000;
 	}
 
-	.hero-video-editor label,
-	.image-hero-editor label {
-		font-weight: 600;
-		font-size: 0.6875rem;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
 	.hero-video-editor input,
 	.image-hero-editor input,
 	.video-editor input {
@@ -2396,64 +2267,38 @@ Voorbeelden:
 		font-size: 0.875rem;
 	}
 
-	.hero-align-picker {
-		display: flex;
-		gap: 5px;
-		background: white;
-		padding: 4px;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-		margin-top: 0.25rem;
-	}
-
-	.hero-align-picker input[type='radio'] {
-		display: none;
-	}
-
-	.hero-align-picker label {
-		cursor: pointer;
-		padding: 6px;
-		border-radius: 4px;
-		transition: all 0.15s;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 2px solid transparent;
-		flex: 1;
-		text-transform: none;
-		letter-spacing: normal;
-	}
-
-	.hero-align-picker label.active {
-		border-color: #d10a10;
-		background: #fef2f2;
-	}
-
-	.hero-align-icon {
-		width: 40px;
-		height: 30px;
-		border: 1px solid #e5e7eb;
-		border-radius: 4px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: white;
-	}
-
-	.hero-align-icon svg {
-		width: 100%;
-		height: 100%;
-		opacity: 0.3;
-		transition: opacity 0.2s;
-		color: #6b7280;
-	}
-
-	.hero-align-picker label.active .hero-align-icon svg {
-		opacity: 1;
-		color: #d10a10;
-	}
-
 	/* Focus Controls */
+	/* Voeg dit toe aan je <style> blok in SortableCanvas.svelte */
+
+	.focus-dot {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		background-color: #ff0000;
+		border: 3px solid white;
+		border-radius: 50%;
+		pointer-events: none;
+		z-index: 10;
+		/* De transform zorgt voor centrering op de coördinaten */
+		transform: translate(-50%, -50%);
+		/* De animatie: rustig pulseren (2 seconden loop) */
+		animation: focus-pulse 2s infinite ease-in-out;
+	}
+
+	@keyframes focus-pulse {
+		0% {
+			transform: translate(-50%, -50%) scale(1);
+			box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+		}
+		70% {
+			transform: translate(-50%, -50%) scale(1.1);
+			box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+		}
+		100% {
+			transform: translate(-50%, -50%) scale(1);
+			box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+		}
+	}
 	.focus-controls {
 		margin-top: 1.5rem;
 		padding: 1rem;
@@ -2467,40 +2312,6 @@ Voorbeelden:
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: #374151;
-	}
-
-	.focus-slider-group {
-		margin-bottom: 1.5rem;
-	}
-
-	.focus-slider-group:last-of-type {
-		margin-bottom: 1rem;
-	}
-
-	.focus-slider-group label {
-		display: block;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		margin-bottom: 0.5rem;
-	}
-
-	.reset-focus-btn {
-		width: 100%;
-		padding: 0.5rem;
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-
-	.reset-focus-btn:hover {
-		background: #f9fafb;
-		border-color: #d1d5db;
 	}
 
 	.value-display {
@@ -3658,8 +3469,5 @@ Voorbeelden:
 		outline: none;
 		border-color: #667eea;
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-	}
-	.block-textarea.is-lead-preview {
-		border-left: 4px solid var(--color-accent, #667eea);
 	}
 </style>

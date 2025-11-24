@@ -151,7 +151,7 @@
 					onchange={onsave}
 					placeholder="-0.2em"
 					class="text-input"
-					style="width: 10px;"
+					style="width: 80px;"
 				/>
 			</div>
 			<span class="hint">Afstand tot bovenkant (default: -0.2em)</span>
