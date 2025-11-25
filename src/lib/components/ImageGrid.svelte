@@ -22,7 +22,12 @@
 				onclick={() => handleOpen(i)}
 				aria-label={`Open afbeelding: ${image.caption || 'Zonder bijschrift'}`}
 			>
-				<img src={image.url} alt={image.caption || ''} loading="lazy" />
+				<img
+					src={image.url}
+					alt={image.caption || ''}
+					loading="lazy"
+					style:object-position="{image.focusX ?? 50}% {image.focusY ?? 50}%"
+				/>
 			</button>
 			{#if image.caption || image.source}
 				<figcaption class="caption-container">

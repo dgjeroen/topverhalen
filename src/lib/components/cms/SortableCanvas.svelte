@@ -99,6 +99,18 @@
 		dispatch('save');
 	}
 
+	function handleGalleryImageFocusClick(event: MouseEvent, image: any) {
+		const target = event.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+		const x = ((event.clientX - rect.left) / rect.width) * 100;
+		const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+		image.focusX = Math.round(x * 10) / 10;
+		image.focusY = Math.round(y * 10) / 10;
+
+		dispatch('save');
+	}
+
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
 	let markdownInfoOpen = $state<Record<string, boolean>>({});
@@ -737,6 +749,50 @@
 						/>
 						<span>Parallax-effect toepassen</span>
 					</label>
+
+					{#if block.content.parallax}
+						<div class="focus-point-controls">
+							<div
+								style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
+							>
+								<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
+									Focuspunt Instellen
+								</h5>
+								<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+									X: {block.content.focusX ?? 50}% Y: {block.content.focusY ?? 50}%
+								</span>
+							</div>
+
+							<div
+								role="button"
+								tabindex="0"
+								class="focus-interactive-wrapper"
+								onclick={(e) => handleFocusClick(e, block)}
+								onkeydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+								}}
+								style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+							>
+								<img
+									src={block.content.url}
+									alt="Focus preview"
+									style="width: 100%; height: auto; display: block; object-fit: contain;"
+								/>
+
+								<div
+									class="focus-dot"
+									style:left="{block.content.focusX ?? 50}%"
+									style:top="{block.content.focusY ?? 50}%"
+								></div>
+							</div>
+							<p
+								class="control-hint"
+								style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+							>
+								Klik op het focuspunt (voor parallax effect)
+							</p>
+						</div>
+					{/if}
 				{:else if block.type === 'quote'}
 					<div class="quote-editor">
 						<textarea
@@ -1088,11 +1144,35 @@ Voorbeelden:
 													>
 														×
 													</button>
-													<img
-														src={image.url || 'https://placehold.co/150x100'}
-														alt=""
-														class="slide-preview"
-													/>
+													<div class="slide-preview-wrapper">
+														<div
+															role="button"
+															tabindex="0"
+															class="focus-interactive-wrapper"
+															onclick={(e) => handleGalleryImageFocusClick(e, image)}
+															onkeydown={(e) => {
+																if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+															}}
+															style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+														>
+															<img
+																src={image.url || 'https://placehold.co/150x100'}
+																alt=""
+																class="slide-preview"
+															/>
+															<div
+																class="focus-dot"
+																style:left="{image.focusX ?? 50}%"
+																style:top="{image.focusY ?? 50}%"
+															></div>
+														</div>
+														<p
+															class="control-hint"
+															style="font-size: 0.7rem; color: #6b7280; margin: 0.25rem 0 0.5rem; text-align: center;"
+														>
+															Klik op foto voor focuspunt • X: {image.focusX ?? 50}% Y: {image.focusY ?? 50}%
+														</p>
+													</div>
 													<input
 														type="url"
 														placeholder="Afbeeldings-URL"

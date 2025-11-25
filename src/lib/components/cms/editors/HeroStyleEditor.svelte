@@ -8,9 +8,12 @@
 	}>();
 
 	const fontOptions = [
-		{ value: 'var(--font-family-quote)', label: 'Standaard Koppen (Flama SC)' },
-		{ value: 'var(--font-family-acumin)', label: 'Acumin Pro (Extra Condensed)' },
-		{ value: 'var(--font-family-base)', label: 'Standaard Tekst (Arial)' },
+		{
+			value: "var(--font-family-flama), 'Arial Narrow', sans-serif",
+			label: 'Standaard Koppen (Flama SC)'
+		},
+		{ value: 'var(--font-family-acumin), sans-serif', label: 'Acumin Pro (Extra Condensed)' },
+		{ value: 'Arial, sans-serif', label: 'Standaard Tekst (Arial)' },
 		{ value: 'Inter, sans-serif', label: 'Inter' },
 		{ value: 'Georgia, serif', label: 'Georgia' },
 		{ value: '"Courier New", monospace', label: 'Courier New' }
