@@ -3,7 +3,7 @@
 	import type { ImageContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
 
-	let { url, caption, source }: ImageContent = $props();
+	let { url, caption, source, focusX = 50, focusY = 50 }: ImageContent = $props();
 	let y = $state(0);
 	let containerEl = $state<HTMLElement | undefined>(undefined);
 	let imgEl = $state<HTMLImageElement | undefined>(undefined);
@@ -47,6 +47,7 @@
 			alt={caption || 'Parallax afbeelding'}
 			class="parallax-img"
 			style:transform="translateY({translateY}px)"
+			style:object-position="{focusX}% {focusY}%"
 			loading="lazy"
 			bind:this={imgEl}
 		/>

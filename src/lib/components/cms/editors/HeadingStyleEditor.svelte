@@ -23,10 +23,12 @@
 		colorKey: string;
 		styleKey: string;
 		marginKey: string;
+		lineHeightKey: string;
 		defaultSize: string;
 		defaultWeight: string;
 		defaultColor: string;
 		defaultMargin: string;
+		defaultLineHeight: string;
 	};
 
 	const configs: Record<'h2' | 'h3' | 'h4', Config> = {
@@ -37,10 +39,12 @@
 			colorKey: 'h2-color',
 			styleKey: 'font-style-h2',
 			marginKey: 'h2-margin-bottom',
+			lineHeightKey: 'h2-line-height',
 			defaultSize: '2.5rem',
 			defaultWeight: '700',
 			defaultColor: '#000000',
-			defaultMargin: '1rem'
+			defaultMargin: '1rem',
+			defaultLineHeight: '1.3'
 		},
 		h3: {
 			title: 'Extra Tussenkop (H3)',
@@ -49,10 +53,12 @@
 			colorKey: 'h3-color',
 			styleKey: 'font-style-h3',
 			marginKey: 'h3-margin-bottom',
+			lineHeightKey: 'h3-line-height',
 			defaultSize: '1.5rem',
-			defaultWeight: '700', // ✅ FIXED: was 500
+			defaultWeight: '700',
 			defaultColor: '#374151',
-			defaultMargin: '0.5rem' // ✅ FIXED: was 0.25rem
+			defaultMargin: '0.5rem',
+			defaultLineHeight: '1.3'
 		},
 		h4: {
 			title: 'Tussenkop (H4)',
@@ -61,10 +67,12 @@
 			colorKey: 'h4-color',
 			styleKey: 'font-style-h4',
 			marginKey: 'h4-margin-bottom',
+			lineHeightKey: 'h4-line-height',
 			defaultSize: '1.125rem',
 			defaultWeight: '500',
 			defaultColor: '#4b5563',
-			defaultMargin: '0.5rem' // ✅ FIXED: was 0.25rem
+			defaultMargin: '0.5rem',
+			defaultLineHeight: '1.3'
 		}
 	};
 
@@ -197,6 +205,20 @@
 				class="text-input"
 			/>
 			<span class="hint">Bijv: 0.5rem, 1rem, 2rem</span>
+		</div>
+
+		<!-- Line Height -->
+		<div class="control-group">
+			<label for="{level}-line-height">Regelafstand (Line Height)</label>
+			<input
+				id="{level}-line-height"
+				type="text"
+				bind:value={theme[config.lineHeightKey]}
+				onchange={onsave}
+				placeholder={config.defaultLineHeight}
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 1.2, 1.3, 1.5 (zonder eenheid)</span>
 		</div>
 
 		<!-- Italic Toggle -->

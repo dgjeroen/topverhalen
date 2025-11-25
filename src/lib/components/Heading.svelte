@@ -55,19 +55,21 @@
 		margin-top: 0;
 		margin-left: 0;
 		margin-right: 0;
-		line-height: 1.3;
 	}
 
 	.heading-2 {
 		margin-bottom: var(--h2-margin-bottom, 2rem);
+		line-height: var(--h2-line-height, 1.3);
 	}
 
 	.heading-3 {
 		margin-bottom: var(--h3-margin-bottom, 1.5rem);
+		line-height: var(--h3-line-height, 1.3);
 	}
 
 	.heading-4 {
 		margin-bottom: var(--h4-margin-bottom, 1rem);
+		line-height: var(--h4-line-height, 1.3);
 	}
 
 	.heading-bg {

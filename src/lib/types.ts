@@ -55,6 +55,9 @@ export type Theme = {
 	'h2-margin-bottom'?: string;
 	'h3-margin-bottom'?: string;
 	'h4-margin-bottom'?: string;
+	'h2-line-height'?: string;
+	'h3-line-height'?: string;
+	'h4-line-height'?: string;
 	'h2-background-enabled'?: string;
 	'h2-background-color'?: string;
 	'h2-background-text-color'?: string;
@@ -211,11 +214,42 @@ export type Theme = {
 	'video-aspect-ratio'?: string;
 
 	// ============================================
-	// HERO VIDEO
+	// HERO (Image + Video)
 	// ============================================
-	'hero-title-font-size'?: string;
+	// Position & Layout
+	'hero-position-y'?: string;
+	'hero-text-align'?: string;
+	'hero-align-items'?: string;
+
+	// Title
+	'hero-title-font'?: string;
+	'hero-title-size'?: string;
+	'hero-title-size-mobile'?: string;
 	'hero-title-color'?: string;
+	'hero-title-color-mobile'?: string;
+	'hero-title-transform'?: string;
+	'hero-title-style'?: string;
+
+	// Label
+	'hero-label-font'?: string;
+	'hero-label-size'?: string;
+	'hero-label-size-mobile'?: string;
 	'hero-label-color'?: string;
+	'hero-label-color-mobile'?: string;
+	'hero-label-transform'?: string;
+	'hero-label-style'?: string;
+	'hero-label-align'?: string;
+
+	// Source
+	'hero-source-color'?: string;
+	'hero-source-color-mobile'?: string;
+	'hero-source-align'?: string;
+
+	// Overlay
+	'hero-overlay-opacity'?: number;
+
+	// Legacy (backwards compatibility)
+	'hero-title-font-size'?: string;
 	'hero-label-background'?: string;
 
 	// ============================================
@@ -324,6 +358,8 @@ export interface ImageContent {
 	caption: string;
 	source: string;
 	parallax: boolean;
+	focusX?: number;
+	focusY?: number;
 }
 
 export interface QuoteContent {
@@ -400,7 +436,7 @@ export interface ImageHeroContent {
 }
 
 export interface GalleryContent {
-	images: { url: string; caption: string; source: string }[];
+	images: { url: string; caption: string; source: string; focusX?: number; focusY?: number }[];
 	columns: number;
 }
 
