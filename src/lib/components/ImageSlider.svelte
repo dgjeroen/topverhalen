@@ -156,8 +156,6 @@
 </figure>
 
 <style>
-	@import '$lib/styles/image-shared.css';
-
 	.slider-container {
 		position: relative;
 		margin: 0;

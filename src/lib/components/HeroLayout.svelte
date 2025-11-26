@@ -74,6 +74,7 @@
 					<span
 						class="label"
 						style:font-family={t('hero-label-font', 'var(--font-family-flama)')}
+						style:font-weight={t('hero-label-weight', '400')}
 						style:text-transform={t('hero-label-transform', 'uppercase')}
 						style:font-style={t('hero-label-style', 'normal')}
 						style:align-self={t('hero-label-align', 'center')}
@@ -85,6 +86,7 @@
 				<h1
 					class="hero-title"
 					style:font-family={t('hero-title-font', 'var(--font-family-flama)')}
+					style:font-weight={t('hero-title-weight', '700')}
 					style:text-transform={t('hero-title-transform', 'none')}
 					style:font-style={t('hero-title-style', 'normal')}
 				>
@@ -95,6 +97,7 @@
 					<span
 						class="source"
 						style:font-family={t('hero-label-font', 'var(--font-family-flama)')}
+						style:font-weight={t('hero-label-weight', '400')}
 						style:text-transform={t('hero-label-transform', 'uppercase')}
 						style:font-style={t('hero-label-style', 'normal')}
 						style:align-self={t('hero-source-align', 'center')}

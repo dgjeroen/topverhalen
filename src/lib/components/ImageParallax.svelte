@@ -62,8 +62,6 @@
 </figure>
 
 <style>
-	@import '$lib/styles/image-shared.css';
-
 	figure {
 		margin: 0;
 		display: block;

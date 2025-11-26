@@ -40,8 +40,6 @@
 </div>
 
 <style>
-	@import '$lib/styles/image-shared.css';
-
 	.gallery-grid {
 		display: grid;
 		gap: var(--space-m);

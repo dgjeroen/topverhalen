@@ -223,6 +223,7 @@ export type Theme = {
 
 	// Title
 	'hero-title-font'?: string;
+	'hero-title-weight'?: string;
 	'hero-title-size'?: string;
 	'hero-title-size-mobile'?: string;
 	'hero-title-color'?: string;
@@ -232,6 +233,7 @@ export type Theme = {
 
 	// Label
 	'hero-label-font'?: string;
+	'hero-label-weight'?: string;
 	'hero-label-size'?: string;
 	'hero-label-size-mobile'?: string;
 	'hero-label-color'?: string;
