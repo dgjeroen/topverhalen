@@ -19,20 +19,35 @@
 		{ value: '"Courier New", monospace', label: 'Courier New' }
 	];
 
+	const fontWeightOptions = [
+		{ value: '300', label: '300 (Light)' },
+		{ value: '400', label: '400 (Normal)' },
+		{ value: '500', label: '500 (Medium)' },
+		{ value: '600', label: '600 (Semibold)' },
+		{ value: '700', label: '700 (Bold)' },
+		{ value: '800', label: '800 (Extra Bold)' },
+		{ value: '900', label: '900 (Black)' }
+	];
+
 	// --- HELPERS ---
 	function getSize(val: string | undefined, defaultVal: number): number {
 		if (!val) return defaultVal;
 		return parseFloat(val);
 	}
 
-	function setSize(key: string, val: number) {
-		theme[key] = `${val}rem`;
-		handleChange();
-	}
+	// Reactive size getters
+	let titleSize = $derived(getSize(theme['hero-title-size'], 4));
+	let titleSizeMobile = $derived(getSize(theme['hero-title-size-mobile'], 2.0));
+	let labelSize = $derived(getSize(theme['hero-label-size'], 1.5));
+	let labelSizeMobile = $derived(getSize(theme['hero-label-size-mobile'], 1.0));
 
 	function handleSizeInput(key: string, event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
-		setSize(key, parseFloat(input.value));
+		const val = parseFloat(input.value);
+		if (!isNaN(val)) {
+			theme[key] = `${val}rem`;
+			handleChange();
+		}
 	}
 
 	function handleOpacityInput(event: Event) {
@@ -157,39 +172,54 @@
 			</div>
 		</div>
 
-		<div class="control-group">
-			<span class="input-label">Font</span>
-			<select
-				id="hero-title-font"
-				bind:value={theme['hero-title-font']}
-				onchange={handleChange}
-				class="input-field"
-			>
-				{#each fontOptions as option}
-					<option value={option.value}>{option.label}</option>
-				{/each}
-			</select>
+		<div class="control-row-grid">
+			<div class="control-group">
+				<span class="input-label">Font</span>
+				<select
+					id="hero-title-font"
+					bind:value={theme['hero-title-font']}
+					onchange={handleChange}
+					class="input-field"
+				>
+					{#each fontOptions as option}
+						<option value={option.value}>{option.label}</option>
+					{/each}
+				</select>
+			</div>
+			<div class="control-group">
+				<span class="input-label">Font Weight</span>
+				<select
+					id="hero-title-weight"
+					bind:value={theme['hero-title-weight']}
+					onchange={handleChange}
+					class="input-field"
+				>
+					{#each fontWeightOptions as option}
+						<option value={option.value}>{option.label}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
 
 		<div class="control-row-grid">
 			<div class="control-group">
-				<label class="input-label" for="hero-title-size">Grootte Desktop</label>
+				<label class="input-label" for="hero-title-size">Grootte desktop (rem)</label>
 				<input
 					id="hero-title-size"
 					type="number"
 					step="0.1"
-					value={getSize(theme['hero-title-size'], 4)}
+					value={titleSize}
 					oninput={(e) => handleSizeInput('hero-title-size', e)}
 					class="input-field"
 				/>
 			</div>
 			<div class="control-group">
-				<label class="input-label" for="hero-title-size-mobile">Grootte Mobiel</label>
+				<label class="input-label" for="hero-title-size-mobile">Grootte mobiel (rem)</label>
 				<input
 					id="hero-title-size-mobile"
 					type="number"
 					step="0.1"
-					value={getSize(theme['hero-title-size-mobile'], 2.0)}
+					value={titleSizeMobile}
 					oninput={(e) => handleSizeInput('hero-title-size-mobile', e)}
 					class="input-field"
 				/>
@@ -330,13 +360,40 @@
 				</select>
 			</div>
 			<div class="control-group">
-				<label class="input-label" for="hero-label-size">Grootte (rem)</label>
+				<span class="input-label">Font Weight</span>
+				<select
+					id="hero-label-weight"
+					bind:value={theme['hero-label-weight']}
+					onchange={handleChange}
+					class="input-field"
+				>
+					{#each fontWeightOptions as option}
+						<option value={option.value}>{option.label}</option>
+					{/each}
+				</select>
+			</div>
+		</div>
+
+		<div class="control-row-grid">
+			<div class="control-group">
+				<label class="input-label" for="hero-label-size">Grootte desktop (rem)</label>
 				<input
 					id="hero-label-size"
 					type="number"
 					step="0.1"
-					value={getSize(theme['hero-label-size'], 1.5)}
+					value={labelSize}
 					oninput={(e) => handleSizeInput('hero-label-size', e)}
+					class="input-field"
+				/>
+			</div>
+			<div class="control-group">
+				<label class="input-label" for="hero-label-size-mobile">Grootte mobiel (rem)</label>
+				<input
+					id="hero-label-size-mobile"
+					type="number"
+					step="0.1"
+					value={labelSizeMobile}
+					oninput={(e) => handleSizeInput('hero-label-size-mobile', e)}
 					class="input-field"
 				/>
 			</div>
