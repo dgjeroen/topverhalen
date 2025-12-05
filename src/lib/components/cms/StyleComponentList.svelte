@@ -11,11 +11,11 @@
 		{ id: 'hero', label: 'Hero (video & foto)', icon: 'icon-block-hero-video' },
 		{ id: 'heading', label: 'Kop (H2)', icon: 'icon-block-h2' },
 		{ id: 'subheading', label: 'Tussenkop (H4)', icon: 'icon-block-h4' },
-		{ id: 'text', label: 'Tekst', icon: 'icon-block-text' },
-		{ id: 'textframe', label: 'Tekstkader', icon: 'icon-block-text' },
+		{ id: 'text', label: 'Tekstblok', icon: 'icon-block-text' },
+		{ id: 'textframe', label: 'Tekstkader', icon: 'icon-block-text-frame' },
 		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
 		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
-		{ id: 'slider', label: 'Slider', icon: 'icon-block-slider' },
+		{ id: 'slider', label: 'Fotoslider', icon: 'icon-block-slider' },
 		{ id: 'audio', label: 'Audio', icon: 'icon-block-audio' },
 		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },
 		{ id: 'subheadingSoccer', label: 'Tussenkop voetbal', icon: 'icon-block-soccer' },
@@ -56,7 +56,8 @@
 		border-radius: 6px;
 		padding: 10px 12px;
 		cursor: pointer;
-		font-weight: 500;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		font-weight: 600;
 		font-size: 0.875rem;
 		transition: all 0.15s;
 		color: #374151;
@@ -78,10 +79,11 @@
 	}
 
 	.icon {
-		width: 20px;
-		height: 20px;
+		width: 18px;
+		height: 18px;
 		flex-shrink: 0;
-		color: currentColor;
+		color: #6b7280;
+		stroke-width: 2;
 	}
 
 	.label {

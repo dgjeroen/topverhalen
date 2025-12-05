@@ -8,6 +8,8 @@
 	interface Project {
 		name: string;
 		id: string;
+		editing?: boolean;
+		editName?: string;
 	}
 
 	let projects: Project[] = $state([]);
@@ -29,6 +31,39 @@
 		// Filter op projectnaam (case-insensitive)
 		return projects.filter((project) => project.name.toLowerCase().includes(query));
 	});
+
+	// Utility helpers for inline editing state
+	function startEdit(project: any) {
+		project.editing = true;
+		project.editName = project.name;
+	}
+
+	function cancelEdit(project: any) {
+		project.editing = false;
+		project.editName = undefined;
+	}
+
+	async function saveProjectName(project: any) {
+		const newName = (project.editName || '').trim();
+		if (!newName) return alert('Naam mag niet leeg zijn');
+
+		try {
+			const resp = await fetch(`/cms/api/projects/${project.id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ storyName: newName })
+			});
+
+			if (!resp.ok) throw new Error('Kon project niet updaten');
+
+			// Update local list immediately
+			project.name = newName;
+			project.editing = false;
+			project.editName = undefined;
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'Fout bij opslaan');
+		}
+	}
 
 	// ✅ Show search hint
 	let showSearchHint = $derived(searchQuery.trim().length > 0 && searchQuery.trim().length < 3);
@@ -168,9 +203,30 @@
 			<div class="projects-grid">
 				{#each filteredProjects as project (project.id)}
 					<div class="project-card">
-						<h3>{project.name}</h3>
-						<p class="project-id">ID: {project.id.substring(0, 8)}...</p>
-						<button class="btn-secondary" onclick={() => openProject(project.id)}> Openen </button>
+						{#if project.editing}
+							<input
+								class="edit-input"
+								bind:value={project.editName}
+								aria-describedby={'hint-' + project.id}
+							/>
+							<p id={'hint-' + project.id} class="input-hint">
+								Wordt gebruikt als naam voor browser tabblad
+							</p>
+							<div class="card-actions">
+								<button class="btn-secondary" onclick={() => cancelEdit(project)}>Annuleren</button>
+								<button class="btn-primary" onclick={() => saveProjectName(project)}>Opslaan</button
+								>
+							</div>
+						{:else}
+							<h3>{project.name}</h3>
+							<p class="project-id">ID: {project.id.substring(0, 8)}...</p>
+							<div class="card-actions">
+								<button class="btn-secondary" onclick={() => openProject(project.id)}>Openen</button
+								>
+								<button class="btn-secondary" onclick={() => startEdit(project)}>Wijzig naam</button
+								>
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -334,6 +390,28 @@
 		border-radius: 8px;
 		padding: 1.5rem;
 		transition: all 0.2s;
+	}
+
+	.project-card .edit-input {
+		width: 100%;
+		padding: 0.6rem;
+		margin-bottom: 0.75rem;
+		border-radius: 6px;
+		border: 1px solid #d1d5db;
+		box-sizing: border-box;
+	}
+
+	.input-hint {
+		font-size: 0.85rem;
+		color: #6b7280;
+		margin-top: 0.25rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.card-actions {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
 	}
 
 	.project-card:hover {

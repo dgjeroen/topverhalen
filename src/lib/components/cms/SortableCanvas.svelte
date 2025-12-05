@@ -1,6 +1,6 @@
 <!--src\lib\components\cms\SortableCanvas.svelte-->
 <script lang="ts">
-	import { onDestroy, tick, createEventDispatcher } from 'svelte';
+	import { onDestroy, tick, createEventDispatcher, untrack } from 'svelte';
 	import type { ContentBlock, Theme } from '$lib/types';
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
@@ -10,28 +10,61 @@
 	let {
 		blocks = $bindable([]),
 		theme = {},
-		toolbox = null
+		toolbox = null,
+		allCollapsed = $bindable(false)
 	} = $props<{
 		blocks?: ContentBlock[];
 		theme?: Theme;
 		toolbox?: Sortable | null;
+		allCollapsed?: boolean;
 	}>();
 
 	// === STATE ===
 	let canvasEl!: HTMLElement;
 	let canvasSortable: Sortable | null = null;
+
+	// per-gallery portrait flags and scroll handler registry for editor previews
+	let galleryPortraits = $state<Record<string, boolean[]>>({});
+	const galleryScrollHandlers: Map<string, { onDown: any; onMove: any; onUp: any }> = new Map();
 	const dispatch = createEventDispatcher();
 
-	// ✅ COLLAPSE STATE (simplified)
-	let collapsedBlocks = $state<Set<string>>(new Set());
+	// ✅ COLLAPSE STATE with localStorage persistence
+	const STORAGE_KEY = 'topverhalen-collapsed-blocks';
 
-	// ✅ Collapsible types constant
+	// Load from localStorage
+	function loadCollapsedState(): Set<string> {
+		if (typeof window === 'undefined') return new Set();
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			return stored ? new Set(JSON.parse(stored)) : new Set();
+		} catch {
+			return new Set();
+		}
+	}
+
+	// Save to localStorage
+	function saveCollapsedState(collapsed: Set<string>) {
+		if (typeof window === 'undefined') return;
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify([...collapsed]));
+		} catch (e) {
+			console.warn('Failed to save collapsed state:', e);
+		}
+	}
+
+	let collapsedBlocks = $state<Set<string>>(loadCollapsedState());
+
+	// ✅ All block types are collapsible
 	const COLLAPSIBLE_TYPES = [
 		'heroVideo',
 		'imageHero',
+		'heading',
+		'subheading',
+		'subheadingMedium',
 		'subheadingSoccer',
 		'textblock',
 		'image',
+		'quote',
 		'video',
 		'embed',
 		'slider',
@@ -56,7 +89,53 @@
 		}
 		// ✅ Force reactivity by reassigning
 		collapsedBlocks = new Set(collapsedBlocks);
+		saveCollapsedState(collapsedBlocks);
 	}
+
+	// Track previous value to prevent infinite loop
+	let previousAllCollapsed = allCollapsed;
+
+	// Watch for allCollapsed changes from parent
+	$effect(() => {
+		// Only act if value actually changed
+		if (allCollapsed === previousAllCollapsed) return;
+		previousAllCollapsed = allCollapsed;
+
+		const collapsibleBlockIds = blocks
+			.filter((b: ContentBlock) => isCollapsible(b.type))
+			.map((b: ContentBlock) => b.id);
+
+		if (allCollapsed) {
+			// Collapse all
+			collapsibleBlockIds.forEach((id: string) => collapsedBlocks.add(id));
+		} else {
+			// Expand all
+			collapsibleBlockIds.forEach((id: string) => collapsedBlocks.delete(id));
+		}
+
+		collapsedBlocks = new Set(collapsedBlocks);
+		saveCollapsedState(collapsedBlocks);
+	});
+
+	// Ensure all image blocks have aspectRatio property
+	$effect(() => {
+		blocks.forEach((block: ContentBlock) => {
+			if (block.type === 'image' && !block.content.aspectRatio) {
+				block.content.aspectRatio = 'original';
+			}
+
+			// Ensure gallery blocks have a default aspectRatio
+			if (block.type === 'gallery' && !block.content.aspectRatio) {
+				block.content.aspectRatio = 'original';
+			}
+			// Initialize portrait flags for gallery blocks so editor preview can mark portraits
+			if (block.type === 'gallery') {
+				const existing = galleryPortraits[block.id] || [];
+				const arr = (block.content.images || []).map((_, i) => existing[i] || false);
+				galleryPortraits = { ...galleryPortraits, [block.id]: arr };
+			}
+		});
+	});
 
 	function isCollapsible(blockType: string): boolean {
 		return COLLAPSIBLE_TYPES.includes(blockType);
@@ -76,7 +155,7 @@
 			video: 'Video',
 			embed: 'Embed',
 			slider: 'Fotoslider',
-			gallery: 'Galerij',
+			gallery: 'Fotogrid',
 			textframe: 'Tekstkader',
 			timeline: 'Tijdlijn',
 			mediaPair: 'Mediapaar',
@@ -84,6 +163,67 @@
 			colofon: 'Colofon'
 		};
 		return labels[type] || type;
+	}
+
+	// ✅ Generate content preview for collapsed blocks
+	function getContentPreview(block: ContentBlock): string {
+		const maxLength = 60;
+		const truncate = (text: string) =>
+			text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+
+		switch (block.type) {
+			case 'heading':
+			case 'subheading':
+			case 'subheadingMedium':
+			case 'subheadingSoccer':
+				return truncate((block.content as any).text || '');
+
+			case 'textblock':
+				const text = Array.isArray((block.content as any).text)
+					? (block.content as any).text[0] || ''
+					: (block.content as any).text || '';
+				const leadLabel = (block.content as any).isLead ? '[Inleiding] ' : '';
+				return leadLabel + truncate(text.replace(/[#*_~`]/g, '').trim());
+
+			case 'quote':
+				return truncate((block.content as any).text || '');
+
+			case 'image':
+				return truncate((block.content as any).caption || 'Geen bijschrift');
+
+			case 'textframe':
+				return truncate((block.content as any).heading || (block.content as any).text || '');
+
+			case 'audio':
+				return truncate((block.content as any).title || 'Geen titel');
+
+			case 'video':
+				return truncate((block.content as any).url || '');
+
+			case 'heroVideo':
+			case 'imageHero':
+				return truncate((block.content as any).title || '');
+
+			case 'timeline':
+				const itemCount = (block.content as any).timelines?.length || 0;
+				return `${itemCount} item${itemCount === 1 ? '' : 's'}`;
+
+			case 'slider':
+			case 'gallery':
+				const imageCount = (block.content as any).images?.length || 0;
+				return `${imageCount} afbeelding${imageCount === 1 ? '' : 'en'}`;
+
+			case 'embed':
+				return truncate((block.content as any).code ? 'Embed code aanwezig' : 'Geen code');
+
+			case 'colofon':
+				const items = (block.content as any).items;
+				const firstItem = items?.[0];
+				return firstItem ? truncate(firstItem.functie + ': ' + firstItem.namen) : '';
+
+			default:
+				return '';
+		}
 	}
 
 	function handleFocusClick(event: MouseEvent, block: ContentBlock) {
@@ -113,6 +253,7 @@
 
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
+	let gallerySortables = new Map<string, Sortable>();
 	let markdownInfoOpen = $state<Record<string, boolean>>({});
 
 	const themeStyles = $derived.by(() => {
@@ -190,6 +331,102 @@
 			});
 
 			splide.mount();
+			splide.mount();
+
+			// If this is a gallery block, create a Sortable instance on the slide list
+			if (blockType === 'gallery') {
+				const listEl = splideEl.querySelector('.splide__list') as HTMLElement | null;
+				if (listEl) {
+					// destroy existing if present
+					if (gallerySortables.has(blockId)) {
+						gallerySortables.get(blockId)?.destroy();
+						gallerySortables.delete(blockId);
+					}
+
+					// also clean up any scroll handlers for this block
+					if (galleryScrollHandlers.has(blockId)) {
+						const h = galleryScrollHandlers.get(blockId)!;
+						const container = splideEl.closest('.splide-container') as HTMLElement | null;
+						if (container) {
+							container.removeEventListener('mousedown', h.onDown);
+							container.removeEventListener('mousemove', h.onMove);
+							container.removeEventListener('mouseup', h.onUp);
+							container.removeEventListener('mouseleave', h.onUp);
+							container.removeEventListener('touchstart', h.onDown);
+							container.removeEventListener('touchmove', h.onMove);
+							container.removeEventListener('touchend', h.onUp);
+						}
+						galleryScrollHandlers.delete(blockId);
+					}
+
+					const gs = new Sortable(listEl, {
+						animation: 150,
+						draggable: '.splide__slide',
+						onEnd: (evt) => {
+							const oldIndex = evt.oldIndex;
+							const newIndex = evt.newIndex;
+							if (oldIndex == null || newIndex == null) return;
+							const block = blocks.find((b: ContentBlock) => b.id === blockId);
+							if (block) {
+								const item = (block.content.images as any).splice(oldIndex, 1)[0];
+								(block.content.images as any).splice(newIndex, 0, item);
+
+								// reorder portrait flags for this gallery as well
+								const portraits = galleryPortraits[blockId] || [];
+								const flag = portraits.splice(oldIndex, 1)[0];
+								portraits.splice(newIndex, 0, flag);
+								galleryPortraits = { ...galleryPortraits, [blockId]: [...portraits] };
+
+								dispatch('save');
+								updateSlideNumbers(blockId);
+							}
+						}
+					});
+					gallerySortables.set(blockId, gs);
+
+					// make the outer container show a horizontal scrollbar and allow click-drag scrolling
+					const container = splideEl.closest('.splide-container') as HTMLElement | null;
+					if (container) {
+						container.style.overflowX = 'auto';
+						container.style.setProperty('-webkit-overflow-scrolling', 'touch');
+
+						let isDown = false;
+						let startX = 0;
+						let scrollLeft = 0;
+
+						const onDown = (e: any) => {
+							isDown = true;
+							container.classList.add('dragging');
+							startX = (e.pageX ?? e.touches?.[0]?.pageX) + 0;
+							scrollLeft = container.scrollLeft;
+						};
+
+						const onMove = (e: any) => {
+							if (!isDown) return;
+							e.preventDefault();
+							const x = (e.pageX ?? e.touches?.[0]?.pageX) + 0;
+							const walk = startX - x;
+							container.scrollLeft = scrollLeft + walk;
+						};
+
+						const onUp = () => {
+							isDown = false;
+							container.classList.remove('dragging');
+						};
+
+						container.addEventListener('mousedown', onDown);
+						container.addEventListener('mousemove', onMove);
+						container.addEventListener('mouseup', onUp);
+						container.addEventListener('mouseleave', onUp);
+						container.addEventListener('touchstart', onDown, { passive: false } as any);
+						container.addEventListener('touchmove', onMove, { passive: false } as any);
+						container.addEventListener('touchend', onUp);
+
+						galleryScrollHandlers.set(blockId, { onDown, onMove, onUp });
+					}
+				}
+			}
+
 			splideInstances.set(blockId, splide);
 
 			updateSlideNumbers(blockId);
@@ -251,6 +488,12 @@
 					instance.destroy();
 				}
 				splideInstances.delete(blockId);
+				// destroy gallery sortable if present
+				if (gallerySortables.has(blockId)) {
+					const s = gallerySortables.get(blockId);
+					if (s) s.destroy();
+					gallerySortables.delete(blockId);
+				}
 			}
 		}
 
@@ -275,10 +518,16 @@
 				handle: '.drag-handle',
 				ghostClass: 'sortable-ghost',
 				dragClass: 'dragging-preview',
+				// ✅ FIX: Don't prevent clicks on non-drag elements
+				preventOnFilter: false,
+				filter: '.no-drag',
 
 				onAdd: async (evt) => {
 					canvasSortable?.option('disabled', true);
-					if (toolbox) toolbox.option('disabled', true);
+					// ✅ FIX: Use untrack to prevent toolbox from being tracked as dependency
+					untrack(() => {
+						if (toolbox) toolbox.option('disabled', true);
+					});
 
 					const blockType = evt.item.dataset.type;
 					const newIndex = evt.newIndex;
@@ -290,12 +539,16 @@
 					await tick();
 
 					canvasSortable?.option('disabled', false);
-					if (toolbox) toolbox.option('disabled', false);
+					untrack(() => {
+						if (toolbox) toolbox.option('disabled', false);
+					});
 				},
 
 				onUpdate: async (evt) => {
 					canvasSortable?.option('disabled', true);
-					if (toolbox) toolbox.option('disabled', true);
+					untrack(() => {
+						if (toolbox) toolbox.option('disabled', true);
+					});
 
 					const { oldIndex, newIndex } = evt;
 					if (oldIndex !== undefined && newIndex !== undefined) {
@@ -305,7 +558,9 @@
 					await tick();
 
 					canvasSortable?.option('disabled', false);
-					if (toolbox) toolbox.option('disabled', false);
+					untrack(() => {
+						if (toolbox) toolbox.option('disabled', false);
+					});
 				}
 			});
 
@@ -318,6 +573,9 @@
 
 	onDestroy(() => {
 		splideInstances.forEach((instance) => instance.destroy());
+
+		// destroy any gallery sortables
+		gallerySortables.forEach((s) => s.destroy());
 	});
 </script>
 
@@ -349,7 +607,12 @@
 					</button>
 				{/if}
 
-				<span class="block-label">{getBlockLabel(block.type)}</span>
+				<div class="block-label-container">
+					<span class="block-label">{getBlockLabel(block.type)}</span>
+					{#if collapsedBlocks.has(block.id)}
+						<span class="block-preview">{getContentPreview(block)}</span>
+					{/if}
+				</div>
 
 				<button type="button" class="remove-btn" onclick={() => dispatch('remove', block.id)}>
 					×
@@ -725,7 +988,53 @@
 						class="slide-input"
 					/>
 					{#if block.content.url}
-						<img src={block.content.url} alt="" class="block-preview" />
+						{#if block.content.parallax || (block.content.aspectRatio && block.content.aspectRatio !== 'original')}
+							<div class="focus-point-controls">
+								<div
+									style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
+								>
+									<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
+										Focuspunt Instellen
+									</h5>
+									<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+										X: {block.content.focusX ?? 50}% Y: {block.content.focusY ?? 50}%
+									</span>
+								</div>
+								<div
+									role="button"
+									tabindex="0"
+									class="focus-interactive-wrapper"
+									onclick={(e) => handleFocusClick(e, block)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+									}}
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+								>
+									<img
+										src={block.content.url}
+										alt="Focus preview"
+										style="width: 100%; height: auto; display: block; object-fit: contain;"
+									/>
+									<div
+										class="focus-dot"
+										style:left="{block.content.focusX ?? 50}%"
+										style:top="{block.content.focusY ?? 50}%"
+									></div>
+								</div>
+								<p
+									class="control-hint"
+									style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+								>
+									{#if block.content.parallax}
+										Klik op het focuspunt (voor parallax effect en uitsnede)
+									{:else}
+										Klik op het focuspunt (voor uitsnede)
+									{/if}
+								</p>
+							</div>
+						{:else}
+							<img src={block.content.url} alt="" class="block-preview" />
+						{/if}
 					{/if}
 					<textarea
 						placeholder="Bijschrift..."
@@ -741,58 +1050,60 @@
 						oninput={() => dispatch('save')}
 						class="slide-input"
 					/>
-					<label class="parallax-toggle">
-						<input
-							type="checkbox"
-							bind:checked={block.content.parallax}
-							onchange={() => dispatch('save')}
-						/>
-						<span>Parallax-effect toepassen</span>
-					</label>
-
-					{#if block.content.parallax}
-						<div class="focus-point-controls">
-							<div
-								style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
-							>
-								<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
-									Focuspunt Instellen
-								</h5>
-								<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
-									X: {block.content.focusX ?? 50}% Y: {block.content.focusY ?? 50}%
-								</span>
-							</div>
-
-							<div
-								role="button"
-								tabindex="0"
-								class="focus-interactive-wrapper"
-								onclick={(e) => handleFocusClick(e, block)}
-								onkeydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+					<div class="image-controls">
+						<div class="control-label">Breedte:</div>
+						<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+							<IconButton
+								icon="icon-width-narrow"
+								label="Normaal"
+								active={block.content.width === 'normal'}
+								onclick={() => {
+									block.content.width = 'normal';
+									dispatch('save');
 								}}
-								style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
-							>
-								<img
-									src={block.content.url}
-									alt="Focus preview"
-									style="width: 100%; height: auto; display: block; object-fit: contain;"
-								/>
-
-								<div
-									class="focus-dot"
-									style:left="{block.content.focusX ?? 50}%"
-									style:top="{block.content.focusY ?? 50}%"
-								></div>
-							</div>
-							<p
-								class="control-hint"
-								style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
-							>
-								Klik op het focuspunt (voor parallax effect)
-							</p>
+							/>
+							<IconButton
+								icon="icon-width-wide"
+								label="Breed"
+								active={block.content.width === 'wide'}
+								onclick={() => {
+									block.content.width = 'wide';
+									dispatch('save');
+								}}
+							/>
+							<IconButton
+								icon="icon-width-full"
+								label="Volledige breedte"
+								active={block.content.width === 'full'}
+								onclick={() => {
+									block.content.width = 'full';
+									dispatch('save');
+								}}
+							/>
 						</div>
-					{/if}
+
+						<div class="control-label">Beeldverhouding:</div>
+						<select
+							bind:value={block.content.aspectRatio}
+							onchange={() => dispatch('save')}
+							class="aspect-ratio-select"
+						>
+							<option value="original">Origineel (volledig)</option>
+							<option value="4:3">4:3 (landschap)</option>
+							<option value="16:9">16:9 (breed landschap)</option>
+							<option value="4:5">4:5 (portret)</option>
+							<option value="1:1">1:1 (vierkant)</option>
+						</select>
+
+						<label class="parallax-toggle">
+							<input
+								type="checkbox"
+								bind:checked={block.content.parallax}
+								onchange={() => dispatch('save')}
+							/>
+							<span>Parallax-effect</span>
+						</label>
+					</div>
 				{:else if block.type === 'quote'}
 					<div class="quote-editor">
 						<textarea
@@ -833,6 +1144,39 @@
 					</div>
 				{:else if block.type === 'video'}
 					<div class="video-editor">
+						<div class="video-width-control">
+							<div class="control-label">Breedte:</div>
+							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+								<IconButton
+									icon="icon-width-narrow"
+									label="Normaal"
+									active={block.content.width === 'normal'}
+									onclick={() => {
+										block.content.width = 'normal';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-wide"
+									label="Breed"
+									active={block.content.width === 'wide'}
+									onclick={() => {
+										block.content.width = 'wide';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-full"
+									label="Volledige breedte"
+									active={block.content.width === 'full'}
+									onclick={() => {
+										block.content.width = 'full';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<div class="input-row">
 							<div class="input-col">
 								<span class="input-label">Video URL (YouTube of .m3u8)</span>
@@ -878,6 +1222,30 @@
 					</div>
 				{:else if block.type === 'embed'}
 					<div class="embed-editor">
+						<div class="embed-width-control">
+							<div class="control-label">Breedte:</div>
+							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+								<IconButton
+									icon="icon-width-narrow"
+									label="Normaal"
+									active={block.content.width === 'normal'}
+									onclick={() => {
+										block.content.width = 'normal';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-wide"
+									label="Breed"
+									active={block.content.width === 'wide'}
+									onclick={() => {
+										block.content.width = 'wide';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<label class="input-label" for="embed-code-{block.id}">Embed Code</label>
 						<textarea
 							id="embed-code-{block.id}"
@@ -956,6 +1324,30 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'slider'}
 					<div class="slider-editor">
+						<div class="slider-controls">
+							<div class="control-label">Breedte:</div>
+							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+								<IconButton
+									icon="icon-width-narrow"
+									label="Normaal"
+									active={block.content.width === 'normal'}
+									onclick={() => {
+										block.content.width = 'normal';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-wide"
+									label="Breed"
+									active={block.content.width === 'wide'}
+									onclick={() => {
+										block.content.width = 'wide';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<h4>Fotoslider ({block.content.images.length} foto's)</h4>
 						<div class="splide-container">
 							<div id="splide-{block.id}" class="splide">
@@ -1009,6 +1401,15 @@ Voorbeelden:
 														src={slide.url || 'https://placehold.co/150x100'}
 														alt=""
 														class="slide-preview"
+														class:is-portrait={galleryPortraits[block.id] &&
+															galleryPortraits[block.id][i]}
+														onload={(e) => {
+															const img = e.currentTarget as HTMLImageElement;
+															const portrait = img.naturalHeight > img.naturalWidth;
+															const existing = galleryPortraits[block.id] || [];
+															existing[i] = portrait;
+															galleryPortraits = { ...galleryPortraits, [block.id]: [...existing] };
+														}}
 													/>
 													<input
 														type="url"
@@ -1049,6 +1450,30 @@ Voorbeelden:
 				{:else if block.type === 'gallery'}
 					<div class="gallery-editor">
 						<div class="gallery-controls">
+							<div class="width-picker">
+								<div class="control-label">Breedte:</div>
+								<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+									<IconButton
+										icon="icon-width-narrow"
+										label="Normaal"
+										active={block.content.width === 'normal'}
+										onclick={() => {
+											block.content.width = 'normal';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-width-wide"
+										label="Breed"
+										active={block.content.width === 'wide'}
+										onclick={() => {
+											block.content.width = 'wide';
+											dispatch('save');
+										}}
+									/>
+								</div>
+							</div>
+
 							<div class="layout-picker">
 								<span class="input-label">Layout:</span>
 								<div class="layout-options">
@@ -1092,6 +1517,20 @@ Voorbeelden:
 										</div>
 									</label>
 								</div>
+							</div>
+							<div class="aspect-picker">
+								<div class="control-label">Beeldverhouding:</div>
+								<select
+									bind:value={block.content.aspectRatio}
+									onchange={() => dispatch('save')}
+									class="aspect-ratio-select"
+								>
+									<option value="original">Origineel (volledig)</option>
+									<option value="4:3">4:3 (landschap)</option>
+									<option value="16:9">16:9 (breed landschap)</option>
+									<option value="4:5">4:5 (portret)</option>
+									<option value="1:1">1:1 (vierkant)</option>
+								</select>
 							</div>
 							<span class="gallery-info">{getGalleryLayoutInfo(block)}</span>
 						</div>
@@ -1159,6 +1598,18 @@ Voorbeelden:
 																src={image.url || 'https://placehold.co/150x100'}
 																alt=""
 																class="slide-preview"
+																class:is-portrait={galleryPortraits[block.id] &&
+																	galleryPortraits[block.id][i]}
+																onload={(e) => {
+																	const img = e.currentTarget as HTMLImageElement;
+																	const portrait = img.naturalHeight > img.naturalWidth;
+																	const existing = galleryPortraits[block.id] || [];
+																	existing[i] = portrait;
+																	galleryPortraits = {
+																		...galleryPortraits,
+																		[block.id]: [...existing]
+																	};
+																}}
 															/>
 															<div
 																class="focus-dot"
@@ -1170,7 +1621,8 @@ Voorbeelden:
 															class="control-hint"
 															style="font-size: 0.7rem; color: #6b7280; margin: 0.25rem 0 0.5rem; text-align: center;"
 														>
-															Klik op foto voor focuspunt • X: {image.focusX ?? 50}% Y: {image.focusY ?? 50}%
+															Klik op foto voor focuspunt • X: {image.focusX ?? 50}% Y: {image.focusY ??
+																50}%
 														</p>
 													</div>
 													<input
@@ -1413,10 +1865,10 @@ Voorbeelden:
 										<div class="width-controls">
 											<IconButton
 												icon="icon-width-narrow"
-												label="Smalle layout (700px)"
-												active={block.content.width === 'narrow'}
+												label="Normale breedte (700px)"
+												active={block.content.width === 'normal'}
 												onclick={() => {
-													block.content.width = 'narrow';
+													block.content.width = 'normal';
 													dispatch('save');
 												}}
 											/>
@@ -1629,7 +2081,7 @@ Voorbeelden:
 													/>
 													<input
 														type="text"
-														placeholder="Titel (optioneel)"
+														placeholder="Kopje (optioneel)"
 														bind:value={item.title}
 														oninput={() => dispatch('save')}
 														class="slide-input"
@@ -1649,12 +2101,49 @@ Voorbeelden:
 														class="slide-input"
 													/>
 													{#if item.imageSrc}
-														<img
-															src={item.imageSrc}
-															alt=""
-															class="slide-preview"
-															style="margin-top: 0.5rem;"
-														/>
+														<div style="margin-top: 1rem;">
+															<div
+																style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;"
+															>
+																Focus punt
+															</div>
+															<div
+																role="button"
+																tabindex="0"
+																onclick={(e) => {
+																	const rect = e.currentTarget.getBoundingClientRect();
+																	const x = ((e.clientX - rect.left) / rect.width) * 100;
+																	const y = ((e.clientY - rect.top) / rect.height) * 100;
+																	item.focusX = Math.round(x);
+																	item.focusY = Math.round(y);
+																	dispatch('save');
+																}}
+																onkeydown={(e) => {
+																	if (e.key === 'Enter' || e.key === ' ') {
+																		e.preventDefault();
+																		e.currentTarget.click();
+																	}
+																}}
+																style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+															>
+																<img
+																	src={item.imageSrc}
+																	alt="Focus preview"
+																	style="width: 100%; height: auto; display: block; object-fit: contain;"
+																/>
+																<div
+																	class="focus-dot"
+																	style:left="{item.focusX || 50}%"
+																	style:top="{item.focusY || 50}%"
+																></div>
+															</div>
+															<p
+																class="control-hint"
+																style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+															>
+																Klik op het belangrijkste deel van de foto
+															</p>
+														</div>
 													{/if}
 													<input
 														type="text"
@@ -1680,6 +2169,30 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'mediaPair'}
 					<div class="mediapaar-editor">
+						<div class="mediapair-width-control">
+							<div class="control-label">Breedte:</div>
+							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+								<IconButton
+									icon="icon-width-narrow"
+									label="Normaal"
+									active={block.content.width === 'normal'}
+									onclick={() => {
+										block.content.width = 'normal';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-wide"
+									label="Breed"
+									active={block.content.width === 'wide'}
+									onclick={() => {
+										block.content.width = 'wide';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<div class="mediapaar-controls">
 							<button
 								type="button"
@@ -1828,6 +2341,31 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'audio'}
 					<div class="audio-editor">
+						<!-- Width selector -->
+						<div class="control-group">
+							<div class="control-label">Breedte:</div>
+							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+								<IconButton
+									icon="icon-width-narrow"
+									label="Normaal"
+									active={block.content.width === 'normal'}
+									onclick={() => {
+										block.content.width = 'normal';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-width-wide"
+									label="Breed"
+									active={block.content.width === 'wide'}
+									onclick={() => {
+										block.content.width = 'wide';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<!-- Layout selector -->
 						<div class="control-group">
 							<label class="control-label" for="audio-layout-{block.id}"> Afbeelding layout </label>
@@ -2042,6 +2580,31 @@ Voorbeelden:
 							</div>
 						{/if}
 
+						<!-- Layout controls -->
+						<div class="control-group">
+							<div class="control-label">Layout:</div>
+							<div class="width-controls" role="toolbar" aria-label="Layout selectie">
+								<IconButton
+									icon="icon-colofon-inline"
+									label="Onder elkaar"
+									active={block.content.layout === 'inline'}
+									onclick={() => {
+										block.content.layout = 'inline';
+										dispatch('save');
+									}}
+								/>
+								<IconButton
+									icon="icon-colofon-columns"
+									label="Naast elkaar"
+									active={block.content.layout === 'columns'}
+									onclick={() => {
+										block.content.layout = 'columns';
+										dispatch('save');
+									}}
+								/>
+							</div>
+						</div>
+
 						<!-- Existing colofon items -->
 						<div class="colofon-items">
 							{#each block.content.items as item, i (i)}
@@ -2098,9 +2661,8 @@ Voorbeelden:
 		margin: 0 auto;
 		min-height: 400px;
 		background: white;
-		border: 2px dashed #e5e7eb;
 		border-radius: 8px;
-		padding: 20px;
+		padding: 2rem;
 		position: relative;
 		padding-bottom: 40vh;
 	}
@@ -2149,6 +2711,7 @@ Voorbeelden:
 		background-color: #f3f4f6; /* ✅ Slightly darker than block */
 		border-bottom: 1px solid #e5e7eb;
 		cursor: default;
+		min-height: 48px; /* Consistent height */
 	}
 
 	.drag-handle {
@@ -2158,6 +2721,9 @@ Voorbeelden:
 		user-select: none;
 		padding: 0 0.25rem;
 		flex-shrink: 0;
+		line-height: 1;
+		display: flex;
+		align-items: center;
 	}
 
 	.drag-handle:active {
@@ -2175,6 +2741,8 @@ Voorbeelden:
 		color: #6b7280;
 		transition: color 0.2s;
 		flex-shrink: 0;
+		height: 28px; /* Match icon + padding */
+		width: 28px;
 	}
 
 	.collapse-toggle:hover {
@@ -2191,16 +2759,38 @@ Voorbeelden:
 		transform: rotate(-90deg);
 	}
 
-	.block-label {
+	.block-label-container {
 		flex: 1;
+		display: flex;
+		align-items: center; /* Center vertically */
+		gap: 0.5rem;
+		min-width: 0; /* Allow flex children to shrink */
+		overflow: hidden;
+	}
+
+	.block-label {
 		font-weight: 600;
 		font-size: 0.875rem;
-		color: #374151;
+		color: #d10a10;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		white-space: nowrap;
+		flex-shrink: 0; /* Don't shrink the label */
+		line-height: 1;
+	}
+
+	.block-preview {
+		font-size: 0.875rem; /* Same as label for alignment */
+		color: #000000;
+		font-weight: 400;
+		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		font-style: italic;
+		flex: 1; /* Take remaining space */
+		min-width: 0; /* Allow text-overflow to work */
+		line-height: 1;
+		transform: translateY(-3.75px); /* Optical adjustment for uppercase vs normal text */
 	}
 
 	/* ✅ FIXED: Remove button (in header, no absolute positioning) */
@@ -2214,6 +2804,10 @@ Voorbeelden:
 		line-height: 1;
 		transition: color 0.2s;
 		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 32px;
 	}
 
 	.remove-btn:hover {
@@ -2429,7 +3023,8 @@ Voorbeelden:
 	}
 
 	.splide-container {
-		overflow: visible;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.splide {
@@ -2437,8 +3032,7 @@ Voorbeelden:
 	}
 
 	.splide__track {
-		overflow-x: auto;
-		overflow-y: visible;
+		overflow: visible;
 	}
 
 	.splide__list {
@@ -2456,6 +3050,16 @@ Voorbeelden:
 		max-width: 380px;
 		margin-right: 10px;
 		box-sizing: border-box;
+	}
+
+	/* make the scrollbar visually obvious */
+	.splide-container::-webkit-scrollbar {
+		height: 10px;
+	}
+
+	.splide-container::-webkit-scrollbar-thumb {
+		background: #d1d5db;
+		border-radius: 6px;
 	}
 
 	.slide-header {
@@ -2522,6 +3126,16 @@ Voorbeelden:
 		object-fit: cover;
 		margin-bottom: 10px;
 		border-radius: 6px;
+	}
+
+	.slide-preview.is-portrait {
+		width: auto;
+		height: 200px;
+		object-fit: contain;
+		background: var(--color-background-light, #fff);
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.slide-input,
@@ -3143,12 +3757,10 @@ Voorbeelden:
 
 	.input-label {
 		font-weight: 600;
-		font-size: 0.6875rem;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		font-size: 0.875rem;
+		color: #374151;
 		display: block;
-		margin-bottom: 0.25rem;
+		margin-bottom: 0.5rem;
 	}
 	.subheading-soccer-editor {
 		display: flex;

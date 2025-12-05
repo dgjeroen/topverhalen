@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>{project.storyName || 'Story'} - Topverhalen</title>
+	<title>{project.storyName || 'Story'}</title>
 
 	{#if data.isPreview}
 		<meta name="robots" content="noindex" />

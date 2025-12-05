@@ -1,6 +1,7 @@
 <!--src\lib\components\ThemeLoader.svelte-->
 <script lang="ts">
 	import type { Theme } from '$lib/types';
+	import { applyImageShape } from '$lib/utils/applyImageShape';
 
 	let { theme } = $props<{ theme?: Theme }>();
 
@@ -8,7 +9,11 @@
 		if (!theme || Object.keys(theme).length === 0) return;
 
 		// ✅ FIX: Handle ALL value types (string, number, boolean)
-		const cssVars = Object.entries(theme)
+		// Separate quote variables from other variables for scoping
+		const quoteVars: string[] = [];
+		const rootVars: string[] = [];
+
+		Object.entries(theme)
 			.filter(([_, value]) => {
 				// Accept strings, numbers, and booleans
 				return (
@@ -17,23 +22,32 @@
 					typeof value === 'boolean'
 				);
 			})
-			.map(([key, value]) => {
-				// ✅ FIX: Special handling voor specifieke keys
+			.forEach(([key, value]) => {
+				let cssLine: string;
 
+				// ✅ FIX: Special handling voor specifieke keys
 				// Overlay opacity: convert percentage (0-100) to decimal (0-1)
 				if (key === 'hero-video-overlay-opacity' && typeof value === 'number') {
-					return `  --${key}: ${value / 100};`;
+					cssLine = `  --${key}: ${value / 100};`;
 				}
-
 				// Uppercase title: convert boolean to CSS value
-				if (key === 'hero-video-uppercase-title' && typeof value === 'boolean') {
-					return `  --${key}: ${value ? 'uppercase' : 'none'};`;
+				else if (key === 'hero-video-uppercase-title' && typeof value === 'boolean') {
+					cssLine = `  --${key}: ${value ? 'uppercase' : 'none'};`;
+				}
+				// Default: direct value
+				else {
+					cssLine = `  --${key}: ${value};`;
 				}
 
-				// Default: direct value
-				return `  --${key}: ${value};`;
-			})
-			.join('\n');
+				// ✅ Scope quote variables to .quote-block only
+				if (key.startsWith('quote-')) {
+					quoteVars.push(cssLine);
+				} else {
+					rootVars.push(cssLine);
+				}
+			});
+
+		const cssVars = rootVars.join('\n');
 
 		const bgImage = theme['background-image'];
 		const bgVars = bgImage
@@ -59,6 +73,10 @@
 		style.textContent = `
 :root {
 ${allVars}
+}
+
+.quote-block {
+${quoteVars.join('\n')}
 }
 
 html {
@@ -94,6 +112,12 @@ body {
 }
 `;
 		document.head.appendChild(style);
+
+		// Apply image shape data attributes after CSS variables are loaded
+		// Use setTimeout to ensure CSS has been applied
+		setTimeout(() => {
+			applyImageShape();
+		}, 0);
 
 		return () => {
 			const el = document.getElementById('theme-overrides');

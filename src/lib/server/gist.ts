@@ -108,7 +108,20 @@ export async function getGist(id: string): Promise<ProjectContent> {
 
 	const gist = await response.json();
 	const fileContent = Object.values(gist.files)[0] as { content: string };
-	return JSON.parse(fileContent.content);
+	const content: ProjectContent = JSON.parse(fileContent.content);
+
+	// Migrate old image blocks to include aspectRatio
+	if (content.data && Array.isArray(content.data)) {
+		content.data.forEach((block: any) => {
+			if (block.type === 'image' && block.content) {
+				if (!block.content.aspectRatio) {
+					block.content.aspectRatio = 'original';
+				}
+			}
+		});
+	}
+
+	return content;
 }
 
 // ✅ Maak nieuwe Gist

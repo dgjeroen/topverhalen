@@ -195,7 +195,7 @@ export type Theme = {
 	// ============================================
 	'image-border-radius'?: string;
 	'image-box-shadow'?: string;
-	'image-hover-transform'?: string;
+	'image-hover-effect'?: string;
 	'image-hover-shadow'?: string;
 	'image-caption-spacing'?: string;
 	'image-caption-color'?: string;
@@ -269,10 +269,8 @@ export type Theme = {
 	'slider-dot-size'?: string;
 	'slider-dot-bg'?: string;
 	'slider-dot-border-width'?: string;
-	'slider-dot-border-color'?: string;
 	'slider-dot-active-bg'?: string;
 	'slider-dot-active-border-width'?: string;
-	'slider-dot-active-border-color'?: string;
 
 	// ============================================
 	// ACHTERGROND AFBEELDING (Desktop only)
@@ -307,11 +305,14 @@ export type Theme = {
 	'timeline-year-color'?: string;
 	'timeline-year-size'?: string;
 	'timeline-year-weight'?: string;
+	'timeline-heading-color'?: string;
 	'timeline-text-color'?: string;
 	'timeline-text-size'?: string;
 	'timeline-text-line-height'?: string;
 	'timeline-image-max-width'?: string;
+	'timeline-image-max-width-percent'?: number;
 	'timeline-image-border-radius'?: string;
+	'timeline-image-round'?: boolean;
 
 	// Mobile (Horizontal)
 	'timeline-mobile-title-align'?: string;
@@ -360,8 +361,10 @@ export interface ImageContent {
 	caption: string;
 	source: string;
 	parallax: boolean;
+	aspectRatio?: 'original' | '4:3' | '4:5' | '16:9' | '1:1';
 	focusX?: number;
 	focusY?: number;
+	width?: 'normal' | 'wide' | 'full';
 }
 
 export interface QuoteContent {
@@ -381,6 +384,7 @@ export interface AudioContent {
 	imageScale?: number;
 	imageFocusX?: number;
 	imageFocusY?: number;
+	width?: 'normal' | 'wide';
 }
 
 export interface HeroStyleProps {
@@ -440,11 +444,14 @@ export interface ImageHeroContent {
 export interface GalleryContent {
 	images: { url: string; caption: string; source: string; focusX?: number; focusY?: number }[];
 	columns: number;
+	width?: 'normal' | 'wide';
+	aspectRatio?: 'original' | '4:3' | '16:9' | '4:5' | '1:1';
 }
 
 export interface VideoContent {
 	url: string;
 	poster?: string;
+	width?: 'normal' | 'wide' | 'full';
 }
 
 export interface SliderContent {
@@ -453,12 +460,14 @@ export interface SliderContent {
 		caption: string;
 		source: string;
 	}>;
+	width?: 'normal' | 'wide';
 }
 
 export interface ColofonContent {
 	items: { functie: string; namen: string }[];
 	showLogo?: boolean;
 	logoVariant?: 'color' | 'dia';
+	layout?: 'inline' | 'columns';
 }
 
 export interface TimelineItem {
@@ -467,6 +476,8 @@ export interface TimelineItem {
 	imageSrc: string | null;
 	imageAlt: string;
 	description: string;
+	focusX?: number;
+	focusY?: number;
 }
 
 export type MediaItem = {
@@ -482,10 +493,11 @@ export type MediaItem = {
 export interface MediaPairContent {
 	verticalAlign: 'top' | 'bottom';
 	items: [MediaItem, MediaItem];
+	width?: 'normal' | 'wide';
 }
 
 export interface TextFrameContent {
-	width: 'narrow' | 'wide';
+	width: 'normal' | 'wide';
 	heading?: string;
 	text: string;
 	image?: {
@@ -511,6 +523,7 @@ export interface EmbedContent {
 	aspectRatio?: '16:9' | '4:3' | '1:1' | '3:2' | '21:9' | 'auto';
 	caption?: string;
 	source?: string;
+	width?: 'normal' | 'wide';
 }
 
 type BlockBase = {

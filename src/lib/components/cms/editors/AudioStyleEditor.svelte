@@ -13,14 +13,9 @@
 </script>
 
 <div class="style-editor">
-	<div class="editor-header">
-		<h3>Audio Speler Styling</h3>
-		<p class="editor-description">Pas de stijl van audio speler blokken aan</p>
-	</div>
-
-	<div class="controls">
-		<!-- SECTIE: Container -->
-		<div class="section-header">Container</div>
+	<!-- SECTIE: Container -->
+	<div class="section">
+		<h3>Container</h3>
 
 		<div class="control-group">
 			<label for="audio-bg">Achtergrondkleur</label>
@@ -74,9 +69,11 @@
 			/>
 			<span class="hint">Bijv: 1rem, 1.5rem, 2rem</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Afbeelding -->
-		<div class="section-header">Afbeelding</div>
+	<!-- SECTIE: Afbeelding -->
+	<div class="section">
+		<h3>Afbeelding</h3>
 
 		<div class="control-group">
 			<label for="audio-image-size">Afbeelding grootte</label>
@@ -103,9 +100,11 @@
 			/>
 			<span class="hint">Bijv: 4px, 6px, 50% (rond)</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Titel & Beschrijving -->
-		<div class="section-header">Titel & Beschrijving</div>
+	<!-- SECTIE: Titel & Beschrijving -->
+	<div class="section">
+		<h3>Titel & Beschrijving</h3>
 
 		<div class="control-group">
 			<label for="audio-title-color">Titel kleur</label>
@@ -181,9 +180,11 @@
 			/>
 			<span class="hint">Bijv: 0.8rem, 0.9rem, 1rem</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Play Button -->
-		<div class="section-header">Play Button</div>
+	<!-- SECTIE: Play Button -->
+	<div class="section">
+		<h3>Play Button</h3>
 
 		<div class="control-group">
 			<label for="audio-btn-size">Button grootte</label>
@@ -254,9 +255,11 @@
 				/>
 			</div>
 		</div>
+	</div>
 
-		<!-- SECTIE: Progress Bar -->
-		<div class="section-header">Progress Bar</div>
+	<!-- SECTIE: Progress Bar -->
+	<div class="section">
+		<h3>Progress Bar</h3>
 
 		<div class="control-group">
 			<label for="audio-progress-height">Hoogte</label>
@@ -321,9 +324,11 @@
 			/>
 			<span class="hint">Bijv: 2px, 3px, 4px</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Tijd Display -->
-		<div class="section-header">Tijd Display</div>
+	<!-- SECTIE: Tijd Display -->
+	<div class="section">
+		<h3>Tijd Display</h3>
 
 		<div class="control-group">
 			<label for="audio-time-color">Tekstkleur</label>
@@ -361,125 +366,108 @@
 
 <style>
 	.style-editor {
-		padding: 2rem;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-
-	.editor-header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		color: #111827;
-		font-size: 1.5rem;
-		font-weight: 700;
-	}
-
-	.editor-description {
-		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.section-header {
-		font-weight: 700;
-		font-size: 0.75rem;
-		color: #9ca3af;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	.section-header:first-of-type {
-		margin-top: 0;
-		padding-top: 0;
-		border-top: none;
-	}
-
-	.controls {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		padding: 2rem;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.section {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 1.25rem;
 	}
 
-	label {
-		font-weight: 600;
+	h3 {
+		margin: 0 0 1rem 0;
 		font-size: 0.875rem;
+		font-weight: 700;
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
+	.control-group {
+		margin-bottom: 1rem;
+	}
+
+	.control-group:last-child {
+		margin-bottom: 0;
+	}
+
+	label {
+		display: block;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #4b5563;
+		margin-bottom: 0.375rem;
+	}
+
 	.color-control {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
 	input[type='color'] {
-		width: 60px;
-		height: 40px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 40px;
+		height: 38px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		cursor: pointer;
+		padding: 0;
+		background: none;
 		flex-shrink: 0;
 	}
 
 	.color-value,
 	.text-input {
-		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
 		color: #374151;
 	}
 
 	.color-value {
 		font-family: 'SF Mono', Monaco, monospace;
+		flex: 1;
 	}
 
 	.text-input:focus,
 	.color-value:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 
 	.hint {
 		font-size: 0.75rem;
 		color: #9ca3af;
 		font-style: italic;
+		display: block;
+		margin-top: 0.25rem;
 	}
 
 	select {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.9375rem;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
 		color: #374151;
 		background: white;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	select:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 </style>

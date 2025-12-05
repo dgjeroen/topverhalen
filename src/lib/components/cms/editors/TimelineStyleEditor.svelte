@@ -45,6 +45,7 @@
 	let cardBg = $state('');
 	let yearColor = $state('');
 	let textColor = $state('');
+	let headingColor = $state('');
 	let mobileYearBg = $state('');
 	let mobileButtonBg = $state('');
 	let mobileButtonBorder = $state('');
@@ -87,6 +88,10 @@
 		textColor = value;
 		theme['timeline-text-color'] = value;
 	}
+	function updateHeadingColor(value: string) {
+		headingColor = value;
+		theme['timeline-heading-color'] = value;
+	}
 	function updateMobileYearBg(value: string) {
 		mobileYearBg = value;
 		theme['timeline-mobile-year-bg'] = value;
@@ -119,6 +124,7 @@
 		cardBg = theme['timeline-card-bg'] || '#fdf6e9';
 		yearColor = theme['timeline-year-color'] || '#f59e0b';
 		textColor = theme['timeline-text-color'] || '#111827';
+		headingColor = theme['timeline-heading-color'] || '#111827';
 		mobileYearBg = theme['timeline-mobile-year-bg'] || '#fdf6e9';
 		mobileButtonBg = theme['timeline-mobile-button-bg'] || 'rgba(255, 255, 255, 0.9)';
 		mobileButtonBorder = theme['timeline-mobile-button-border'] || '#ddd';
@@ -128,16 +134,9 @@
 </script>
 
 <div class="style-editor">
-	<div class="editor-header">
-		<h3>Tijdlijn</h3>
-		<p class="editor-description">Pas de stijl van de tijdlijn aan</p>
-	</div>
-
-	<div class="controls">
-		<!-- ============================================ -->
-		<!-- SYNC TOGGLE                                  -->
-		<!-- ============================================ -->
-		<div class="control-group sync-toggle-group">
+	<!-- SECTIE: Mobiel/Desktop Sync -->
+	<div class="section sync-section">
+		<div class="control-group">
 			<label class="checkbox-label">
 				<input
 					type="checkbox"
@@ -152,17 +151,12 @@
 			</label>
 			<span class="hint">Als aan: mobiele styling volgt desktop automatisch</span>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Titel -->
+	<div class="section">
+		<h3>Titel (naam tijdlijn)</h3>
 
-		<!-- ============================================ -->
-		<!-- GEDEELDE STYLING (Desktop + Mobile)          -->
-		<!-- ============================================ -->
-		<div class="section-header">
-			<h4>Algemeen</h4>
-		</div>
-
-		<!-- Titel -->
 		<div class="control-group">
 			<label for="timeline-title-color">Titelkleur</label>
 			<div class="color-control">
@@ -211,10 +205,12 @@
 				<option value="900">Black (900)</option>
 			</select>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Lijn -->
+	<div class="section">
+		<h3>Lijn</h3>
 
-		<!-- Lijn -->
 		<div class="control-group">
 			<label for="timeline-line-color">Lijnkleur</label>
 			<div class="color-control">
@@ -257,10 +253,12 @@
 			/>
 			<span class="hint">Bijv: 2px, 4px, 0.25rem</span>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Marker -->
+	<div class="section">
+		<h3>Marker</h3>
 
-		<!-- Marker -->
 		<div class="control-group">
 			<label for="timeline-marker-size">Marker grootte</label>
 			<input
@@ -344,10 +342,12 @@
 			/>
 			<span class="hint">Bijv: 2px, 4px, 0.25rem</span>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Event Kaart -->
+	<div class="section">
+		<h3>Event Kaart</h3>
 
-		<!-- Event Card -->
 		<div class="control-group">
 			<label for="timeline-card-bg">Kaart achtergrond</label>
 			<div class="color-control">
@@ -425,10 +425,12 @@
 			/>
 			<span class="hint">Bijv: 0 4px 6px rgba(0,0,0,0.1)</span>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Jaar & Tekst -->
+	<div class="section">
+		<h3>Jaar & Tekst</h3>
 
-		<!-- Jaar & Tekst -->
 		<div class="control-group">
 			<label for="timeline-year-color">Jaarkleur</label>
 			<div class="color-control">
@@ -482,6 +484,27 @@
 		</div>
 
 		<div class="control-group">
+			<label for="timeline-heading-color">Tekstkleur kopje</label>
+			<div class="color-control">
+				<input
+					id="timeline-heading-color"
+					type="color"
+					value={headingColor}
+					oninput={(e) => updateHeadingColor(e.currentTarget.value)}
+					onchange={onsave}
+				/>
+				<input
+					type="text"
+					class="color-value"
+					value={headingColor}
+					oninput={(e) => updateHeadingColor(e.currentTarget.value)}
+					onchange={onsave}
+					placeholder="#111827"
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
 			<label for="timeline-text-color">Tekstkleur</label>
 			<div class="color-control">
 				<input
@@ -527,50 +550,53 @@
 			/>
 			<span class="hint">Bijv: 1.6, 1.5</span>
 		</div>
+	</div>
 
-		<div class="section-divider"></div>
+	<!-- SECTIE: Afbeelding -->
+	<div class="section">
+		<h3>Afbeelding</h3>
 
-		<!-- Afbeelding -->
 		<div class="control-group">
-			<label for="timeline-image-max-width">Afbeelding max breedte</label>
+			<label for="timeline-image-max-width">Afbeelding max breedte (%)</label>
 			<input
 				id="timeline-image-max-width"
-				type="text"
-				bind:value={theme['timeline-image-max-width']}
+				type="number"
+				min="1"
+				max="100"
+				bind:value={theme['timeline-image-max-width-percent']}
 				onchange={onsave}
-				placeholder="80px"
+				placeholder="100"
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 80px, 5rem</span>
+			<span class="hint">Percentage (1-100)</span>
 		</div>
 
 		<div class="control-group">
-			<label for="timeline-image-border-radius">Afbeelding afronding</label>
-			<input
-				id="timeline-image-border-radius"
-				type="text"
-				bind:value={theme['timeline-image-border-radius']}
-				onchange={onsave}
-				placeholder="0.25rem"
-				class="text-input"
-			/>
-			<span class="hint">Bijv: 0.25rem, 4px</span>
+			<label class="checkbox-label">
+				<input
+					type="checkbox"
+					bind:checked={theme['timeline-image-round']}
+					onchange={async (e) => {
+						const checked = e.currentTarget.checked;
+						theme['timeline-image-round'] = checked;
+						await onsave();
+					}}
+				/>
+				<span>Ronde uitsnede (cirkel)</span>
+			</label>
+			<span class="hint">Als aan: perfecte cirkel, als uit: originele verhouding</span>
 		</div>
+	</div>
 
-		<!-- ============================================ -->
-		<!-- MOBIEL-SPECIFIEKE STYLING                    -->
-		<!-- ============================================ -->
-		{#if !syncMobileDesktop}
-			<div class="section-divider-major"></div>
+	<!-- SECTIE: Mobiel Specifiek (alleen als sync uit staat) -->
+	{#if !syncMobileDesktop}
+		<div class="section mobile-section">
+			<h3>Mobiel Specifiek</h3>
+			<p class="section-note">
+				Pas mobiele styling apart aan. Desktop waarden worden als fallback gebruikt.
+			</p>
 
-			<div class="section-header">
-				<h4>Mobiel Specifiek</h4>
-				<p class="section-description">
-					Pas mobiele styling apart aan. Desktop waarden worden als fallback gebruikt.
-				</p>
-			</div>
-
-			<!-- Titel Mobile -->
+			<!-- Titel uitlijning -->
 			<div class="control-group">
 				<label for="timeline-mobile-title-align">Titel uitlijning</label>
 				<select
@@ -585,9 +611,7 @@
 				</select>
 			</div>
 
-			<div class="section-divider"></div>
-
-			<!-- Horizontale Lijn -->
+			<!-- Lijn -->
 			<div class="control-group">
 				<label for="timeline-mobile-line-color-manual">Lijnkleur</label>
 				<div class="color-control">
@@ -621,9 +645,7 @@
 				<span class="hint">Fallback: desktop lijnbreedte</span>
 			</div>
 
-			<div class="section-divider"></div>
-
-			<!-- Marker Mobile -->
+			<!-- Marker -->
 			<div class="control-group">
 				<label for="timeline-mobile-marker-size-manual">Marker grootte</label>
 				<input
@@ -690,9 +712,7 @@
 				<span class="hint">Fallback: desktop marker randbreedte</span>
 			</div>
 
-			<div class="section-divider"></div>
-
-			<!-- Kaart Mobile -->
+			<!-- Kaart -->
 			<div class="control-group">
 				<label for="timeline-mobile-card-width">Kaartbreedte</label>
 				<input
@@ -786,9 +806,7 @@
 				</div>
 			</div>
 
-			<div class="section-divider"></div>
-
-			<!-- Jaar Mobile -->
+			<!-- Jaar -->
 			<div class="control-group">
 				<label for="timeline-mobile-year-color-manual">Jaarkleur</label>
 				<div class="color-control">
@@ -830,9 +848,7 @@
 				</div>
 			</div>
 
-			<div class="section-divider"></div>
-
-			<!-- Connector Lijn -->
+			<!-- Connector -->
 			<div class="control-group">
 				<label for="timeline-mobile-connector-color-manual">Verbindingslijn kleur</label>
 				<div class="color-control">
@@ -866,8 +882,6 @@
 				<span class="hint">Fallback: desktop lijnbreedte</span>
 			</div>
 
-			<div class="section-divider"></div>
-
 			<!-- Afbeelding Mobile -->
 			<div class="control-group">
 				<label for="timeline-mobile-image-height">Afbeelding hoogte</label>
@@ -881,8 +895,6 @@
 				/>
 				<span class="hint">Bijv: 120px, 7.5rem</span>
 			</div>
-
-			<div class="section-divider"></div>
 
 			<!-- Scroll Knoppen -->
 			<div class="control-group">
@@ -960,141 +972,116 @@
 					/>
 				</div>
 			</div>
-		{/if}
-	</div>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.style-editor {
-		padding: 2rem;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-
-	.editor-header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		color: #111827;
-		font-size: 1.5rem;
-		font-weight: 700;
-	}
-
-	.editor-description {
-		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.section-header {
-		margin-top: 1rem;
-		margin-bottom: 1rem;
-	}
-
-	.section-header h4 {
-		margin: 0;
-		color: #111827;
-		font-size: 1.125rem;
-		font-weight: 600;
-		padding: 0.5rem 0.75rem;
-		background: #f3f4f6;
-		border-radius: 6px;
-		border-left: 4px solid #d10a10;
-	}
-
-	.controls {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		padding: 2rem;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.sync-toggle-group {
-		background: #fef2f2;
-		padding: 1rem;
+	.section {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
 		border-radius: 8px;
+		padding: 1.25rem;
+	}
+
+	.sync-section {
+		background: #fef2f2;
 		border: 2px solid #fecaca;
 	}
 
-	.section-divider {
-		height: 1px;
-		background: #e5e7eb;
-		margin: 0.5rem 0;
+	.mobile-section {
+		background: #eff6ff;
+		border: 2px solid #bfdbfe;
 	}
 
-	.section-divider-major {
-		height: 2px;
-		background: #d1d5db;
-		margin: 2rem 0;
-	}
-
-	.section-description {
-		margin: 0.5rem 0 0 0;
+	.section-note {
+		margin: 0 0 1rem 0;
 		color: #6b7280;
 		font-size: 0.8125rem;
-		font-weight: 400;
-		padding: 0;
-		background: none;
-		border: none;
+		font-style: italic;
 	}
 
-	label {
-		font-weight: 600;
+	h3 {
+		margin: 0 0 1rem 0;
 		font-size: 0.875rem;
+		font-weight: 700;
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
+	.control-group {
+		margin-bottom: 1rem;
+	}
+
+	.control-group:last-child {
+		margin-bottom: 0;
+	}
+
+	label {
+		display: block;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #4b5563;
+		margin-bottom: 0.375rem;
+	}
+
 	.color-control {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
 	input[type='color'] {
-		width: 60px;
-		height: 40px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 40px;
+		height: 38px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		cursor: pointer;
+		padding: 0;
+		background: none;
 		flex-shrink: 0;
 	}
 
 	.color-value,
 	.text-input {
-		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
 		color: #374151;
 	}
 
 	.color-value {
 		font-family: 'SF Mono', Monaco, monospace;
+		flex: 1;
 	}
 
 	.text-input:focus,
 	.color-value:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 
 	.hint {
 		font-size: 0.75rem;
 		color: #9ca3af;
 		font-style: italic;
+		display: block;
+		margin-top: 0.25rem;
 	}
 
 	.sync-hint {
@@ -1105,20 +1092,18 @@
 
 	select {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.9375rem;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
 		color: #374151;
 		background: white;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	select:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 
 	.checkbox-label {

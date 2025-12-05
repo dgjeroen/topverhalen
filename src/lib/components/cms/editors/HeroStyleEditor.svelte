@@ -599,7 +599,7 @@
 		flex-direction: column;
 		gap: 1.5rem;
 		padding: 2rem;
-		max-width: 600px;
+		max-width: 800px;
 		margin: 0 auto;
 		width: 100%;
 	}

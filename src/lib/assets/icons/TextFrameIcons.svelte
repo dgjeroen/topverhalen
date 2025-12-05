@@ -12,32 +12,55 @@
 	     WIDTH CONTROLS (2 icons)
 	     ======================================== -->
 
-	<!-- Narrow Layout -->
+	<!-- Narrow Layout (page frame + centered content with wide gutters) -->
 	<symbol id="icon-width-narrow" viewBox="0 0 24 24">
-		<rect
-			x="6"
-			y="4"
-			width="12"
-			height="16"
-			rx="2"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-		/>
-	</symbol>
-
-	<!-- Wide Layout -->
-	<symbol id="icon-width-wide" viewBox="0 0 24 24">
+		<!-- 16:9 screen frame -->
 		<rect
 			x="2"
-			y="4"
+			y="6"
 			width="20"
-			height="16"
-			rx="2"
+			height="11"
+			rx="1.2"
 			fill="none"
 			stroke="currentColor"
-			stroke-width="2"
+			stroke-width="1"
 		/>
+		<!-- portrait (tall) content that spans top-to-bottom inside screen -->
+		<rect x="9" y="6" width="6" height="11" rx="0.8" fill="#d10a10" opacity="0.22" />
+	</symbol>
+
+	<!-- Wide Layout (smaller side gutters) -->
+	<symbol id="icon-width-wide" viewBox="0 0 24 24">
+		<!-- 16:9 screen frame -->
+		<rect
+			x="2"
+			y="6"
+			width="20"
+			height="11"
+			rx="1.2"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1"
+		/>
+		<!-- landscape content that doesn't touch screen edges (centered, slightly less wide) -->
+		<rect x="6" y="7" width="12" height="9" rx="0.9" fill="#d10a10" opacity="0.2" />
+	</symbol>
+
+	<!-- Full / Edge-to-edge Layout (content touches edges) -->
+	<symbol id="icon-width-full" viewBox="0 0 24 24">
+		<!-- 16:9 screen frame -->
+		<rect
+			x="2"
+			y="6"
+			width="20"
+			height="11"
+			rx="1.2"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1"
+		/>
+		<!-- full-bleed content that fills the screen horizontally -->
+		<rect x="2" y="6" width="20" height="11" rx="1.2" fill="#d10a10" opacity="0.18" />
 	</symbol>
 
 	<!-- ========================================
@@ -273,6 +296,118 @@
 			stroke="currentColor"
 			stroke-width="1"
 			stroke-linecap="round"
+		/>
+	</symbol>
+
+	<!-- ========================================
+	     COLOFON LAYOUTS (2 icons)
+	     ======================================== -->
+
+	<!-- Colofon Inline: Onder elkaar (verticaal gestapeld) -->
+	<symbol id="icon-colofon-inline" viewBox="0 0 32 32">
+		<!-- Blok 1 -->
+		<line
+			x1="13"
+			y1="9"
+			x2="19"
+			y2="9"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+		<line
+			x1="8"
+			y1="12"
+			x2="24"
+			y2="12"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			opacity="0.5"
+		/>
+		<!-- Blok 2 -->
+		<line
+			x1="13"
+			y1="20"
+			x2="19"
+			y2="20"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+		<line
+			x1="8"
+			y1="23"
+			x2="24"
+			y2="23"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			opacity="0.5"
+		/>
+	</symbol>
+
+	<!-- Colofon Columns: Naast elkaar (horizontaal) -->
+	<symbol id="icon-colofon-columns" viewBox="0 0 32 32">
+		<!-- Rij 1 -->
+		<line
+			x1="6"
+			y1="10"
+			x2="11"
+			y2="10"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+		<line
+			x1="14"
+			y1="10"
+			x2="26"
+			y2="10"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			opacity="0.5"
+		/>
+		<!-- Rij 2 -->
+		<line
+			x1="6"
+			y1="16"
+			x2="11"
+			y2="16"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+		<line
+			x1="14"
+			y1="16"
+			x2="26"
+			y2="16"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			opacity="0.5"
+		/>
+		<!-- Rij 3 -->
+		<line
+			x1="6"
+			y1="22"
+			x2="11"
+			y2="22"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+		/>
+		<line
+			x1="14"
+			y1="22"
+			x2="26"
+			y2="22"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			opacity="0.5"
 		/>
 	</symbol>
 </svg>

@@ -3,11 +3,11 @@
 	import type { ColofonContent } from '$lib/types';
 	import SwitchLogo from './SwitchLogo.svelte';
 
-	let { items, showLogo = true, logoVariant = 'dia' }: ColofonContent = $props();
+	let { items, showLogo = true, logoVariant = 'dia', layout = 'inline' }: ColofonContent = $props();
 </script>
 
 <div class="colofon-container" class:with-logo={showLogo}>
-	<dl>
+	<dl class="layout-{layout}">
 		{#each items as item (item.functie)}
 			<dt>{item.functie}</dt>
 			<dd>{item.namen}</dd>
@@ -28,24 +28,22 @@
 		border-bottom: 1px solid var(--colofon-border-color, var(--color-border, #e5e7eb));
 		padding-block: var(--colofon-padding-block, var(--space-l, 2rem));
 		font-size: var(--colofon-font-size, var(--font-size-m, 1rem));
+		text-align: center;
 	}
 
 	.colofon-container:not(.with-logo) {
 		border-top: 1px solid var(--colofon-border-color, var(--color-border, #e5e7eb));
 	}
 
+	/* Base styles for both layouts */
 	dl {
 		margin: 0;
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--colofon-gap, var(--space-s, 0.75rem)) var(--colofon-column-gap, var(--space-l, 2rem));
 	}
 
 	dt {
 		font-family: var(--font-family-base);
 		font-weight: var(--colofon-dt-weight, 600);
 		color: var(--colofon-dt-color, var(--color-text, #111827));
-		text-align: var(--colofon-dt-align, right);
 	}
 
 	dd {
@@ -54,15 +52,69 @@
 		font-weight: var(--colofon-dd-weight, 400);
 	}
 
-	/* ✅ REMOVED: .development-credit specifieke styling */
+	/* Inline layout (default) */
+	dl.layout-inline {
+		display: flex;
+		flex-direction: column;
+		gap: var(--colofon-gap, var(--space-s, 0.75rem));
+	}
+
+	dl.layout-inline dt,
+	dl.layout-inline dd {
+		display: inline;
+	}
+
+	dl.layout-inline dt::after {
+		content: '';
+		display: inline-block;
+		width: var(--colofon-column-gap, 0.5rem);
+	}
+
+	/* Columns layout */
+	dl.layout-columns {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		row-gap: var(--colofon-gap, var(--space-s, 0.75rem));
+		max-width: max-content;
+		margin: 0 auto;
+	}
+
+	dl.layout-columns dt {
+		text-align: right;
+		white-space: nowrap;
+		padding-right: var(--colofon-column-gap, 0.25rem);
+	}
+
+	dl.layout-columns dd {
+		text-align: left;
+		padding-left: var(--colofon-column-gap, 0.25rem);
+	}
 
 	@media (max-width: 600px) {
-		dl {
-			grid-template-columns: 1fr;
+		/* Op mobiel: dl wordt een smal blok (gecentreerd), inhoud links uitgelijnd */
+		dl.layout-inline,
+		dl.layout-columns {
+			display: flex;
+			flex-direction: column;
 			gap: var(--space-xs);
+			width: min(92%, 360px);
+			margin: 0 auto; /* center the block itself */
+			text-align: left; /* make inner text left-aligned */
 		}
-		dt {
+
+		/* Stack items and remove inline separators on small screens */
+		dl.layout-inline dt,
+		dl.layout-inline dd,
+		dl.layout-columns dt,
+		dl.layout-columns dd {
+			display: block;
+			padding: 0;
 			text-align: left;
+		}
+
+		dl.layout-inline dt::after,
+		dl.layout-columns dt::after {
+			content: none;
 		}
 	}
 </style>

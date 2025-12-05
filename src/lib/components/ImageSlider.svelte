@@ -59,12 +59,29 @@
 
 	function next() {
 		currentIndex = (currentIndex + 1) % images.length;
+		requestAnimationFrame(() => scrollToCenter());
 	}
 	function prev() {
 		currentIndex = (currentIndex - 1 + images.length) % images.length;
+		requestAnimationFrame(() => scrollToCenter());
 	}
 	function goTo(index: number) {
 		currentIndex = index;
+		requestAnimationFrame(() => scrollToCenter());
+	}
+
+	function scrollToCenter() {
+		if (sliderViewport) {
+			const rect = sliderViewport.getBoundingClientRect();
+			const viewportHeight = window.innerHeight;
+			const elementCenter = rect.top + rect.height / 2;
+			const viewportCenter = viewportHeight / 2;
+
+			// Only scroll if not already centered
+			if (Math.abs(elementCenter - viewportCenter) > 50) {
+				sliderViewport.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		}
 	}
 </script>
 
@@ -168,7 +185,7 @@
 		height: 0;
 		padding-bottom: 56.25%;
 		cursor: pointer;
-		background-color: var(--color-background-light);
+		background-color: var(--slider-container-bg, var(--color-background-light));
 		transition: box-shadow 0.2s ease-in-out;
 	}
 
@@ -211,8 +228,8 @@
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		background-color: var(--slider-btn-bg, rgba(255, 255, 255, 0.5));
-		color: var(--slider-btn-color, var(--color-white));
+		background-color: var(--slider-btn-bg, rgba(255, 255, 255, 0.9));
+		color: var(--slider-btn-color, #1f2937);
 		border: none;
 		border-radius: 50%;
 		width: var(--slider-btn-size, 40px);
@@ -227,7 +244,7 @@
 	}
 
 	.slider-btn:hover {
-		background-color: var(--slider-btn-hover-bg, rgba(255, 255, 255, 0.7));
+		background-color: var(--slider-btn-hover-bg, rgba(255, 255, 255, 1));
 	}
 
 	.slider-btn.prev {
@@ -246,23 +263,25 @@
 		z-index: 20;
 		display: flex;
 		gap: var(--slider-dots-gap, 8px);
-		background: var(--slider-dots-bg, rgba(255, 255, 255, 0.5));
-		padding: var(--slider-dots-padding, 4px 8px);
-		border-radius: var(--slider-dots-border-radius, 12px);
+		/* Container styling - controlled by CSS variables */
+		background: var(--slider-dots-bg, rgba(255, 255, 255, 0.9));
+		padding: var(--slider-dots-padding, 6px 12px);
+		border-radius: var(--slider-dots-border-radius, 50px);
 	}
 
 	.dots-nav button {
-		width: var(--slider-dot-size, 16px);
-		height: var(--slider-dot-size, 16px);
-		aspect-ratio: 1/1;
-		border-radius: 50%;
-		border: var(--slider-dot-border-width, 1px) solid
-			var(--slider-dot-border-color, var(--color-border));
-		background-color: var(--slider-dot-bg, transparent);
-		margin: 0 4px;
+		width: var(--slider-dot-width, var(--slider-dot-size, 12px));
+		height: var(--slider-dot-size, 12px);
+		/* Default to circles, can be overridden for bars */
+		border-radius: var(--slider-dot-border-radius, 50%);
+		/* remove visible border - color removed per request */
+		border: none;
+		background-color: var(--slider-dot-bg, #ffffff);
 		cursor: pointer;
-		transition: background-color 0.2s;
+		transition: all 0.2s ease;
 		outline: none;
+		box-sizing: border-box;
+		flex-shrink: 0;
 	}
 
 	.dots-nav button:focus {
@@ -270,8 +289,9 @@
 	}
 
 	.dots-nav button.active {
-		background-color: var(--slider-dot-active-bg, #ffd302);
-		border: var(--slider-dot-active-border-width, 0.5px) solid
-			var(--slider-dot-active-border-color, #000000);
+		background-color: var(--slider-dot-active-bg, #d10a10);
+		/* active border removed */
+		border: none;
+		transform: scale(1.2);
 	}
 </style>

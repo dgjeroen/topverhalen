@@ -80,6 +80,7 @@
 </blockquote>
 
 <style>
+	/* ✅ Quote CSS variabelen worden gescopeerd via ThemeLoader naar .quote-block */
 	.quote-block {
 		position: relative;
 		margin: 0;
@@ -97,7 +98,7 @@
 		top: var(--local-mark-top, calc(var(--quote-mark-top, -0.2) * 1em));
 		left: 0.3em;
 		font-size: var(--quote-mark-size, 10em);
-		font-family: var(--quote-mark-font-family, var(--font-family-quote)), sans-serif;
+		font-family: var(--quote-mark-font-family, var(--font-family-quote, 'Catamaran')), sans-serif;
 		color: var(--quote-mark-color, black);
 		opacity: var(--quote-mark-opacity, 1);
 		z-index: 10;
@@ -108,7 +109,7 @@
 	.quote-text {
 		position: relative;
 		z-index: 1;
-		font-family: var(--quote-font-family, var(--font-family-quote));
+		font-family: var(--quote-font-family, var(--font-family-quote, 'Catamaran'));
 		font-size: var(--quote-font-size, 2rem);
 		font-weight: var(--quote-font-weight, 800);
 
@@ -148,7 +149,7 @@
 		z-index: 1;
 		margin-top: -1.5rem;
 		font-size: var(--quote-author-font-size, 1.5rem);
-		font-family: var(--quote-font-family, var(--font-family-quote));
+		font-family: var(--quote-font-family, var(--font-family-quote, 'Catamaran'));
 		font-weight: var(--quote-author-font-weight, 500);
 		color: var(--quote-author-color, var(--color-text-muted));
 		text-align: var(--quote-author-align, right);

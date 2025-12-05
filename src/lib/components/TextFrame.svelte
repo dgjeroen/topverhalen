@@ -160,8 +160,8 @@
      LAYOUT
      ======================================== */
 	.frame-content {
-		background: var(--textframe-bg-color, var(--color-bg-secondary, #f9fafb)) !important;
-		border: 1px solid var(--textframe-border-color, var(--color-border, #e5e7eb)) !important;
+		background: var(--textframe-bg-color, #f7f7f7) !important;
+		border: 1px solid var(--textframe-border-color, #E1DEE0) !important;
 		border-radius: var(--textframe-border-radius, 8px) !important;
 		padding: var(--textframe-padding, var(--space-l, 2rem)) !important;
 		overflow: hidden;
@@ -175,7 +175,7 @@
 		font-size: var(--textframe-heading-size, 1.875rem) !important;
 		font-weight: var(--textframe-heading-weight, 700) !important;
 		line-height: 1.2;
-		color: var(--textframe-heading-color, #111827) !important;
+		color: var(--textframe-heading-color, #000000) !important;
 		background: none !important;
 		padding: 0 !important;
 	}
@@ -189,19 +189,17 @@
 		font-size: var(--textframe-text-size, 1rem) !important;
 	}
 
-	:global(.frame-text),
-	:global(.text-content) {
-		color: var(--textframe-text-color, #374151) !important;
-	}
-
-	:global(.frame-text p),
-	:global(.text-content p) {
-		color: var(--textframe-text-color, #374151) !important;
+	.frame-text,
+	.text-content {
+		color: var(--textframe-text-color, #32302c);
 	}
 
 	.frame-text :global(p),
 	.text-content :global(p) {
 		margin: 0 0 var(--space-m, 1.5rem) 0;
+		font-size: inherit;
+		line-height: inherit;
+		color: var(--textframe-text-color, #32302c);
 	}
 
 	.frame-text :global(p:last-child),
@@ -261,14 +259,18 @@
 	.text-content :global(ul),
 	.text-content :global(ol) {
 		margin: var(--space-m, 1.5rem) 0;
-		padding-left: 1.5em;
-		color: var(--textframe-text-color, #374151);
+		padding-left: 0;
+		color: var(--textframe-text-color, #32302c);
+		list-style-position: inside;
 	}
 
 	.frame-text :global(li),
 	.text-content :global(li) {
-		margin: 0.25em 0;
-		color: var(--textframe-text-color, #374151);
+		margin: 0.5em 0;
+		padding-left: 0;
+		color: var(--textframe-text-color, #32302c);
+		font-size: inherit;
+		line-height: inherit;
 	}
 
 	.frame-text :global(ul ul),
@@ -289,9 +291,9 @@
 	.text-content :global(blockquote) {
 		margin: var(--space-m, 1.5rem) 0;
 		padding: var(--space-s, 0.75rem) var(--space-m, 1.5rem);
-		border-left: 4px solid var(--textframe-border-color, #e5e7eb);
-		background: var(--color-bg-secondary, #f9fafb);
-		color: var(--textframe-text-color, #374151);
+		border-left: 4px solid var(--textframe-border-color, #E1DEE0);
+		background: var(--color-bg-secondary, #f7f7f7);
+		color: var(--textframe-text-color, #32302c);
 		font-style: italic;
 		border-radius: 0 var(--textframe-border-radius, 8px) var(--textframe-border-radius, 8px) 0;
 	}
@@ -312,7 +314,7 @@
 		border-radius: 4px;
 		font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
 		font-size: 0.9em;
-		border: 1px solid var(--textframe-border-color, #e5e7eb);
+		border: 1px solid var(--textframe-border-color, #E1DEE0);
 	}
 
 	.frame-text :global(pre),
@@ -322,7 +324,7 @@
 		border-radius: var(--textframe-border-radius, 8px);
 		overflow-x: auto;
 		margin: var(--space-m, 1.5rem) 0;
-		border: 1px solid var(--textframe-border-color, #e5e7eb);
+		border: 1px solid var(--textframe-border-color, #E1DEE0);
 	}
 
 	.frame-text :global(pre code),
@@ -358,6 +360,7 @@
 	.source {
 		text-align: right;
 		font-style: italic;
+		color: inherit !important;
 	}
 
 	/* ========================================
@@ -426,10 +429,8 @@
 		margin-bottom: var(--space-s, 0.75rem);
 	}
 
-	.inline-image.rounded.float-left,
-	.inline-image.rounded.float-right {
-		shape-outside: circle(50%);
-	}
+	/* Shape-outside disabled: causes inconsistent bullet alignment
+	   Text wraps around the image box, not the circular shape */
 
 	/* ========================================
      COLLAPSIBLE STYLES
@@ -481,7 +482,7 @@
 	.collapsible-heading {
 		margin: 0 !important;
 		flex: 1;
-		color: var(--textframe-heading-color, #111827) !important;
+		color: var(--textframe-heading-color, #000000) !important;
 	}
 
 	/* ========================================
