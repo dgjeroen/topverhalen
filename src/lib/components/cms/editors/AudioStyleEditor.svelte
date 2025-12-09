@@ -26,7 +26,7 @@
 					class="color-value"
 					bind:value={theme['audio-bg-color']}
 					onchange={onsave}
-					placeholder="#f3f3f3"
+					placeholder="#EDEAEC"
 				/>
 			</div>
 		</div>
@@ -120,7 +120,7 @@
 					class="color-value"
 					bind:value={theme['audio-title-color']}
 					onchange={onsave}
-					placeholder="#111827"
+					placeholder="#000000"
 				/>
 			</div>
 		</div>
@@ -163,7 +163,7 @@
 					class="color-value"
 					bind:value={theme['audio-description-color']}
 					onchange={onsave}
-					placeholder="#6b7280"
+					placeholder="#32302c"
 				/>
 			</div>
 		</div>
@@ -213,7 +213,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-border-color']}
 					onchange={onsave}
-					placeholder="#d1d5db"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
@@ -232,7 +232,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-hover-bg']}
 					onchange={onsave}
-					placeholder="#e5e7eb"
+					placeholder="#E1DEE0"
 				/>
 			</div>
 		</div>
@@ -251,7 +251,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-icon-color']}
 					onchange={onsave}
-					placeholder="#111827"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
@@ -268,10 +268,10 @@
 				type="text"
 				bind:value={theme['audio-progress-height']}
 				onchange={onsave}
-				placeholder="6px"
+				placeholder="3px"
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 4px, 6px, 8px</span>
+			<span class="hint">Bijv: 3px, 4px, 6px</span>
 		</div>
 
 		<div class="control-group">
@@ -288,13 +288,13 @@
 					class="color-value"
 					bind:value={theme['audio-progress-bg']}
 					onchange={onsave}
-					placeholder="#e5e7eb"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="audio-progress-fill">Vul kleur (accent)</label>
+			<label for="audio-progress-fill">Vulkleur (accent)</label>
 			<div class="color-control">
 				<input
 					id="audio-progress-fill"
@@ -307,7 +307,7 @@
 					class="color-value"
 					bind:value={theme['audio-progress-fill-color']}
 					onchange={onsave}
-					placeholder="#ef4444"
+					placeholder="#D10A10"
 				/>
 			</div>
 		</div>
@@ -319,10 +319,10 @@
 				type="text"
 				bind:value={theme['audio-progress-border-radius']}
 				onchange={onsave}
-				placeholder="3px"
+				placeholder="0"
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 2px, 3px, 4px</span>
+			<span class="hint">Bijv: 0, 2px, 3px</span>
 		</div>
 	</div>
 
@@ -344,7 +344,7 @@
 					class="color-value"
 					bind:value={theme['audio-time-color']}
 					onchange={onsave}
-					placeholder="#6b7280"
+					placeholder="#000000"
 				/>
 			</div>
 		</div>

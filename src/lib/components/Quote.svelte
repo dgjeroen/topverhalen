@@ -85,8 +85,8 @@
 		position: relative;
 		margin: 0;
 		padding: var(--quote-padding, var(--space-xxl) var(--space-xl) var(--space-m) var(--space-xxl));
-		border-left: var(--quote-border-width, 10px) solid var(--quote-border-color, #ffd302);
-		background-color: var(--quote-background, #ffffff);
+		border-left: var(--quote-border-width, 10px) solid var(--quote-border-color, #D10A10);
+		background-color: var(--quote-background, #EDEAEC);
 		border-radius: var(--quote-border-radius, var(--border-radius-base));
 		box-shadow: var(--quote-box-shadow, var(--box-shadow-base));
 	}
@@ -99,7 +99,7 @@
 		left: 0.3em;
 		font-size: var(--quote-mark-size, 10em);
 		font-family: var(--quote-mark-font-family, var(--font-family-quote, 'Catamaran')), sans-serif;
-		color: var(--quote-mark-color, black);
+		color: var(--quote-mark-color, #6E757C);
 		opacity: var(--quote-mark-opacity, 1);
 		z-index: 10;
 		line-height: 1;
@@ -116,7 +116,7 @@
 		/* ✅ Standaard normal, italic via class */
 		font-style: normal;
 
-		color: var(--quote-color, var(--color-text));
+		color: var(--quote-color, #000000);
 		line-height: var(--quote-line-height, 1);
 		min-height: 1.6em;
 	}
@@ -151,7 +151,7 @@
 		font-size: var(--quote-author-font-size, 1.5rem);
 		font-family: var(--quote-font-family, var(--font-family-quote, 'Catamaran'));
 		font-weight: var(--quote-author-font-weight, 500);
-		color: var(--quote-author-color, var(--color-text-muted));
+		color: var(--quote-author-color, #6E757C);
 		text-align: var(--quote-author-align, right);
 		opacity: 0;
 		/* ✅ Transition toegevoegd voor als typewriter uit staat (smooth fade in) */

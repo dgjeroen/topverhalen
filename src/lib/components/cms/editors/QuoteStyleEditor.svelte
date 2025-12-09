@@ -129,7 +129,7 @@
 					bind:value={theme['quote-background']}
 					oninput={handleChange}
 					class="input-field"
-					placeholder="#ffffff"
+					placeholder="#EDEAEC"
 				/>
 			</div>
 		</div>
@@ -148,7 +148,7 @@
 					bind:value={theme['quote-border-color']}
 					oninput={handleChange}
 					class="input-field"
-					placeholder="#ffd302"
+					placeholder="#D10A10"
 				/>
 			</div>
 		</div>
@@ -224,7 +224,7 @@
 					bind:value={theme['quote-mark-color']}
 					oninput={handleChange}
 					class="input-field"
-					placeholder="black"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
@@ -275,7 +275,7 @@
 					bind:value={theme['quote-author-color']}
 					oninput={handleChange}
 					class="input-field"
-					placeholder="Gebruik muted color"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>

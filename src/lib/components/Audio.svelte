@@ -135,7 +135,7 @@
 <style>
 	.audio-widget-container {
 		font-family: var(--font-family-base);
-		background-color: var(--audio-bg-color, var(--color-background-light, #f8f9fa));
+		background-color: var(--audio-bg-color, #EDEAEC);
 		border-radius: var(--audio-border-radius, var(--border-radius-base, 8px));
 		padding: var(--audio-padding, var(--space-m, 1rem));
 		display: flex;
@@ -203,13 +203,13 @@
 		margin: 0;
 		font-size: var(--audio-title-size, var(--font-size-m, 1.1rem));
 		font-weight: var(--audio-title-weight, 600);
-		color: var(--audio-title-color, var(--color-text, #111827));
+		color: var(--audio-title-color, #000000);
 	}
 
 	.audio-widget-info p {
 		margin: 4px 0 0;
 		font-size: var(--audio-description-size, var(--font-size-s, 0.9rem));
-		color: var(--audio-description-color, var(--color-text-muted, #4b5563));
+		color: var(--audio-description-color, #32302c);
 	}
 
 	.audio-widget-controls {
@@ -220,7 +220,7 @@
 
 	.audio-widget-play-btn {
 		background-color: transparent;
-		border: 2px solid var(--audio-button-border-color, var(--color-border, #d1d5db));
+		border: 2px solid var(--audio-button-border-color, #6E757C);
 		border-radius: 50%;
 		width: var(--audio-button-size, 40px);
 		height: var(--audio-button-size, 40px);
@@ -234,13 +234,13 @@
 	}
 
 	.audio-widget-play-btn:hover {
-		background-color: var(--audio-button-hover-bg, #e5e7eb);
+		background-color: var(--audio-button-hover-bg, #E1DEE0);
 	}
 
 	.audio-widget-play-btn svg {
 		width: 20px;
 		height: 20px;
-		fill: var(--audio-button-icon-color, var(--color-text, #111827));
+		fill: var(--audio-button-icon-color, #6E757C);
 	}
 
 	.audio-widget-progress-wrapper {
@@ -251,23 +251,23 @@
 	}
 
 	.audio-widget-progress-bar {
-		background-color: var(--audio-progress-bg, #e5e7eb);
-		height: var(--audio-progress-height, 6px);
-		border-radius: var(--audio-progress-border-radius, 3px);
+		background-color: var(--audio-progress-bg, #6E757C);
+		height: var(--audio-progress-height, 3px);
+		border-radius: var(--audio-progress-border-radius, 0);
 		width: 100%;
 		cursor: pointer;
 	}
 
 	.audio-widget-progress-fill {
-		background-color: var(--audio-progress-fill-color, #d10a10);
+		background-color: var(--audio-progress-fill-color, #D10A10);
 		height: 100%;
-		border-radius: var(--audio-progress-border-radius, 3px);
+		border-radius: var(--audio-progress-border-radius, 0);
 		transition: width 0.1s linear;
 	}
 
 	.audio-widget-time {
 		font-size: var(--audio-time-size, 0.8rem);
-		color: var(--audio-time-color, var(--color-text-muted, #6b7280));
+		color: var(--audio-time-color, #000000);
 		white-space: nowrap;
 	}
 </style>

@@ -35,12 +35,11 @@
 					class="color-value"
 					bind:value={theme['subheading-soccer-bg']}
 					onchange={onsave}
-					placeholder="Standaard zwart gradient"
+					placeholder="#000000"
 				/>
 			</div>
 			<span class="hint">
-				Standaard: linear-gradient(to right, #0b1320 100%, transparent). Gebruik gradient voor
-				fade-out effect.
+				Standaard: #000000. Je kunt ook een gradient gebruiken voor fade-out effect.
 			</span>
 		</div>
 
