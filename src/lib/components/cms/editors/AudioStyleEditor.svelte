@@ -9,6 +9,17 @@
 
 	$effect(() => {
 		if (!theme) theme = {};
+
+		// Initialize with defaults if not set
+		if (!theme['audio-bg-color']) theme['audio-bg-color'] = '#EDEAEC';
+		if (!theme['audio-title-color']) theme['audio-title-color'] = '#000000';
+		if (!theme['audio-description-color']) theme['audio-description-color'] = '#32302c';
+		if (!theme['audio-button-border-color']) theme['audio-button-border-color'] = '#6E757C';
+		if (!theme['audio-button-hover-bg']) theme['audio-button-hover-bg'] = '#E1DEE0';
+		if (!theme['audio-button-icon-color']) theme['audio-button-icon-color'] = '#6E757C';
+		if (!theme['audio-progress-bg']) theme['audio-progress-bg'] = '#6E757C';
+		if (!theme['audio-progress-fill-color']) theme['audio-progress-fill-color'] = '#D10A10';
+		if (!theme['audio-time-color']) theme['audio-time-color'] = '#000000';
 	});
 </script>
 

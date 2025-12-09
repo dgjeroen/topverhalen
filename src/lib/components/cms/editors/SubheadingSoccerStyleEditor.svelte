@@ -9,10 +9,10 @@
 
 	$effect(() => {
 		if (!theme) theme = {};
-		// Always ensure white is the default color if not explicitly set
-		if (!theme['subheading-soccer-color'] || theme['subheading-soccer-color'] === '') {
-			theme['subheading-soccer-color'] = '#ffffff';
-		}
+
+		// Initialize with defaults if not set
+		if (!theme['subheading-soccer-bg']) theme['subheading-soccer-bg'] = '#000000';
+		if (!theme['subheading-soccer-color']) theme['subheading-soccer-color'] = '#ffffff';
 	});
 </script>
 
