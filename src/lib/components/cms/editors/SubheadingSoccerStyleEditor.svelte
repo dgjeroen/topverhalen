@@ -9,18 +9,17 @@
 
 	$effect(() => {
 		if (!theme) theme = {};
+		// Always ensure white is the default color if not explicitly set
+		if (!theme['subheading-soccer-color'] || theme['subheading-soccer-color'] === '') {
+			theme['subheading-soccer-color'] = '#ffffff';
+		}
 	});
 </script>
 
 <div class="style-editor">
-	<div class="editor-header">
-		<h3>Tussenkop Voetbal ⚽</h3>
-		<p class="editor-description">Pas de stijl aan van tussenkoppen met rollende bal animatie</p>
-	</div>
-
-	<div class="controls">
-		<!-- SECTIE: Balkje -->
-		<div class="section-header">Balkje Styling</div>
+	<!-- SECTIE: Balkje Styling -->
+	<div class="section">
+		<h3>Balkje Styling</h3>
 
 		<div class="control-group">
 			<label for="soccer-bg">Achtergrondkleur</label>
@@ -36,12 +35,12 @@
 					class="color-value"
 					bind:value={theme['subheading-soccer-bg']}
 					onchange={onsave}
-					placeholder="linear-gradient(to right, #0b1320 100%, transparent)"
+					placeholder="Standaard zwart gradient"
 				/>
 			</div>
 			<span class="hint">
-				Tip: Gebruik gradient voor fade-out effect, bijv: linear-gradient(to right, #000 80%,
-				transparent)
+				Standaard: linear-gradient(to right, #0b1320 100%, transparent). Gebruik gradient voor
+				fade-out effect.
 			</span>
 		</div>
 
@@ -59,9 +58,10 @@
 					class="color-value"
 					bind:value={theme['subheading-soccer-color']}
 					onchange={onsave}
-					placeholder="#ffffff"
+					placeholder="Standaard wit (#ffffff)"
 				/>
 			</div>
+			<span class="hint">Standaardwaarde: wit (#ffffff)</span>
 		</div>
 
 		<div class="control-group">
@@ -89,9 +89,11 @@
 			/>
 			<span class="hint">Bijv: 0, 4px, 8px</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Typografie -->
-		<div class="section-header">Typografie</div>
+	<!-- SECTIE: Typografie -->
+	<div class="section">
+		<h3>Typografie</h3>
 
 		<div class="control-group">
 			<label for="soccer-font-size">Lettergrootte</label>
@@ -120,9 +122,11 @@
 				<option value="900">Black (900)</option>
 			</select>
 		</div>
+	</div>
 
-		<!-- SECTIE: Bal Animatie -->
-		<div class="section-header">Bal Animatie ⚽</div>
+	<!-- SECTIE: Bal Animatie -->
+	<div class="section">
+		<h3>Bal Animatie ⚽</h3>
 
 		<div class="control-group">
 			<label for="ball-size">Bal Grootte</label>
@@ -149,6 +153,7 @@
 			/>
 			<span class="hint">Moet minimaal gelijk zijn aan bal grootte</span>
 		</div>
+
 		<div class="control-group">
 			<label for="soccer-margin-bottom">Witruimte onder</label>
 			<input
@@ -166,125 +171,108 @@
 
 <style>
 	.style-editor {
-		padding: 2rem;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-
-	.editor-header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		color: #111827;
-		font-size: 1.5rem;
-		font-weight: 700;
-	}
-
-	.editor-description {
-		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.section-header {
-		font-weight: 700;
-		font-size: 0.75rem;
-		color: #9ca3af;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	.section-header:first-of-type {
-		margin-top: 0;
-		padding-top: 0;
-		border-top: none;
-	}
-
-	.controls {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		padding: 2rem;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.section {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 1.25rem;
 	}
 
-	label {
-		font-weight: 600;
+	h3 {
+		margin: 0 0 1rem 0;
 		font-size: 0.875rem;
+		font-weight: 700;
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
+	.control-group {
+		margin-bottom: 1rem;
+	}
+
+	.control-group:last-child {
+		margin-bottom: 0;
+	}
+
+	label {
+		display: block;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #4b5563;
+		margin-bottom: 0.375rem;
+	}
+
 	.color-control {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
 	input[type='color'] {
-		width: 60px;
-		height: 40px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 40px;
+		height: 38px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		cursor: pointer;
+		padding: 0;
+		background: none;
 		flex-shrink: 0;
 	}
 
 	.color-value,
 	.text-input {
-		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
 		color: #374151;
 	}
 
 	.color-value {
 		font-family: 'SF Mono', Monaco, monospace;
+		flex: 1;
 	}
 
 	.text-input:focus,
 	.color-value:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 
 	.hint {
 		font-size: 0.75rem;
 		color: #9ca3af;
 		font-style: italic;
+		display: block;
+		margin-top: 0.25rem;
 	}
 
 	select {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.9375rem;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
 		color: #374151;
 		background: white;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	select:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 </style>

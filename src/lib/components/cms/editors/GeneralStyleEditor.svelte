@@ -90,15 +90,12 @@
 </script>
 
 <div class="style-editor">
-	<div class="editor-header">
-		<h3>Algemene Instellingen</h3>
-		<p class="editor-description">Pas de globale stijl van je verhaal aan</p>
-	</div>
+	<!-- SECTIE: Body Achtergrond -->
+	<div class="section">
+		<h3>Body Achtergrond Kleur</h3>
 
-	<div class="controls">
-		<!-- Body Achtergrond Kleur -->
 		<div class="control-group">
-			<label for="body-bg">Body Achtergrond Kleur</label>
+			<label for="body-bg">Tekstkleur</label>
 			<div class="color-control">
 				<input
 					id="body-bg"
@@ -116,20 +113,24 @@
 					placeholder={defaults['color-background-light']}
 				/>
 			</div>
-			<p class="control-hint small">
+			<span class="hint">
 				<strong>Tip:</strong> Raadpleeg de
-				<a href="https://adr-brand-guide.web.app/kleuren.html" target="_blank">Brand Guide</a> voor aanbevolen
-				kleuren.
-			</p>
+				<a href="https://adr-brand-guide.web.app/kleuren.html" target="_blank">Brand Guide</a> voor
+				aanbevolen kleuren.
+			</span>
 		</div>
+	</div>
 
-		<!-- Achtergrond Afbeelding -->
-		<div class="control-group section-divider">
-			<label for="bg-image">Achtergrond Afbeelding (Desktop)</label>
-			<p class="control-hint">
+	<!-- SECTIE: Achtergrond Afbeelding (Desktop) -->
+	<div class="section">
+		<h3>Achtergrond Afbeelding (Desktop)</h3>
+
+		<div class="control-group">
+			<label for="bg-image">Afbeelding URL</label>
+			<span class="hint">
 				Voeg een subtiel patroon of textuur toe. Alleen zichtbaar op desktop (mobiel krijgt alleen
 				de kleur).
-			</p>
+			</span>
 			<input
 				id="bg-image"
 				type="url"
@@ -139,7 +140,7 @@
 				oninput={(e) => updateBackgroundImage(e.currentTarget.value)}
 				onchange={onsave}
 			/>
-			<p class="control-hint small">
+			<span class="hint">
 				<strong>Tip:</strong> Gebruik kleine afbeeldingen (&lt; 100KB) voor betere performance.<br
 				/>
 				<strong>Gratis patronen:</strong>
@@ -148,124 +149,128 @@
 				>,
 				<a href="https://heropatterns.com/" target="_blank">Hero Patterns</a>,
 				<a href="https://www.transparenttextures.com/" target="_blank">Transparent Textures</a>
-			</p>
-
-			{#if backgroundImage}
-				<!-- Preview -->
-				<div class="background-preview">
-					<div
-						class="preview-content"
-						style="
-							background-image: url({backgroundImage});
-							background-repeat: {backgroundRepeat};
-							background-position: {backgroundPosition};
-							background-size: {backgroundSize};
-							opacity: {backgroundOpacity / 100};
-						"
-					></div>
-					<p class="preview-text">Voorbeeld tekst op achtergrond</p>
-				</div>
-
-				<!-- Herhaling -->
-				<div class="control-subgroup">
-					<label for="bg-repeat">Herhaling</label>
-					<select
-						id="bg-repeat"
-						value={backgroundRepeat}
-						onchange={(e) => {
-							updateBackgroundRepeat(e.currentTarget.value);
-							onsave();
-						}}
-					>
-						<option value="repeat">Herhalen (beide richtingen)</option>
-						<option value="repeat-x">Horizontaal herhalen</option>
-						<option value="repeat-y">Verticaal herhalen</option>
-						<option value="no-repeat">Niet herhalen</option>
-					</select>
-				</div>
-
-				<!-- Positie -->
-				<div class="control-subgroup">
-					<label for="bg-position">Positie</label>
-					<select
-						id="bg-position"
-						value={backgroundPosition}
-						onchange={(e) => {
-							updateBackgroundPosition(e.currentTarget.value);
-							onsave();
-						}}
-					>
-						<option value="center">Midden</option>
-						<option value="top">Boven</option>
-						<option value="bottom">Onder</option>
-						<option value="left">Links</option>
-						<option value="right">Rechts</option>
-						<option value="top left">Linksboven</option>
-						<option value="top right">Rechtsboven</option>
-						<option value="bottom left">Linksonder</option>
-						<option value="bottom right">Rechtsonder</option>
-					</select>
-				</div>
-
-				<!-- Grootte -->
-				<div class="control-subgroup">
-					<label for="bg-size">Grootte</label>
-					<select
-						id="bg-size"
-						value={backgroundSize}
-						onchange={(e) => {
-							updateBackgroundSize(e.currentTarget.value);
-							onsave();
-						}}
-					>
-						<option value="auto">Origineel</option>
-						<option value="cover">Bedekken (cover)</option>
-						<option value="contain">Passen (contain)</option>
-					</select>
-				</div>
-
-				<!-- Doorzichtigheid -->
-				<div class="control-subgroup">
-					<label for="bg-opacity"> Doorzichtigheid: {backgroundOpacity}% </label>
-					<input
-						id="bg-opacity"
-						type="range"
-						min="0"
-						max="100"
-						step="5"
-						value={backgroundOpacity}
-						oninput={(e) => updateBackgroundOpacity(parseInt(e.currentTarget.value))}
-						onchange={onsave}
-					/>
-				</div>
-
-				<!-- Effect -->
-				<div class="control-subgroup">
-					<label for="bg-attachment">Effect</label>
-					<select
-						id="bg-attachment"
-						value={backgroundAttachment}
-						onchange={(e) => {
-							updateBackgroundAttachment(e.currentTarget.value);
-							onsave();
-						}}
-					>
-						<option value="scroll">Scrolt mee</option>
-						<option value="fixed">Vast (parallax)</option>
-					</select>
-				</div>
-
-				<!-- Verwijder knop -->
-				<button type="button" class="button-remove" onclick={removeBackground}>
-					Verwijder achtergrond
-				</button>
-			{/if}
+			</span>
 		</div>
 
-		<!-- Lettertype Koppen -->
+		{#if backgroundImage}
+			<!-- Preview -->
+			<div class="background-preview">
+				<div
+					class="preview-content"
+					style="
+						background-image: url({backgroundImage});
+						background-repeat: {backgroundRepeat};
+						background-position: {backgroundPosition};
+						background-size: {backgroundSize};
+						opacity: {backgroundOpacity / 100};
+					"
+				></div>
+				<p class="preview-text">Voorbeeld tekst op achtergrond</p>
+			</div>
+
+			<!-- Herhaling -->
+			<div class="control-group">
+				<label for="bg-repeat">Herhaling</label>
+				<select
+					id="bg-repeat"
+					value={backgroundRepeat}
+					onchange={(e) => {
+						updateBackgroundRepeat(e.currentTarget.value);
+						onsave();
+					}}
+				>
+					<option value="repeat">Herhalen (beide richtingen)</option>
+					<option value="repeat-x">Horizontaal herhalen</option>
+					<option value="repeat-y">Verticaal herhalen</option>
+					<option value="no-repeat">Niet herhalen</option>
+				</select>
+			</div>
+
+			<!-- Positie -->
+			<div class="control-group">
+				<label for="bg-position">Positie</label>
+				<select
+					id="bg-position"
+					value={backgroundPosition}
+					onchange={(e) => {
+						updateBackgroundPosition(e.currentTarget.value);
+						onsave();
+					}}
+				>
+					<option value="center">Midden</option>
+					<option value="top">Boven</option>
+					<option value="bottom">Onder</option>
+					<option value="left">Links</option>
+					<option value="right">Rechts</option>
+					<option value="top left">Linksboven</option>
+					<option value="top right">Rechtsboven</option>
+					<option value="bottom left">Linksonder</option>
+					<option value="bottom right">Rechtsonder</option>
+				</select>
+			</div>
+
+			<!-- Grootte -->
+			<div class="control-group">
+				<label for="bg-size">Grootte</label>
+				<select
+					id="bg-size"
+					value={backgroundSize}
+					onchange={(e) => {
+						updateBackgroundSize(e.currentTarget.value);
+						onsave();
+					}}
+				>
+					<option value="auto">Origineel</option>
+					<option value="cover">Bedekken (cover)</option>
+					<option value="contain">Passen (contain)</option>
+				</select>
+			</div>
+
+			<!-- Doorzichtigheid -->
+			<div class="control-group">
+				<label for="bg-opacity">Doorzichtigheid: {backgroundOpacity}%</label>
+				<input
+					id="bg-opacity"
+					type="range"
+					min="0"
+					max="100"
+					step="5"
+					value={backgroundOpacity}
+					oninput={(e) => updateBackgroundOpacity(parseInt(e.currentTarget.value))}
+					onchange={onsave}
+				/>
+			</div>
+
+			<!-- Effect -->
+			<div class="control-group">
+				<label for="bg-attachment">Effect</label>
+				<select
+					id="bg-attachment"
+					value={backgroundAttachment}
+					onchange={(e) => {
+						updateBackgroundAttachment(e.currentTarget.value);
+						onsave();
+					}}
+				>
+					<option value="scroll">Scrolt mee</option>
+					<option value="fixed">Vast (parallax)</option>
+				</select>
+			</div>
+
+			<!-- Verwijder knop -->
+			<button type="button" class="button-remove" onclick={removeBackground}>
+				Verwijder achtergrond
+			</button>
+		{/if}
+	</div>
+
+	<!-- SECTIE: Lettertypes -->
+	<div class="section">
+		<h3>Lettertypes</h3>
+
 		<div class="control-group">
 			<label for="font-heading">Lettertype Koppen</label>
-			<p class="control-hint">Gebruikt voor H2, H4 en TextFrame koppen</p>
+			<span class="hint">Gebruikt voor H2, H4 en TextFrame koppen</span>
 			<select
 				id="font-heading"
 				value={fontQuote}
@@ -288,7 +293,7 @@
 		<!-- Lettertype Body -->
 		<div class="control-group">
 			<label for="font-body">Lettertype Body</label>
-			<p class="control-hint">Gebruikt voor tekstblokken en quote auteur</p>
+			<span class="hint">Gebruikt voor tekstblokken en quote auteur</span>
 			<select
 				id="font-body"
 				value={fontBase}
@@ -304,131 +309,314 @@
 			</select>
 		</div>
 	</div>
+
+	<!-- SECTIE: Bijschriften & Bronnen -->
+	<div class="section">
+		<h3>Bijschriften & Bronnen</h3>
+		<p class="hint" style="margin-bottom: 1rem;">
+			Styling voor afbeelding/video bijschriften en bronvermeldingen (geldt voor alle componenten)
+		</p>
+
+		<!-- Bijschrift (Caption) -->
+		<h4 style="margin: 1.5rem 0 0.75rem; font-size: 0.8125rem; font-weight: 600; color: #6b7280;">
+			Bijschrift
+		</h4>
+
+		<div class="control-group">
+			<label for="caption-font-family">Lettertype</label>
+			<select
+				id="caption-font-family"
+				value={theme['caption-font-family'] || "'Arial', sans-serif"}
+				onchange={(e) => {
+					theme['caption-font-family'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="'Arial', sans-serif">Arial (standaard)</option>
+				<option value="'Inter', sans-serif">Inter</option>
+				<option value="'Georgia', serif">Georgia</option>
+				<option value="'Courier New', monospace">Courier New</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-size">Tekstgrootte</label>
+			<input
+				id="caption-font-size"
+				type="text"
+				placeholder="bijv. 0.875rem"
+				value={theme['caption-font-size'] || ''}
+				oninput={(e) => {
+					theme['caption-font-size'] = e.currentTarget.value;
+					onsave();
+				}}
+			/>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-color">Tekstkleur</label>
+			<div class="color-control">
+				<input
+					id="caption-color"
+					type="color"
+					value={theme['caption-color'] || '#6b7280'}
+					oninput={(e) => {
+						theme['caption-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+				<input
+					type="text"
+					placeholder="#6b7280"
+					value={theme['caption-color'] || ''}
+					oninput={(e) => {
+						theme['caption-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-weight">Lettergewicht</label>
+			<select
+				id="caption-font-weight"
+				value={theme['caption-font-weight'] || '400'}
+				onchange={(e) => {
+					theme['caption-font-weight'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="300">Light (300)</option>
+				<option value="400">Normal (400)</option>
+				<option value="500">Medium (500)</option>
+				<option value="600">Semi-bold (600)</option>
+				<option value="700">Bold (700)</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-style">Cursief</label>
+			<select
+				id="caption-font-style"
+				value={theme['caption-font-style'] || 'normal'}
+				onchange={(e) => {
+					theme['caption-font-style'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="normal">Normaal</option>
+				<option value="italic">Cursief</option>
+			</select>
+		</div>
+
+		<!-- Bron (Source) -->
+		<h4 style="margin: 1.5rem 0 0.75rem; font-size: 0.8125rem; font-weight: 600; color: #6b7280;">
+			Bron
+		</h4>
+
+		<div class="control-group">
+			<label for="source-font-family">Lettertype</label>
+			<select
+				id="source-font-family"
+				value={theme['source-font-family'] || "'Arial', sans-serif"}
+				onchange={(e) => {
+					theme['source-font-family'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="'Arial', sans-serif">Arial (standaard)</option>
+				<option value="'Inter', sans-serif">Inter</option>
+				<option value="'Georgia', serif">Georgia</option>
+				<option value="'Courier New', monospace">Courier New</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-size">Tekstgrootte</label>
+			<input
+				id="source-font-size"
+				type="text"
+				placeholder="bijv. 0.75rem"
+				value={theme['source-font-size'] || ''}
+				oninput={(e) => {
+					theme['source-font-size'] = e.currentTarget.value;
+					onsave();
+				}}
+			/>
+		</div>
+
+		<div class="control-group">
+			<label for="source-color">Tekstkleur</label>
+			<div class="color-control">
+				<input
+					id="source-color"
+					type="color"
+					value={theme['source-color'] || '#9ca3af'}
+					oninput={(e) => {
+						theme['source-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+				<input
+					type="text"
+					placeholder="#9ca3af"
+					value={theme['source-color'] || ''}
+					oninput={(e) => {
+						theme['source-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-weight">Lettergewicht</label>
+			<select
+				id="source-font-weight"
+				value={theme['source-font-weight'] || '400'}
+				onchange={(e) => {
+					theme['source-font-weight'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="300">Light (300)</option>
+				<option value="400">Normal (400)</option>
+				<option value="500">Medium (500)</option>
+				<option value="600">Semi-bold (600)</option>
+				<option value="700">Bold (700)</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-style">Cursief</label>
+			<select
+				id="source-font-style"
+				value={theme['source-font-style'] || 'normal'}
+				onchange={(e) => {
+					theme['source-font-style'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="normal">Normaal</option>
+				<option value="italic">Cursief</option>
+			</select>
+		</div>
+	</div>
 </div>
 
 <style>
 	.style-editor {
-		padding: 2rem;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-
-	.editor-header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		color: #111827;
-		font-size: 1.5rem;
-		font-weight: 700;
-	}
-
-	.editor-description {
-		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.controls {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		padding: 2rem;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.section {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 1.25rem;
 	}
 
-	.section-divider {
-		padding-top: 1.5rem;
-		border-top: 2px solid #e5e7eb;
-	}
-
-	.control-subgroup {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-top: 0.75rem;
-	}
-
-	label {
-		font-weight: 600;
+	h3 {
+		margin: 0 0 1rem 0;
 		font-size: 0.875rem;
+		font-weight: 700;
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
-	.control-hint {
+	.control-group {
+		margin-bottom: 1rem;
+	}
+
+	.control-group:last-child {
+		margin-bottom: 0;
+	}
+
+	label {
+		display: block;
 		font-size: 0.8125rem;
-		color: #6b7280;
-		margin: -0.25rem 0 0.5rem 0;
-		font-style: italic;
-		line-height: 1.4;
+		font-weight: 600;
+		color: #4b5563;
+		margin-bottom: 0.375rem;
 	}
 
-	.control-hint.small {
+	.hint {
 		font-size: 0.75rem;
-		margin-top: 0.5rem;
+		color: #9ca3af;
+		font-style: italic;
+		display: block;
+		margin-top: 0.25rem;
 	}
 
-	.control-hint a {
+	.hint a {
 		color: #667eea;
 		text-decoration: none;
 	}
 
-	.control-hint a:hover {
+	.hint a:hover {
 		text-decoration: underline;
 	}
 
 	.color-control {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
 	input[type='color'] {
-		width: 60px;
-		height: 40px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		width: 40px;
+		height: 38px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		cursor: pointer;
+		padding: 0;
+		background: none;
 		flex-shrink: 0;
 	}
 
-	.color-value,
-	.url-input {
+	.color-value {
 		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		font-family: 'SF Mono', Monaco, monospace;
 		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
 		color: #374151;
 	}
 
 	.url-input {
 		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
+		color: #374151;
 	}
 
 	.color-value:focus,
 	.url-input:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
 	}
 
 	.background-preview {
 		position: relative;
 		width: 100%;
 		height: 150px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		overflow: hidden;
 		margin: 1rem 0;
 		background-color: var(--color-background-light, #ffffff);
@@ -462,31 +650,25 @@
 
 	select {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.9375rem;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
 		color: #374151;
 		background: white;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	select:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-	}
-
-	select:hover {
-		border-color: #d1d5db;
+		border-color: #d10a10;
 	}
 
 	input[type='range'] {
 		width: 100%;
 		height: 6px;
 		border-radius: 3px;
-		background: #e5e7eb;
+		background: #d1d5db;
 		outline: none;
 		-webkit-appearance: none;
 		appearance: none;
@@ -498,7 +680,7 @@
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		background: #667eea;
+		background: #d10a10;
 		cursor: pointer;
 	}
 
@@ -506,30 +688,25 @@
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		background: #667eea;
+		background: #d10a10;
 		cursor: pointer;
 		border: none;
 	}
 
 	.button-remove {
 		margin-top: 1rem;
-		padding: 0.75rem 1rem;
+		padding: 0.5rem 0.75rem;
 		background: #fee;
 		color: #c00;
 		border: 1px solid #fcc;
-		border-radius: 6px;
+		border-radius: 4px;
 		font-size: 0.875rem;
 		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	.button-remove:hover {
 		background: #fcc;
 		border-color: #c00;
-	}
-
-	.button-remove:active {
-		transform: scale(0.98);
 	}
 </style>

@@ -1,8 +1,7 @@
 <script lang="ts">
-	// cache bust
-	import { browser } from '$app/environment';
 	import type { TimelineItem, Theme } from '$lib/types';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	let {
 		timelines,
@@ -10,17 +9,12 @@
 		theme = {}
 	}: {
 		timelines: TimelineItem[];
-		title?: string; // ✅ ADD
+		title?: string;
 		theme?: Theme;
 	} = $props();
 
-	// Debug kan weg als alles werkt
-	$effect(() => {
-		if (browser) {
-			console.log('🎨 Timeline theme:', theme);
-			console.log('🎨 Title:', title);
-		}
-	});
+	// Check if mobile and desktop should use same styling
+	const syncMobileDesktop = $derived(theme['timeline-sync-mobile-desktop'] === 'true');
 
 	let isDesktop = $state(false);
 	let verticalTimelineContainer: HTMLElement | null = $state(null);
@@ -72,7 +66,6 @@
 		};
 
 		const checkSize = () => {
-			const wasDesktop = isDesktop;
 			isDesktop = window.innerWidth >= 768;
 
 			if (isDesktop) {
@@ -139,11 +132,15 @@
 		style:--timeline-year-color={theme['timeline-year-color'] || '#f59e0b'}
 		style:--timeline-year-size={theme['timeline-year-size'] || '1.125rem'}
 		style:--timeline-year-weight={theme['timeline-year-weight'] || '700'}
+		style:--timeline-heading-color={theme['timeline-heading-color'] || '#111827'}
 		style:--timeline-text-color={theme['timeline-text-color'] || '#111827'}
 		style:--timeline-text-size={theme['timeline-text-size'] || '0.875rem'}
 		style:--timeline-text-line-height={theme['timeline-text-line-height'] || '1.6'}
-		style:--timeline-image-max-width={theme['timeline-image-max-width'] || '80px'}
-		style:--timeline-image-border-radius={theme['timeline-image-border-radius'] || '0.25rem'}
+		style:--timeline-image-max-width={theme['timeline-image-max-width-percent']
+			? `${theme['timeline-image-max-width-percent']}%`
+			: '100%'}
+		style:--timeline-image-border-radius={theme['timeline-image-round'] ? '50%' : '0.25rem'}
+		style:--timeline-image-aspect-ratio={theme['timeline-image-round'] ? '1 / 1' : 'auto'}
 	>
 		<div class="text-center">
 			<h2>{title}</h2>
@@ -165,6 +162,7 @@
 								alt={item.imageAlt || 'Tijdlijn afbeelding'}
 								loading="lazy"
 								decoding="async"
+								style:object-position="{item.focusX || 50}% {item.focusY || 50}%"
 							/>
 						{/if}
 						<p class="timeline-event-desc">{@html item.description}</p>
@@ -176,31 +174,48 @@
 {:else}
 	<section
 		class="horizontal-timeline-section"
+		class:sync-desktop={syncMobileDesktop}
 		style:--timeline-section-margin={theme['timeline-section-margin'] || '4rem'}
 		style:--timeline-title-color={theme['timeline-title-color'] || '#111827'}
 		style:--timeline-title-size={theme['timeline-title-size'] || '2rem'}
 		style:--timeline-title-weight={theme['timeline-title-weight'] || '700'}
 		style:--timeline-mobile-title-align={theme['timeline-mobile-title-align'] || 'left'}
-		style:--timeline-mobile-line-color={theme['timeline-mobile-line-color'] || '#f59e0b'}
+		style:--timeline-mobile-line-color={syncMobileDesktop
+			? theme['timeline-line-color'] || '#f59e0b'
+			: theme['timeline-mobile-line-color'] || '#f59e0b'}
 		style:--timeline-mobile-line-height={theme['timeline-mobile-line-height'] || '4px'}
 		style:--timeline-mobile-marker-size={theme['timeline-mobile-marker-size'] || '1rem'}
-		style:--timeline-mobile-marker-bg={theme['timeline-mobile-marker-bg'] || '#f59e0b'}
-		style:--timeline-mobile-marker-border-color={theme['timeline-mobile-marker-border-color'] ||
-			'#ffffff'}
-		style:--timeline-mobile-marker-border-width={theme['timeline-mobile-marker-border-width'] ||
-			'2px'}
+		style:--timeline-mobile-marker-bg={syncMobileDesktop
+			? theme['timeline-marker-bg'] || '#fdf6e9'
+			: theme['timeline-mobile-marker-bg'] || '#f59e0b'}
+		style:--timeline-mobile-marker-border-color={syncMobileDesktop
+			? theme['timeline-marker-border-color'] || '#2c5599'
+			: theme['timeline-mobile-marker-border-color'] || '#ffffff'}
+		style:--timeline-mobile-marker-border-width={syncMobileDesktop
+			? theme['timeline-marker-border-width'] || '4px'
+			: theme['timeline-mobile-marker-border-width'] || '2px'}
 		style:--timeline-mobile-card-width={theme['timeline-mobile-card-width'] || '260px'}
-		style:--timeline-mobile-card-bg={theme['timeline-mobile-card-bg'] || '#fdf6e9'}
+		style:--timeline-mobile-card-bg={syncMobileDesktop
+			? theme['timeline-card-bg'] || '#fdf6e9'
+			: theme['timeline-mobile-card-bg'] || '#fdf6e9'}
 		style:--timeline-mobile-card-padding={theme['timeline-mobile-card-padding'] || '1rem'}
 		style:--timeline-mobile-card-border-radius={theme['timeline-mobile-card-border-radius'] ||
 			'0.5rem'}
-		style:--timeline-mobile-card-shadow={theme['timeline-mobile-card-shadow'] ||
-			'0 4px 10px rgba(0, 0, 0, 0.2)'}
-		style:--timeline-mobile-card-border-color={theme['timeline-mobile-card-border-color'] ||
-			'#e4b483'}
-		style:--timeline-mobile-year-color={theme['timeline-mobile-year-color'] || '#78350f'}
-		style:--timeline-mobile-year-bg={theme['timeline-mobile-year-bg'] || '#fdf6e9'}
-		style:--timeline-mobile-connector-color={theme['timeline-mobile-connector-color'] || '#f59e0b'}
+		style:--timeline-mobile-card-shadow={syncMobileDesktop
+			? theme['timeline-card-shadow'] || '0 4px 6px rgba(0, 0, 0, 0.1)'
+			: theme['timeline-mobile-card-shadow'] || '0 4px 10px rgba(0, 0, 0, 0.2)'}
+		style:--timeline-mobile-card-border-color={syncMobileDesktop
+			? 'transparent'
+			: theme['timeline-mobile-card-border-color'] || '#e4b483'}
+		style:--timeline-mobile-year-color={syncMobileDesktop
+			? theme['timeline-year-color'] || '#f59e0b'
+			: theme['timeline-mobile-year-color'] || '#78350f'}
+		style:--timeline-mobile-year-bg={syncMobileDesktop
+			? 'transparent'
+			: theme['timeline-mobile-year-bg'] || '#fdf6e9'}
+		style:--timeline-mobile-connector-color={syncMobileDesktop
+			? theme['timeline-line-color'] || '#f59e0b'
+			: theme['timeline-mobile-connector-color'] || '#f59e0b'}
 		style:--timeline-mobile-connector-width={theme['timeline-mobile-connector-width'] || '2px'}
 		style:--timeline-mobile-image-height={theme['timeline-mobile-image-height'] || '120px'}
 		style:--timeline-mobile-button-bg={theme['timeline-mobile-button-bg'] ||
@@ -209,9 +224,15 @@
 		style:--timeline-mobile-button-icon-color={theme['timeline-mobile-button-icon-color'] ||
 			'#78350f'}
 		style:--timeline-mobile-button-size={theme['timeline-mobile-button-size'] || '40px'}
+		style:--timeline-heading-color={theme['timeline-heading-color'] || '#111827'}
 		style:--timeline-text-color={theme['timeline-text-color'] || '#111827'}
 		style:--timeline-text-size={theme['timeline-text-size'] || '0.875rem'}
 		style:--timeline-text-line-height={theme['timeline-text-line-height'] || '1.6'}
+		style:--timeline-image-max-width={theme['timeline-image-max-width-percent']
+			? `${theme['timeline-image-max-width-percent']}%`
+			: '100%'}
+		style:--timeline-image-border-radius={theme['timeline-image-round'] ? '50%' : '0.25rem'}
+		style:--timeline-image-aspect-ratio={theme['timeline-image-round'] ? '1 / 1' : 'auto'}
 	>
 		<h2 class="horizontal-title">{title}</h2>
 		<div class="horizontal-timeline-wrapper">
@@ -234,6 +255,7 @@
 									loading="lazy"
 									decoding="async"
 									class="card-image"
+									style:object-position="{item.focusX || 50}% {item.focusY || 50}%"
 								/>
 							{/if}
 							<p>{@html item.description}</p>
@@ -280,11 +302,11 @@
 		margin-bottom: 2rem;
 	}
 
-	.timeline-section h3,
 	.horizontal-timeline-section h3 {
 		font-family: var(--font-family-base, 'Inter', sans-serif);
 		font-size: 1.125rem;
 		font-weight: 700;
+		color: var(--timeline-heading-color, #111827);
 		margin-bottom: 0.5rem;
 	}
 
@@ -393,6 +415,8 @@
 			margin: 0.5rem auto;
 			display: block;
 			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+			aspect-ratio: var(--timeline-image-aspect-ratio, auto);
+			object-fit: cover;
 		}
 	}
 
@@ -491,11 +515,13 @@
 			position: relative;
 		}
 		.card-image {
-			width: 100%;
-			height: var(--timeline-mobile-image-height, 120px);
+			width: var(--timeline-image-max-width, 100%);
+			height: auto;
 			object-fit: cover;
-			border-radius: 4px;
-			margin-bottom: 0.5rem;
+			border-radius: var(--timeline-image-border-radius, 4px);
+			margin: 0 auto 0.5rem auto;
+			display: block;
+			aspect-ratio: var(--timeline-image-aspect-ratio, auto);
 		}
 
 		.scroll-button {

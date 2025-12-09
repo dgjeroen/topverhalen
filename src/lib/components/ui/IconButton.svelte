@@ -59,8 +59,8 @@
 		cursor: pointer;
 
 		/* Sizing */
-		width: 44px;
-		height: 44px;
+		width: 52px;
+		height: 52px;
 		flex-shrink: 0;
 
 		/* Styling */
@@ -91,7 +91,7 @@
 	}
 
 	.icon-button.active {
-		background: var(--color-primary-light, #fef2f2);
+		background: rgba(209, 10, 16, 0.06);
 		border-color: var(--color-primary, #d10a10);
 	}
 
@@ -102,8 +102,8 @@
 
 	/* Icon Styling */
 	.icon {
-		width: 24px;
-		height: 24px;
+		width: 42px;
+		height: 42px;
 		color: var(--color-text-secondary, #6b7280);
 		transition: color 0.15s ease;
 		pointer-events: none;
@@ -115,6 +115,8 @@
 
 	.icon-button.active .icon {
 		color: var(--color-primary, #d10a10);
+		transform: scale(1.08);
+		filter: drop-shadow(0 2px 6px rgba(209, 10, 16, 0.12));
 	}
 
 	.icon-button:disabled .icon {

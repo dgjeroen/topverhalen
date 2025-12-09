@@ -92,6 +92,9 @@ body {
 	--h3-color: #374151;
 	--h4-color: #4b5563;
 
+	/* Subheading Soccer */
+	--subheading-soccer-color: #ffffff;
+
 	/* Body Text */
 	--text-font-size: 1rem;
 	--text-font-weight: 400;
@@ -104,6 +107,9 @@ body {
 	--border-radius-base: 8px;
 	--box-shadow-base: 0 2px 10px rgba(0, 0, 0, 0.1);
 	--font-family-hero-title: var(--font-family-quote);
+
+	/* Slider defaults */
+	--slider-btn-font-size: 24px;
 }
 
 .hero-container + main {
@@ -118,12 +124,18 @@ main > *:first-child {
 /* 3. WRAPPER CLASSES                          */
 /* ============================================= */
 .wrapper-standard,
-.wrapper-wide {
+.wrapper-wide,
+.wrapper-full {
 	width: 100%;
 	padding: 0 1rem;
 	margin-left: auto;
 	margin-right: auto;
 	margin-block: var(--block-vertical-margin);
+}
+
+.wrapper-full {
+	padding: 0;
+	max-width: 100%;
 }
 
 /* ============================================= */
@@ -202,7 +214,8 @@ p:last-child {
 /* 5. Witruimte voor blokken die elkaar opvolgen */
 /* ============================================= */
 .is-linked-to-next + .wrapper-standard,
-.is-linked-to-next + .wrapper-wide {
+.is-linked-to-next + .wrapper-wide,
+.is-linked-to-next + .wrapper-full {
 	margin-top: var(--linked-block-spacing);
 }
 
@@ -323,4 +336,35 @@ figcaption {
 	border-radius: var(--image-border-radius, var(--border-radius-base, 8px));
 	overflow: hidden;
 	cursor: pointer;
+	box-shadow: var(--image-box-shadow, none);
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+	position: relative;
+}
+
+/* Hover effects - container moves */
+.image-container:hover,
+.image-button:hover,
+.parallax-window:hover {
+	transform: var(--image-hover-container-transform, translateY(-2px));
+	box-shadow: var(--image-hover-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* Image styling and zoom on hover */
+.image-container img,
+.image-button img,
+.parallax-window img {
+	border-radius: inherit;
+	transition: transform 0.2s ease;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.image-container:hover img,
+.image-button:hover img,
+.parallax-window:hover img {
+	transform: var(--image-hover-img-transform, scale(1));
 }

@@ -10,127 +10,183 @@
 	$effect(() => {
 		if (!theme) theme = {};
 	});
+
+	const fontOptions = [
+		{ value: '', label: 'Gebruik standaard (Heading font)' },
+		{ value: "'Acumin Pro Extra Condensed', sans-serif", label: 'Acumin Pro Extra Condensed' },
+		{ value: "'Georgia', serif", label: 'Georgia' },
+		{ value: "'Inter', sans-serif", label: 'Inter' },
+		{ value: 'var(--font-family-base)', label: 'Body Font' },
+		{ value: "'Courier New', monospace", label: 'Courier New' }
+	];
+
+	const fontWeightOptions = [
+		{ value: '', label: 'Standaard (800)' },
+		{ value: '400', label: '400 (Normal)' },
+		{ value: '500', label: '500 (Medium)' },
+		{ value: '600', label: '600 (Semibold)' },
+		{ value: '700', label: '700 (Bold)' },
+		{ value: '800', label: '800 (Extra Bold)' }
+	];
+
+	const quoteFontOptions = [
+		{ value: '', label: 'Gebruik standaard (Heading font)' },
+		{ value: "'Catamaran', sans-serif", label: 'Catamaran (Modern)' },
+		{ value: "'Playfair Display', serif", label: 'Playfair Display (Elegant)' },
+		{ value: "'Abril Fatface', serif", label: 'Abril Fatface (Dik & Sierlijk)' },
+		{ value: "'Georgia', serif", label: 'Georgia' },
+		{ value: "'Inter', sans-serif", label: 'Inter' },
+		{ value: 'var(--font-family-base)', label: 'Body Font' },
+		{ value: "'Arial Black', sans-serif", label: 'Arial Black' }
+	];
+
+	function handleChange() {
+		onsave();
+	}
 </script>
 
 <div class="style-editor">
-	<div class="editor-header">
-		<h3>Citaat Styling</h3>
-		<p class="editor-description">Pas de stijl van citaten aan</p>
-	</div>
-
-	<div class="controls">
-		<!-- SECTIE: Tekst -->
-		<div class="section-header">Tekst</div>
+	<!-- SECTIE: Tekst -->
+	<div class="section">
+		<h3>Tekst</h3>
 
 		<div class="control-group">
-			<label for="quote-font">Lettertype</label>
-			<select id="quote-font" bind:value={theme['quote-font-family']} onchange={onsave}>
-				<option value="">Gebruik standaard (Heading font)</option>
-				<option value="'Georgia', serif">Georgia</option>
-				<option value="'Inter', sans-serif">Inter</option>
-				<option value="var(--font-family-base)">Body Font</option>
-				<option value="'Courier New', monospace">Courier New</option>
+			<span class="input-label">Lettertype</span>
+			<select
+				id="quote-font"
+				bind:value={theme['quote-font-family']}
+				onchange={handleChange}
+				class="input-field"
+			>
+				{#each fontOptions as option}
+					<option value={option.value}>{option.label}</option>
+				{/each}
 			</select>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-size">Lettergrootte</label>
+			<label class="input-label" for="quote-size">Lettergrootte</label>
 			<input
 				id="quote-size"
 				type="text"
 				bind:value={theme['quote-font-size']}
-				onchange={onsave}
+				onchange={handleChange}
 				placeholder="2rem"
-				class="text-input"
+				class="input-field"
 			/>
 			<span class="hint">Bijv: 2rem, 32px, 1.5em</span>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-weight">Letterdikte</label>
-			<select id="quote-weight" bind:value={theme['quote-font-weight']} onchange={onsave}>
-				<option value="">Standaard (800)</option>
-				<option value="400">Normal (400)</option>
-				<option value="500">Medium (500)</option>
-				<option value="600">Semi-bold (600)</option>
-				<option value="700">Bold (700)</option>
-				<option value="800">Extra-bold (800)</option>
+			<span class="input-label">Letterdikte</span>
+			<select
+				id="quote-weight"
+				bind:value={theme['quote-font-weight']}
+				onchange={handleChange}
+				class="input-field"
+			>
+				{#each fontWeightOptions as option}
+					<option value={option.value}>{option.label}</option>
+				{/each}
 			</select>
 		</div>
 
-		<!-- SECTIE: Kader -->
-		<div class="section-header">Kader</div>
-
 		<div class="control-group">
-			<label for="quote-bg">Achtergrondkleur</label>
-			<div class="color-control">
+			<span class="input-label">Tekstkleur</span>
+			<div class="color-input-group">
 				<input
-					id="quote-bg"
 					type="color"
-					bind:value={theme['quote-background']}
-					onchange={onsave}
+					bind:value={theme['quote-color']}
+					oninput={handleChange}
+					class="color-picker"
 				/>
 				<input
 					type="text"
-					class="color-value"
+					bind:value={theme['quote-color']}
+					oninput={handleChange}
+					class="input-field"
+					placeholder="#000000"
+				/>
+			</div>
+		</div>
+	</div>
+
+	<!-- SECTIE: Kader -->
+	<div class="section">
+		<h3>Kader</h3>
+
+		<div class="control-group">
+			<span class="input-label">Achtergrondkleur</span>
+			<div class="color-input-group">
+				<input
+					type="color"
 					bind:value={theme['quote-background']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="color-picker"
+				/>
+				<input
+					type="text"
+					bind:value={theme['quote-background']}
+					oninput={handleChange}
+					class="input-field"
 					placeholder="#ffffff"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-border">Rand Kleur</label>
-			<div class="color-control">
+			<span class="input-label">Rand Kleur</span>
+			<div class="color-input-group">
 				<input
-					id="quote-border"
 					type="color"
 					bind:value={theme['quote-border-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="color-picker"
 				/>
 				<input
 					type="text"
-					class="color-value"
 					bind:value={theme['quote-border-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="input-field"
 					placeholder="#ffd302"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-border-width">Rand Dikte</label>
+			<label class="input-label" for="quote-border-width">Rand Dikte</label>
 			<input
 				id="quote-border-width"
 				type="text"
 				bind:value={theme['quote-border-width']}
-				onchange={onsave}
+				onchange={handleChange}
 				placeholder="10px"
-				class="text-input"
+				class="input-field"
 			/>
 			<span class="hint">Bijv: 10px, 0.5rem</span>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-radius">Afronding Hoeken</label>
+			<label class="input-label" for="quote-radius">Afronding Hoeken</label>
 			<input
 				id="quote-radius"
 				type="text"
 				bind:value={theme['quote-border-radius']}
-				onchange={onsave}
+				onchange={handleChange}
 				placeholder="8px"
-				class="text-input"
+				class="input-field"
 			/>
 			<span class="hint">Bijv: 8px, 0.5rem, 0 (geen)</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Aanhalingsteken -->
-		<div class="section-header">Aanhalingsteken (")</div>
+	<!-- SECTIE: Aanhalingsteken -->
+	<div class="section">
+		<h3>Aanhalingsteken (")</h3>
 
 		<div class="control-group">
-			<label for="quote-mark-top">Verticale Positie</label>
-			<div class="range-control-wrapper" style="display: flex; align-items: center; gap: 10px;">
+			<label class="input-label" for="quote-mark-top">Verticale Positie</label>
+			<div class="range-control-wrapper">
 				<input
 					id="quote-mark-top"
 					type="range"
@@ -139,18 +195,15 @@
 					max="0.5"
 					step="0.1"
 					bind:value={theme['quote-mark-top']}
-					oninput={() => {
-						// Als slider beweegt, update de text input
-						onsave();
-					}}
+					oninput={handleChange}
 					style="flex: 1;"
 				/>
 				<input
 					type="text"
 					bind:value={theme['quote-mark-top']}
-					onchange={onsave}
+					onchange={handleChange}
 					placeholder="-0.2em"
-					class="text-input"
+					class="input-field"
 					style="width: 80px;"
 				/>
 			</div>
@@ -158,89 +211,96 @@
 		</div>
 
 		<div class="control-group">
-			<label for="quote-mark-color">Kleur</label>
-			<div class="color-control">
+			<span class="input-label">Kleur</span>
+			<div class="color-input-group">
 				<input
-					id="quote-mark-color"
 					type="color"
 					bind:value={theme['quote-mark-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="color-picker"
 				/>
 				<input
 					type="text"
-					class="color-value"
 					bind:value={theme['quote-mark-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="input-field"
 					placeholder="black"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-mark-font">Lettertype</label>
-			<select id="quote-mark-font" bind:value={theme['quote-mark-font-family']} onchange={onsave}>
-				<option value="">Gebruik standaard (Heading font)</option>
-				<option value="'Catamaran', sans-serif">Catamaran (Modern)</option>
-				<option value="'Playfair Display', serif">Playfair Display (Elegant)</option>
-				<option value="'Abril Fatface', serif">Abril Fatface (Dik & Sierlijk)</option>
-				<option value="'Georgia', serif">Georgia</option>
-				<option value="'Inter', sans-serif">Inter</option>
-				<option value="var(--font-family-base)">Body Font</option>
-				<option value="'Arial Black', sans-serif">Arial Black</option>
+			<span class="input-label">Lettertype</span>
+			<select
+				id="quote-mark-font"
+				bind:value={theme['quote-mark-font-family']}
+				onchange={handleChange}
+				class="input-field"
+			>
+				{#each quoteFontOptions as option}
+					<option value={option.value}>{option.label}</option>
+				{/each}
 			</select>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-mark-size">Grootte</label>
+			<label class="input-label" for="quote-mark-size">Grootte</label>
 			<input
 				id="quote-mark-size"
 				type="text"
 				bind:value={theme['quote-mark-size']}
-				onchange={onsave}
+				onchange={handleChange}
 				placeholder="10em"
-				class="text-input"
+				class="input-field"
 			/>
 			<span class="hint">Bijv: 10em, 8em, 5em</span>
 		</div>
+	</div>
 
-		<!-- SECTIE: Auteur -->
-		<div class="section-header">Auteur</div>
+	<!-- SECTIE: Auteur -->
+	<div class="section">
+		<h3>Auteur</h3>
 
 		<div class="control-group">
-			<label for="quote-author-color">Tekstkleur</label>
-			<div class="color-control">
+			<span class="input-label">Tekstkleur</span>
+			<div class="color-input-group">
 				<input
-					id="quote-author-color"
 					type="color"
 					bind:value={theme['quote-author-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="color-picker"
 				/>
 				<input
 					type="text"
-					class="color-value"
 					bind:value={theme['quote-author-color']}
-					onchange={onsave}
+					oninput={handleChange}
+					class="input-field"
 					placeholder="Gebruik muted color"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-author-size">Lettergrootte</label>
+			<label class="input-label" for="quote-author-size">Lettergrootte</label>
 			<input
 				id="quote-author-size"
 				type="text"
 				bind:value={theme['quote-author-font-size']}
-				onchange={onsave}
+				onchange={handleChange}
 				placeholder="1.5rem"
-				class="text-input"
+				class="input-field"
 			/>
 			<span class="hint">Bijv: 1.5rem, 24px</span>
 		</div>
 
 		<div class="control-group">
-			<label for="quote-author-align">Uitlijning</label>
-			<select id="quote-author-align" bind:value={theme['quote-author-align']} onchange={onsave}>
+			<span class="input-label">Uitlijning</span>
+			<select
+				id="quote-author-align"
+				bind:value={theme['quote-author-align']}
+				onchange={handleChange}
+				class="input-field"
+			>
 				<option value="">Standaard (rechts)</option>
 				<option value="left">Links</option>
 				<option value="center">Midden</option>
@@ -252,125 +312,111 @@
 
 <style>
 	.style-editor {
-		padding: 2rem;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-
-	.editor-header {
-		margin-bottom: 2rem;
-		padding-bottom: 1rem;
-		border-bottom: 2px solid #e5e7eb;
-	}
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		color: #111827;
-		font-size: 1.5rem;
-		font-weight: 700;
-	}
-
-	.editor-description {
-		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.section-header {
-		font-weight: 700;
-		font-size: 0.75rem;
-		color: #9ca3af;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid #e5e7eb;
-	}
-
-	.section-header:first-of-type {
-		margin-top: 0;
-		padding-top: 0;
-		border-top: none;
-	}
-
-	.controls {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		padding: 2rem;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
-	.control-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.section {
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 1.25rem;
 	}
 
-	label {
-		font-weight: 600;
+	h3 {
+		margin: 0 0 1rem 0;
 		font-size: 0.875rem;
+		font-weight: 700;
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
-	.color-control {
+	.control-group {
+		margin-bottom: 1rem;
+	}
+
+	.control-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.input-label {
+		display: block;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: #4b5563;
+		margin-bottom: 0.375rem;
+	}
+
+	.input-field {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		background: white;
+		box-sizing: border-box;
+	}
+
+	.input-field:focus {
+		border-color: #d10a10;
+		outline: none;
+	}
+
+	.color-input-group {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		align-items: center;
 	}
 
-	input[type='color'] {
-		width: 60px;
-		height: 40px;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
+	.color-picker {
+		width: 40px;
+		height: 38px;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
 		cursor: pointer;
-		flex-shrink: 0;
-	}
-
-	.color-value,
-	.text-input {
-		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	.color-value {
-		font-family: 'SF Mono', Monaco, monospace;
-	}
-
-	.text-input:focus,
-	.color-value:focus {
-		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		padding: 0;
+		background: none;
 	}
 
 	.hint {
 		font-size: 0.75rem;
 		color: #9ca3af;
 		font-style: italic;
+		display: block;
+		margin-top: 0.25rem;
 	}
 
 	select {
 		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		font-size: 0.9375rem;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 4px;
+		font-size: 0.875rem;
 		color: #374151;
 		background: white;
 		cursor: pointer;
-		transition: all 0.15s;
 	}
 
 	select:focus {
 		outline: none;
-		border-color: #667eea;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		border-color: #d10a10;
+	}
+
+	.range-control-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.range-input {
+		flex: 1;
+		accent-color: #d10a10;
+		cursor: pointer;
 	}
 </style>

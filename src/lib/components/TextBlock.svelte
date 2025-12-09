@@ -74,14 +74,23 @@
 		margin-bottom: 0.5em; /* Leads hebben vaak minder witruimte nodig */
 	}
 
-	/* Zorg dat strong/em/span in een lead ook de kleur en grootte erven */
+	/* Zorg dat span/em/a in een lead de kleur en grootte erven */
 	.textblock.is-lead :global(span),
-	.textblock.is-lead :global(strong),
-	.textblock.is-lead :global(em),
-	.textblock.is-lead :global(a) {
+	.textblock.is-lead :global(em) {
 		font-size: inherit !important;
 		color: inherit !important;
-		/* Let op: font-weight doen we niet inherit bij strong, anders is het niet meer dikgedrukt */
+	}
+
+	/* ✅ Strong en links in lead: inherit size maar behoud eigen color */
+	.textblock.is-lead :global(strong) {
+		font-size: inherit !important;
+		color: var(--text-bold-color, inherit) !important;
+		font-weight: var(--text-bold-weight, 700) !important;
+	}
+
+	.textblock.is-lead :global(a) {
+		font-size: inherit !important;
+		/* Link color wordt niet overschreven, gebruikt eigen --text-link-color */
 	}
 
 	/* Standaard paragraaf spacing */

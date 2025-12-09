@@ -3,11 +3,16 @@
 	import type { ImageContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
 
-	let { url, caption, source, focusX = 50, focusY = 50 }: ImageContent = $props();
+	let { url, caption, source, aspectRatio = 'original', focusX = 50, focusY = 50 }: ImageContent = $props();
 	let y = $state(0);
 	let containerEl = $state<HTMLElement | undefined>(undefined);
 	let imgEl = $state<HTMLImageElement | undefined>(undefined);
 	let translateY = $state(0);
+
+	// Convert aspect ratio string to CSS value and replace : with /
+	const cssAspectRatio = $derived(
+		aspectRatio === 'original' ? undefined : aspectRatio.replace(':', ' / ')
+	);
 
 	const startThreshold = 0.18;
 	const endThreshold = 0.82;
@@ -36,22 +41,27 @@
 <svelte:window bind:scrollY={y} />
 
 <figure>
-	<button
-		class="parallax-window"
-		bind:this={containerEl}
-		onclick={() => lightbox.open([{ url, caption, source }], 0)}
-		aria-label={caption || 'Open afbeelding in lightbox'}
+	<div
+		class="parallax-wrapper"
+		style:aspect-ratio={cssAspectRatio}
 	>
-		<img
-			src={url}
-			alt={caption || 'Parallax afbeelding'}
-			class="parallax-img"
-			style:transform="translateY({translateY}px)"
-			style:object-position="{focusX}% {focusY}%"
-			loading="lazy"
-			bind:this={imgEl}
-		/>
-	</button>
+		<button
+			class="parallax-window"
+			bind:this={containerEl}
+			onclick={() => lightbox.open([{ url, caption, source }], 0)}
+			aria-label={caption || 'Open afbeelding in lightbox'}
+		>
+			<img
+				src={url}
+				alt={caption || 'Parallax afbeelding'}
+				class="parallax-img"
+				style:transform="translateY({translateY}px)"
+				style:object-position="{focusX}% {focusY}%"
+				loading="lazy"
+				bind:this={imgEl}
+			/>
+		</button>
+	</div>
 
 	{#if caption || source}
 		<figcaption>
@@ -67,16 +77,26 @@
 		display: block;
 	}
 
+	.parallax-wrapper {
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+	}
+
 	.parallax-window {
 		border: none;
 		padding: 0;
 		background: none;
 		font: inherit;
 		text-align: left;
+		cursor: pointer;
 		display: block;
 		width: 100%;
-		aspect-ratio: var(--parallax-aspect-ratio);
-		position: relative;
+		height: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		overflow: hidden;
 		box-shadow: var(--image-box-shadow, none);
 		transition: box-shadow 0.2s ease;
 	}
@@ -91,7 +111,36 @@
 		top: 0;
 		width: 100%;
 		height: auto;
-		min-height: 100%;
+		min-height: 130%;
 		object-fit: cover;
+	}
+
+	figcaption {
+		margin-top: var(--space-s, 0.75rem);
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+	}
+
+	.caption {
+		font-family: var(--caption-font-family, inherit);
+		font-size: var(--caption-font-size, 0.875rem);
+		font-weight: var(--caption-font-weight, 400);
+		font-style: var(--caption-font-style, normal);
+		color: var(--caption-color, #6b7280);
+		line-height: var(--caption-line-height, 1.5);
+		text-align: left;
+	}
+
+	.source {
+		font-family: var(--source-font-family, inherit);
+		font-size: var(--source-font-size, 0.75rem);
+		font-weight: var(--source-font-weight, 400);
+		font-style: var(--source-font-style, normal);
+		color: var(--source-color, #9ca3af);
+		line-height: var(--source-line-height, 1.4);
+		text-align: right;
+		margin-left: auto;
 	}
 </style>

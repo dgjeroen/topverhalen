@@ -1,9 +1,9 @@
-<!--src\lib\components\ImageGrid.svelte-->
+<!-- src/lib/components/ImageGrid.svelte -->
 <script lang="ts">
 	import type { GalleryContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
 
-	let { images, columns = 2 }: GalleryContent = $props();
+	let { images, columns = 2, aspectRatio = 'original' }: GalleryContent = $props();
 
 	function handleOpen(index: number): void {
 		lightbox.open(images, index);
@@ -13,7 +13,10 @@
 <div
 	class="gallery-grid"
 	class:layout-3-special={images.length === 3 && columns === 2}
-	style="--grid-columns: {columns};"
+	class:layout-4-square={images.length === 4 && columns === 4}
+	style="--grid-columns: {columns}; --gallery-aspect: {aspectRatio === 'original'
+		? 'auto'
+		: aspectRatio.replace(':', ' / ')};"
 >
 	{#each images as image, i}
 		<figure class="gallery-item">
@@ -29,6 +32,7 @@
 					style:object-position="{image.focusX ?? 50}% {image.focusY ?? 50}%"
 				/>
 			</button>
+
 			{#if image.caption || image.source}
 				<figcaption class="caption-container">
 					<span class="caption">{image.caption}</span>
@@ -57,9 +61,8 @@
 
 	.gallery-item {
 		margin: 0;
-		/* ✅ CHANGED: Grid ipv flex voor expliciete row heights */
 		display: grid;
-		grid-template-rows: 300px auto; /* Foto: 300px, Caption: auto */
+		grid-template-rows: auto auto; /* Photo then caption */
 		row-gap: var(--space-s);
 	}
 
@@ -70,8 +73,7 @@
 		line-height: 0;
 		display: block;
 		width: 100%;
-		/* ✅ CHANGED: Height 100% werkt nu (grid row is 300px) */
-		height: 100%;
+		height: auto;
 		box-shadow: var(--image-box-shadow, none);
 		transition:
 			transform 0.2s ease,
@@ -89,27 +91,50 @@
 
 	img {
 		width: 100%;
-		height: 100%;
+		height: auto;
 		display: block;
 		object-fit: cover;
 		transition: transform 0.2s ease-in-out;
+		aspect-ratio: var(--gallery-aspect, auto);
 	}
 
 	.image-button:hover img {
 		transform: scale(1.03);
 	}
 
-	/* ✅ CHANGED: Overlap via transform ipv margin */
 	.caption-container {
 		position: relative;
-		/* ✅ Transform verplaatst visueel, maar layout blijft intact */
-		transform: translateY(calc(var(--space-m) * -0.5));
 		z-index: 1;
-		/* ✅ Pointer events door naar volgend blok (caption is alleen visueel) */
 		pointer-events: none;
+		padding: 0;
+		background: transparent;
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
 	}
 
-	/* ✅ Text binnen caption moet wel klikbaar zijn */
+	.caption {
+		font-family: var(--caption-font-family, inherit);
+		font-size: var(--caption-font-size, 0.875rem);
+		font-weight: var(--caption-font-weight, 400);
+		font-style: var(--caption-font-style, normal);
+		color: var(--caption-color, #6b7280);
+		line-height: var(--caption-line-height, 1.5);
+		text-align: left;
+	}
+
+	.source {
+		font-family: var(--source-font-family, inherit);
+		font-size: var(--source-font-size, 0.75rem);
+		font-weight: var(--source-font-weight, 400);
+		font-style: var(--source-font-style, normal);
+		color: var(--source-color, #9ca3af);
+		line-height: var(--source-line-height, 1.4);
+		text-align: right;
+		margin-left: auto;
+	}
+
 	.caption-container * {
 		pointer-events: auto;
 	}
@@ -119,20 +144,20 @@
 			grid-template-columns: 1fr;
 		}
 
+		/* If exactly 4 images in a 4-column layout, show 2x2 on mobile */
+		.layout-4-square {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
 		.gallery-item {
-			/* ✅ Kleinere foto op mobile */
-			grid-template-rows: 200px auto;
-			row-gap: var(--space-xs);
+			/* photo height adapts to actual image size */
+			grid-template-rows: auto auto;
+			row-gap: var(--space-s);
 		}
 
 		.layout-3-special > :nth-child(n) {
 			grid-column: auto;
 			grid-row: auto;
-		}
-
-		/* ✅ Minder overlap op mobile */
-		.caption-container {
-			transform: translateY(calc(var(--space-m) * -0.25));
 		}
 	}
 </style>

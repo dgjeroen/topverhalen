@@ -61,6 +61,13 @@
 	let showBackupDialog = $state(false);
 	let backupData = $state<any>(null);
 
+	// ✅ Blocks collapse state
+	let allBlocksCollapsed = $state(false);
+
+	function toggleAllBlocks() {
+		allBlocksCollapsed = !allBlocksCollapsed;
+	}
+
 	function handleSave() {
 		debouncedSave();
 	}
@@ -365,20 +372,21 @@
 			case 'quote':
 				return { text: '', author: '', typewriter: true, italic: true };
 			case 'image':
-				return { url: '', caption: '', source: '', parallax: false };
+				return { url: '', caption: '', source: '', parallax: false, aspectRatio: 'original', width: 'normal' };
 			case 'video':
-				return { url: '', poster: '' };
+				return { url: '', poster: '', width: 'normal' };
 			case 'embed':
 				return {
 					code: '',
 					aspectRatio: 'auto',
 					caption: '',
-					source: ''
+					source: '',
+					width: 'normal'
 				};
 			case 'slider':
-				return { images: [{ url: '', caption: '', source: '' }] };
+				return { images: [{ url: '', caption: '', source: '' }], width: 'normal' };
 			case 'gallery':
-				return { columns: 2, images: [] };
+				return { columns: 2, images: [], width: 'normal' };
 			case 'timeline':
 				return {
 					title: 'Tijdlijn',
@@ -398,7 +406,8 @@
 					items: [
 						{ type: 'image', orientation: 'portrait', url: '', caption: '', source: '' },
 						{ type: 'video', orientation: 'landscape', url: '', poster: '', caption: '' }
-					]
+					],
+					width: 'normal'
 				};
 			case 'audio':
 				return {
@@ -409,15 +418,17 @@
 					imageLayout: 'stamp',
 					imageScale: 100,
 					imageFocusX: 50,
-					imageFocusY: 50
+					imageFocusY: 50,
+					width: 'normal'
 				};
 			case 'textframe':
-				return { width: 'narrow', heading: '', text: '', image: null };
+				return { width: 'normal', heading: '', text: '', image: null };
 			case 'colofon':
 				return {
 					items: [{ functie: '', namen: '' }],
 					showLogo: true,
-					logoVariant: 'dia'
+					logoVariant: 'dia',
+					layout: 'inline'
 				};
 			default:
 				return {};
@@ -782,8 +793,6 @@
 			<div class="toolbox-content">
 				{#if activeTab === 'blocks'}
 					<div bind:this={toolboxEl}>
-						<h3>Blokken</h3>
-
 						<div class="block" data-type="heroVideo">
 							<svg class="block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 								<use href="#icon-block-hero-video" />
@@ -919,6 +928,25 @@
 				{/if}
 			</div>
 		</aside>
+
+		{#if activeTab === 'blocks' && canvasBlocks.length > 0}
+			<div class="blocks-toolbar">
+				<button type="button" class="toggle-all-btn" onclick={toggleAllBlocks}>
+					<svg
+						class="toggle-icon"
+						class:collapsed={allBlocksCollapsed}
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<polyline points="6 9 12 15 18 9"></polyline>
+					</svg>
+					<span>{allBlocksCollapsed ? 'Alles uitklappen' : 'Alles inklappen'}</span>
+				</button>
+			</div>
+		{/if}
+
 		<main class="canvas">
 			{#if activeTab === 'blocks'}
 				<SortableCanvas
@@ -932,6 +960,7 @@
 					on:media={handleMediaEvent}
 					on:colofon={handleColofonEvent}
 					toolbox={toolboxSortable}
+					bind:allCollapsed={allBlocksCollapsed}
 				/>
 			{:else}
 				<div class="styling-canvas">
@@ -1343,16 +1372,6 @@
 		padding: 20px;
 	}
 
-	.toolbox h3 {
-		margin-top: 0;
-		margin-bottom: 1rem;
-		color: #111827;
-		font-size: 0.875rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
 	.toolbox hr {
 		border: none;
 		border-top: 1px solid #d10a10;
@@ -1369,7 +1388,8 @@
 		border-radius: 6px;
 		cursor: grab;
 		padding: 10px 12px;
-		font-weight: 500;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		font-weight: 600;
 		font-size: 0.875rem;
 		user-select: none;
 		transition: all 0.15s;
@@ -1399,7 +1419,6 @@
 		gap: 0;
 		padding: 12px 12px 0 12px;
 		background: white;
-		border-bottom: 1px solid #e5e7eb;
 	}
 
 	.tab-btn {
@@ -1408,6 +1427,7 @@
 		border: none;
 		background: transparent;
 		color: #6b7280;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		font-weight: 600;
 		font-size: 0.875rem;
 		cursor: pointer;
@@ -1426,21 +1446,72 @@
 		color: #d10a10;
 		border-bottom-color: #d10a10;
 		background: white;
+		font-weight: 600;
 	}
 
 	.styling-canvas {
 		background: white;
 		min-height: 100%;
 		border-radius: 8px;
-		margin: 0 20px;
+		max-width: 800px;
+		margin: 0 auto;
+		width: 100%;
 	}
 
 	main.canvas {
 		position: relative;
 		flex: 1;
 		overflow-x: hidden !important;
-		overflow-y: visible !important;
+		overflow-y: auto;
 		padding: 40px 20px;
 		height: auto !important;
+		display: flex;
+		justify-content: center;
+	}
+
+	main.canvas > :global(*) {
+		width: 100%;
+		max-width: 900px;
+	}
+
+	/* Blocks toolbar - fixed boven canvas */
+	.blocks-toolbar {
+		position: fixed;
+		top: 70px;
+		right: 20px;
+		z-index: 50;
+		pointer-events: none;
+	}
+
+	.toggle-all-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		cursor: pointer;
+		transition: all 0.15s;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		pointer-events: auto;
+	}
+
+	.toggle-all-btn:hover {
+		background: #f9fafb;
+		border-color: #d1d5db;
+	}
+
+	.toggle-icon {
+		width: 16px;
+		height: 16px;
+		transition: transform 0.2s;
+	}
+
+	.toggle-icon.collapsed {
+		transform: rotate(-90deg);
 	}
 </style>

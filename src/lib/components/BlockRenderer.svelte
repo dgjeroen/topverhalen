@@ -29,7 +29,6 @@
 	}>();
 
 	const noWrapperBlocks = ['heroVideo', 'imageHero'];
-	const wideBlocks = ['video', 'slider', 'gallery', 'mediaPair'];
 	const heroBlocks = ['heroVideo', 'imageHero'];
 
 	function getHeadingLevel(type: string): number | undefined {
@@ -42,12 +41,16 @@
 	const headingLevel = $derived(getHeadingLevel(block.type));
 
 	const wrapperClass = $derived(() => {
-		if (wideBlocks.includes(block.type)) {
+		const width = block.content?.width;
+
+		// Support for components with width property
+		if (width === 'wide') {
 			return 'wrapper-wide';
 		}
-		if (block.type === 'textframe') {
-			return block.content?.width === 'wide' ? 'wrapper-wide' : 'wrapper-standard';
+		if (width === 'full') {
+			return 'wrapper-full';
 		}
+
 		return 'wrapper-standard';
 	});
 </script>
