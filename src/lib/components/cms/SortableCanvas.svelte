@@ -119,21 +119,23 @@
 
 	// Ensure all image blocks have aspectRatio property
 	$effect(() => {
-		blocks.forEach((block: ContentBlock) => {
-			if (block.type === 'image' && !block.content.aspectRatio) {
-				block.content.aspectRatio = 'original';
-			}
+		untrack(() => {
+			blocks.forEach((block: ContentBlock) => {
+				if (block.type === 'image' && !block.content.aspectRatio) {
+					block.content.aspectRatio = 'original';
+				}
 
-			// Ensure gallery blocks have a default aspectRatio
-			if (block.type === 'gallery' && !block.content.aspectRatio) {
-				block.content.aspectRatio = 'original';
-			}
-			// Initialize portrait flags for gallery blocks so editor preview can mark portraits
-			if (block.type === 'gallery') {
-				const existing = galleryPortraits[block.id] || [];
-				const arr = (block.content.images || []).map((_, i) => existing[i] || false);
-				galleryPortraits = { ...galleryPortraits, [block.id]: arr };
-			}
+				// Ensure gallery blocks have a default aspectRatio
+				if (block.type === 'gallery' && !block.content.aspectRatio) {
+					block.content.aspectRatio = 'original';
+				}
+				// Initialize portrait flags for gallery blocks so editor preview can mark portraits
+				if (block.type === 'gallery') {
+					const existing = galleryPortraits[block.id] || [];
+					const arr = (block.content.images || []).map((_, i) => existing[i] || false);
+					galleryPortraits = { ...galleryPortraits, [block.id]: arr };
+				}
+			});
 		});
 	});
 
@@ -671,7 +673,7 @@
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
 									}}
-									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
 								>
 									{#if block.content.poster}
 										<img
@@ -780,7 +782,7 @@
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
 									}}
-									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
 								>
 									<img
 										src={block.content.url}
@@ -1008,7 +1010,7 @@
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
 									}}
-									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+									style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
 								>
 									<img
 										src={block.content.url}
@@ -1051,49 +1053,91 @@
 						class="slide-input"
 					/>
 					<div class="image-controls">
-						<div class="control-label">Breedte:</div>
-						<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
-							<IconButton
-								icon="icon-width-narrow"
-								label="Normaal"
-								active={block.content.width === 'normal'}
-								onclick={() => {
-									block.content.width = 'normal';
-									dispatch('save');
-								}}
-							/>
-							<IconButton
-								icon="icon-width-wide"
-								label="Breed"
-								active={block.content.width === 'wide'}
-								onclick={() => {
-									block.content.width = 'wide';
-									dispatch('save');
-								}}
-							/>
-							<IconButton
-								icon="icon-width-full"
-								label="Volledige breedte"
-								active={block.content.width === 'full'}
-								onclick={() => {
-									block.content.width = 'full';
-									dispatch('save');
-								}}
-							/>
-						</div>
+						<div class="image-controls-row">
+							<div class="control-group">
+								<div class="control-label">Breedte:</div>
+								<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+									<IconButton
+										icon="icon-width-narrow"
+										label="Normaal"
+										active={block.content.width === 'normal'}
+										onclick={() => {
+											block.content.width = 'normal';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-width-wide"
+										label="Breed"
+										active={block.content.width === 'wide'}
+										onclick={() => {
+											block.content.width = 'wide';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-width-full"
+										label="Volledige breedte"
+										active={block.content.width === 'full'}
+										onclick={() => {
+											block.content.width = 'full';
+											dispatch('save');
+										}}
+									/>
+								</div>
+							</div>
 
-						<div class="control-label">Beeldverhouding:</div>
-						<select
-							bind:value={block.content.aspectRatio}
-							onchange={() => dispatch('save')}
-							class="aspect-ratio-select"
-						>
-							<option value="original">Origineel (volledig)</option>
-							<option value="4:3">4:3 (landschap)</option>
-							<option value="16:9">16:9 (breed landschap)</option>
-							<option value="4:5">4:5 (portret)</option>
-							<option value="1:1">1:1 (vierkant)</option>
-						</select>
+							<div class="control-group">
+								<div class="control-label">Beeldverhouding:</div>
+								<div class="aspect-controls" role="toolbar" aria-label="Beeldverhouding selectie">
+									<IconButton
+										icon="icon-aspect-original"
+										label="Origineel (volledig)"
+										active={block.content.aspectRatio === 'original'}
+										onclick={() => {
+											block.content.aspectRatio = 'original';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-4-3"
+										label="4:3 (landschap)"
+										active={block.content.aspectRatio === '4:3'}
+										onclick={() => {
+											block.content.aspectRatio = '4:3';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-16-9"
+										label="16:9 (breed landschap)"
+										active={block.content.aspectRatio === '16:9'}
+										onclick={() => {
+											block.content.aspectRatio = '16:9';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-4-5"
+										label="4:5 (portret)"
+										active={block.content.aspectRatio === '4:5'}
+										onclick={() => {
+											block.content.aspectRatio = '4:5';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-1-1"
+										label="1:1 (vierkant)"
+										active={block.content.aspectRatio === '1:1'}
+										onclick={() => {
+											block.content.aspectRatio = '1:1';
+											dispatch('save');
+										}}
+									/>
+								</div>
+							</div>
+						</div>
 
 						<label class="parallax-toggle">
 							<input
@@ -1450,7 +1494,7 @@ Voorbeelden:
 				{:else if block.type === 'gallery'}
 					<div class="gallery-editor">
 						<div class="gallery-controls">
-							<div class="width-picker">
+							<div class="control-group">
 								<div class="control-label">Breedte:</div>
 								<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
 									<IconButton
@@ -1474,8 +1518,8 @@ Voorbeelden:
 								</div>
 							</div>
 
-							<div class="layout-picker">
-								<span class="input-label">Layout:</span>
+							<div class="control-group">
+								<div class="control-label">Layout:</div>
 								<div class="layout-options">
 									<label class:active={block.content.columns === 2}>
 										<input
@@ -1518,21 +1562,69 @@ Voorbeelden:
 									</label>
 								</div>
 							</div>
-							<div class="aspect-picker">
+
+							<div class="control-group">
 								<div class="control-label">Beeldverhouding:</div>
-								<select
-									bind:value={block.content.aspectRatio}
-									onchange={() => dispatch('save')}
-									class="aspect-ratio-select"
-								>
-									<option value="original">Origineel (volledig)</option>
-									<option value="4:3">4:3 (landschap)</option>
-									<option value="16:9">16:9 (breed landschap)</option>
-									<option value="4:5">4:5 (portret)</option>
-									<option value="1:1">1:1 (vierkant)</option>
-								</select>
+								<div class="aspect-controls" role="toolbar" aria-label="Beeldverhouding selectie">
+									<IconButton
+										icon="icon-aspect-original"
+										label="Origineel (volledig)"
+										active={block.content.aspectRatio === 'original'}
+										onclick={() => {
+											block.content.aspectRatio = 'original';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-4-3"
+										label="4:3 (landschap)"
+										active={block.content.aspectRatio === '4:3'}
+										onclick={() => {
+											block.content.aspectRatio = '4:3';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-16-9"
+										label="16:9 (breed landschap)"
+										active={block.content.aspectRatio === '16:9'}
+										onclick={() => {
+											block.content.aspectRatio = '16:9';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-4-5"
+										label="4:5 (portret)"
+										active={block.content.aspectRatio === '4:5'}
+										onclick={() => {
+											block.content.aspectRatio = '4:5';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-aspect-1-1"
+										label="1:1 (vierkant)"
+										active={block.content.aspectRatio === '1:1'}
+										onclick={() => {
+											block.content.aspectRatio = '1:1';
+											dispatch('save');
+										}}
+									/>
+								</div>
 							</div>
+						</div>
+
+						<div
+							style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; gap: 1rem; flex-wrap: nowrap;"
+						>
 							<span class="gallery-info">{getGalleryLayoutInfo(block)}</span>
+							<p
+								class="control-hint"
+								style="margin: 0; font-size: 0.75rem; color: #6b7280; white-space: nowrap;"
+							>
+								💡 Tip: Gebruik Shift+scroll of touchpad om tussen foto's te navigeren.
+							</p>
 						</div>
 
 						<div class="splide-container">
@@ -1592,7 +1684,7 @@ Voorbeelden:
 															onkeydown={(e) => {
 																if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
 															}}
-															style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+															style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
 														>
 															<img
 																src={image.url || 'https://placehold.co/150x100'}
@@ -2124,7 +2216,7 @@ Voorbeelden:
 																		e.currentTarget.click();
 																	}
 																}}
-																style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden; background: #000;"
+																style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
 															>
 																<img
 																	src={item.imageSrc}
@@ -3180,17 +3272,25 @@ Voorbeelden:
 
 	.gallery-controls {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 10px;
-		flex-wrap: wrap;
+		gap: 5rem;
 		margin-bottom: 1rem;
+		align-items: start;
 	}
 
-	.layout-picker {
+	.control-group {
 		display: flex;
-		align-items: center;
-		gap: 10px;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+	}
+
+	/* Beeldverhouding krijgt meer ruimte voor 5 buttons */
+	.gallery-controls .control-group:has(.aspect-controls) {
+		flex: 2;
+	}
+
+	.gallery-controls .control-group:not(:has(.aspect-controls)) {
+		flex: 1;
 	}
 
 	.layout-options {
@@ -3840,6 +3940,13 @@ Voorbeelden:
 		display: flex;
 		gap: 0.5rem;
 	}
+
+	.aspect-controls {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: nowrap;
+	}
+
 	.layout-controls {
 		display: flex;
 		gap: 0.5rem;
@@ -3897,6 +4004,13 @@ Voorbeelden:
 		border: 1px solid #e5e7eb;
 		border-radius: 8px;
 		margin-top: 0.25rem;
+	}
+
+	.image-controls-row {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 5rem;
+		align-items: start;
 	}
 
 	.textframe-editor input[type='text'],

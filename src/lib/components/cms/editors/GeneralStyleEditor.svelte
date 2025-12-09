@@ -309,6 +309,200 @@
 			</select>
 		</div>
 	</div>
+
+	<!-- SECTIE: Bijschriften & Bronnen -->
+	<div class="section">
+		<h3>Bijschriften & Bronnen</h3>
+		<p class="hint" style="margin-bottom: 1rem;">
+			Styling voor afbeelding/video bijschriften en bronvermeldingen (geldt voor alle componenten)
+		</p>
+
+		<!-- Bijschrift (Caption) -->
+		<h4 style="margin: 1.5rem 0 0.75rem; font-size: 0.8125rem; font-weight: 600; color: #6b7280;">
+			Bijschrift
+		</h4>
+
+		<div class="control-group">
+			<label for="caption-font-family">Lettertype</label>
+			<select
+				id="caption-font-family"
+				value={theme['caption-font-family'] || "'Arial', sans-serif"}
+				onchange={(e) => {
+					theme['caption-font-family'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="'Arial', sans-serif">Arial (standaard)</option>
+				<option value="'Inter', sans-serif">Inter</option>
+				<option value="'Georgia', serif">Georgia</option>
+				<option value="'Courier New', monospace">Courier New</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-size">Tekstgrootte</label>
+			<input
+				id="caption-font-size"
+				type="text"
+				placeholder="bijv. 0.875rem"
+				value={theme['caption-font-size'] || ''}
+				oninput={(e) => {
+					theme['caption-font-size'] = e.currentTarget.value;
+					onsave();
+				}}
+			/>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-color">Tekstkleur</label>
+			<div class="color-control">
+				<input
+					id="caption-color"
+					type="color"
+					value={theme['caption-color'] || '#6b7280'}
+					oninput={(e) => {
+						theme['caption-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+				<input
+					type="text"
+					placeholder="#6b7280"
+					value={theme['caption-color'] || ''}
+					oninput={(e) => {
+						theme['caption-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-weight">Lettergewicht</label>
+			<select
+				id="caption-font-weight"
+				value={theme['caption-font-weight'] || '400'}
+				onchange={(e) => {
+					theme['caption-font-weight'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="300">Light (300)</option>
+				<option value="400">Normal (400)</option>
+				<option value="500">Medium (500)</option>
+				<option value="600">Semi-bold (600)</option>
+				<option value="700">Bold (700)</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="caption-font-style">Cursief</label>
+			<select
+				id="caption-font-style"
+				value={theme['caption-font-style'] || 'normal'}
+				onchange={(e) => {
+					theme['caption-font-style'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="normal">Normaal</option>
+				<option value="italic">Cursief</option>
+			</select>
+		</div>
+
+		<!-- Bron (Source) -->
+		<h4 style="margin: 1.5rem 0 0.75rem; font-size: 0.8125rem; font-weight: 600; color: #6b7280;">
+			Bron
+		</h4>
+
+		<div class="control-group">
+			<label for="source-font-family">Lettertype</label>
+			<select
+				id="source-font-family"
+				value={theme['source-font-family'] || "'Arial', sans-serif"}
+				onchange={(e) => {
+					theme['source-font-family'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="'Arial', sans-serif">Arial (standaard)</option>
+				<option value="'Inter', sans-serif">Inter</option>
+				<option value="'Georgia', serif">Georgia</option>
+				<option value="'Courier New', monospace">Courier New</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-size">Tekstgrootte</label>
+			<input
+				id="source-font-size"
+				type="text"
+				placeholder="bijv. 0.75rem"
+				value={theme['source-font-size'] || ''}
+				oninput={(e) => {
+					theme['source-font-size'] = e.currentTarget.value;
+					onsave();
+				}}
+			/>
+		</div>
+
+		<div class="control-group">
+			<label for="source-color">Tekstkleur</label>
+			<div class="color-control">
+				<input
+					id="source-color"
+					type="color"
+					value={theme['source-color'] || '#9ca3af'}
+					oninput={(e) => {
+						theme['source-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+				<input
+					type="text"
+					placeholder="#9ca3af"
+					value={theme['source-color'] || ''}
+					oninput={(e) => {
+						theme['source-color'] = e.currentTarget.value;
+						onsave();
+					}}
+				/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-weight">Lettergewicht</label>
+			<select
+				id="source-font-weight"
+				value={theme['source-font-weight'] || '400'}
+				onchange={(e) => {
+					theme['source-font-weight'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="300">Light (300)</option>
+				<option value="400">Normal (400)</option>
+				<option value="500">Medium (500)</option>
+				<option value="600">Semi-bold (600)</option>
+				<option value="700">Bold (700)</option>
+			</select>
+		</div>
+
+		<div class="control-group">
+			<label for="source-font-style">Cursief</label>
+			<select
+				id="source-font-style"
+				value={theme['source-font-style'] || 'normal'}
+				onchange={(e) => {
+					theme['source-font-style'] = e.currentTarget.value;
+					onsave();
+				}}
+			>
+				<option value="normal">Normaal</option>
+				<option value="italic">Cursief</option>
+			</select>
+		</div>
+	</div>
 </div>
 
 <style>

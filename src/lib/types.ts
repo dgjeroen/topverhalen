@@ -104,6 +104,22 @@ export type Theme = {
 	'text-link-decoration'?: string;
 
 	// ============================================
+	// CAPTIONS & SOURCES (voor afbeeldingen/video)
+	// ============================================
+	'caption-font-family'?: string;
+	'caption-font-size'?: string;
+	'caption-font-weight'?: string;
+	'caption-font-style'?: string;
+	'caption-color'?: string;
+	'caption-line-height'?: string;
+	'source-font-family'?: string;
+	'source-font-size'?: string;
+	'source-font-weight'?: string;
+	'source-font-style'?: string;
+	'source-color'?: string;
+	'source-line-height'?: string;
+
+	// ============================================
 	// TEXTFRAME COMPONENT (✅ ADD THESE)
 	// ============================================
 	'textframe-bg-color'?: string;

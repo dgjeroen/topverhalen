@@ -410,6 +410,129 @@
 			opacity="0.5"
 		/>
 	</symbol>
+
+	<!-- Aspect Ratio Icons -->
+	<symbol id="icon-aspect-original" viewBox="0 0 32 32">
+		<!-- Auto-fit rectangle with expanding arrows -->
+		<rect
+			x="8"
+			y="10"
+			width="16"
+			height="12"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			rx="2"
+		/>
+		<path d="M 4 16 L 7 16 M 25 16 L 28 16" stroke="currentColor" stroke-width="2" />
+		<path d="M 16 6 L 16 9 M 16 23 L 16 26" stroke="currentColor" stroke-width="2" />
+		<text
+			x="16"
+			y="18"
+			text-anchor="middle"
+			font-size="6"
+			font-weight="600"
+			fill="currentColor"
+		>
+			AUTO
+		</text>
+	</symbol>
+
+	<symbol id="icon-aspect-4-3" viewBox="0 0 32 32">
+		<!-- 4:3 landscape rectangle -->
+		<rect
+			x="6"
+			y="10"
+			width="20"
+			height="12"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			rx="2"
+		/>
+		<text
+			x="16"
+			y="18"
+			text-anchor="middle"
+			font-size="7"
+			font-weight="600"
+			fill="currentColor"
+		>
+			4:3
+		</text>
+	</symbol>
+
+	<symbol id="icon-aspect-16-9" viewBox="0 0 32 32">
+		<!-- 16:9 wide landscape rectangle -->
+		<rect
+			x="4"
+			y="11"
+			width="24"
+			height="10"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			rx="2"
+		/>
+		<text
+			x="16"
+			y="18"
+			text-anchor="middle"
+			font-size="6"
+			font-weight="600"
+			fill="currentColor"
+		>
+			16:9
+		</text>
+	</symbol>
+
+	<symbol id="icon-aspect-4-5" viewBox="0 0 32 32">
+		<!-- 4:5 portrait rectangle -->
+		<rect
+			x="10"
+			y="6"
+			width="12"
+			height="20"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			rx="2"
+		/>
+		<text
+			x="16"
+			y="18"
+			text-anchor="middle"
+			font-size="7"
+			font-weight="600"
+			fill="currentColor"
+		>
+			4:5
+		</text>
+	</symbol>
+
+	<symbol id="icon-aspect-1-1" viewBox="0 0 32 32">
+		<!-- 1:1 square -->
+		<rect
+			x="9"
+			y="9"
+			width="14"
+			height="14"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			rx="2"
+		/>
+		<text
+			x="16"
+			y="18"
+			text-anchor="middle"
+			font-size="7"
+			font-weight="600"
+			fill="currentColor"
+		>
+			1:1
+		</text>
+	</symbol>
 </svg>
 
 <style>
