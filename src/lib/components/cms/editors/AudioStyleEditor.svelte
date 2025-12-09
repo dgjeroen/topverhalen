@@ -9,6 +9,17 @@
 
 	$effect(() => {
 		if (!theme) theme = {};
+
+		// Initialize with defaults if not set or empty
+		theme['audio-bg-color'] = theme['audio-bg-color'] || '#EDEAEC';
+		theme['audio-title-color'] = theme['audio-title-color'] || '#000000';
+		theme['audio-description-color'] = theme['audio-description-color'] || '#32302c';
+		theme['audio-button-border-color'] = theme['audio-button-border-color'] || '#6E757C';
+		theme['audio-button-hover-bg'] = theme['audio-button-hover-bg'] || '#E1DEE0';
+		theme['audio-button-icon-color'] = theme['audio-button-icon-color'] || '#6E757C';
+		theme['audio-progress-bg'] = theme['audio-progress-bg'] || '#6E757C';
+		theme['audio-progress-fill-color'] = theme['audio-progress-fill-color'] || '#D10A10';
+		theme['audio-time-color'] = theme['audio-time-color'] || '#000000';
 	});
 </script>
 
@@ -26,7 +37,7 @@
 					class="color-value"
 					bind:value={theme['audio-bg-color']}
 					onchange={onsave}
-					placeholder="#f3f3f3"
+					placeholder="#EDEAEC"
 				/>
 			</div>
 		</div>
@@ -120,7 +131,7 @@
 					class="color-value"
 					bind:value={theme['audio-title-color']}
 					onchange={onsave}
-					placeholder="#111827"
+					placeholder="#000000"
 				/>
 			</div>
 		</div>
@@ -163,7 +174,7 @@
 					class="color-value"
 					bind:value={theme['audio-description-color']}
 					onchange={onsave}
-					placeholder="#6b7280"
+					placeholder="#32302c"
 				/>
 			</div>
 		</div>
@@ -213,7 +224,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-border-color']}
 					onchange={onsave}
-					placeholder="#d1d5db"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
@@ -232,7 +243,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-hover-bg']}
 					onchange={onsave}
-					placeholder="#e5e7eb"
+					placeholder="#E1DEE0"
 				/>
 			</div>
 		</div>
@@ -251,7 +262,7 @@
 					class="color-value"
 					bind:value={theme['audio-button-icon-color']}
 					onchange={onsave}
-					placeholder="#111827"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
@@ -268,10 +279,10 @@
 				type="text"
 				bind:value={theme['audio-progress-height']}
 				onchange={onsave}
-				placeholder="6px"
+				placeholder="3px"
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 4px, 6px, 8px</span>
+			<span class="hint">Bijv: 3px, 4px, 6px</span>
 		</div>
 
 		<div class="control-group">
@@ -288,13 +299,13 @@
 					class="color-value"
 					bind:value={theme['audio-progress-bg']}
 					onchange={onsave}
-					placeholder="#e5e7eb"
+					placeholder="#6E757C"
 				/>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label for="audio-progress-fill">Vul kleur (accent)</label>
+			<label for="audio-progress-fill">Vulkleur (accent)</label>
 			<div class="color-control">
 				<input
 					id="audio-progress-fill"
@@ -307,7 +318,7 @@
 					class="color-value"
 					bind:value={theme['audio-progress-fill-color']}
 					onchange={onsave}
-					placeholder="#ef4444"
+					placeholder="#D10A10"
 				/>
 			</div>
 		</div>
@@ -319,10 +330,10 @@
 				type="text"
 				bind:value={theme['audio-progress-border-radius']}
 				onchange={onsave}
-				placeholder="3px"
+				placeholder="0"
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 2px, 3px, 4px</span>
+			<span class="hint">Bijv: 0, 2px, 3px</span>
 		</div>
 	</div>
 
@@ -344,7 +355,7 @@
 					class="color-value"
 					bind:value={theme['audio-time-color']}
 					onchange={onsave}
-					placeholder="#6b7280"
+					placeholder="#000000"
 				/>
 			</div>
 		</div>

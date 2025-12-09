@@ -9,10 +9,10 @@
 
 	$effect(() => {
 		if (!theme) theme = {};
-		// Always ensure white is the default color if not explicitly set
-		if (!theme['subheading-soccer-color'] || theme['subheading-soccer-color'] === '') {
-			theme['subheading-soccer-color'] = '#ffffff';
-		}
+
+		// Initialize with defaults if not set or empty
+		theme['subheading-soccer-bg'] = theme['subheading-soccer-bg'] || '#000000';
+		theme['subheading-soccer-color'] = theme['subheading-soccer-color'] || '#ffffff';
 	});
 </script>
 
@@ -35,12 +35,11 @@
 					class="color-value"
 					bind:value={theme['subheading-soccer-bg']}
 					onchange={onsave}
-					placeholder="Standaard zwart gradient"
+					placeholder="#000000"
 				/>
 			</div>
 			<span class="hint">
-				Standaard: linear-gradient(to right, #0b1320 100%, transparent). Gebruik gradient voor
-				fade-out effect.
+				Standaard: #000000. Je kunt ook een gradient gebruiken voor fade-out effect.
 			</span>
 		</div>
 

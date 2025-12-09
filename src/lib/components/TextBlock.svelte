@@ -53,7 +53,7 @@
 		font-weight: var(--text-font-weight, 400);
 	}
 
-	/* ✅ DE FIX VOOR DE LEAD 
+	/* ✅ DE FIX VOOR DE LEAD
        We passen de stijlen toe op de container...
     */
 	.textblock.is-lead {
@@ -61,6 +61,7 @@
 		font-weight: var(--text-lead-font-weight, 500);
 		line-height: var(--text-lead-line-height, 1.5);
 		color: var(--text-lead-color, var(--color-text));
+		text-align: var(--text-lead-align, left);
 	}
 
 	/* ...MAAR we forceren ze ook op de paragraaf (<p>).

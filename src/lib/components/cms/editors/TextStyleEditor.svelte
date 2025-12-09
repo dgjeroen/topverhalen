@@ -74,6 +74,16 @@
 		<h3>Inleiding (Lead Tekst)</h3>
 
 		<div class="control-group">
+			<label for="lead-align">Tekstuitlijning</label>
+			<select id="lead-align" bind:value={theme['text-lead-align']} onchange={onsave}>
+				<option value="">Standaard (links)</option>
+				<option value="left">Links</option>
+				<option value="center">Gecentreerd</option>
+				<option value="right">Rechts</option>
+			</select>
+		</div>
+
+		<div class="control-group">
 			<label for="lead-size">Lettergrootte</label>
 			<input
 				id="lead-size"
