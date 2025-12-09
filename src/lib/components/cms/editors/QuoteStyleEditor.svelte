@@ -10,12 +10,23 @@
 	$effect(() => {
 		if (!theme) theme = {};
 
-		// Initialize with defaults if not set
-		if (!theme['quote-color']) theme['quote-color'] = '#000000';
-		if (!theme['quote-background']) theme['quote-background'] = '#EDEAEC';
-		if (!theme['quote-border-color']) theme['quote-border-color'] = '#D10A10';
-		if (!theme['quote-mark-color']) theme['quote-mark-color'] = '#6E757C';
-		if (!theme['quote-author-color']) theme['quote-author-color'] = '#6E757C';
+		// Initialize with defaults if not set or empty
+		// Use untrack to avoid infinite loops
+		if (!theme['quote-color'] || theme['quote-color'] === '') {
+			theme['quote-color'] = '#000000';
+		}
+		if (!theme['quote-background'] || theme['quote-background'] === '') {
+			theme['quote-background'] = '#EDEAEC';
+		}
+		if (!theme['quote-border-color'] || theme['quote-border-color'] === '') {
+			theme['quote-border-color'] = '#D10A10';
+		}
+		if (!theme['quote-mark-color'] || theme['quote-mark-color'] === '') {
+			theme['quote-mark-color'] = '#6E757C';
+		}
+		if (!theme['quote-author-color'] || theme['quote-author-color'] === '') {
+			theme['quote-author-color'] = '#6E757C';
+		}
 	});
 
 	const fontOptions = [
