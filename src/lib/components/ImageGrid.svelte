@@ -104,13 +104,35 @@
 
 	.caption-container {
 		position: relative;
-		/* overlap slightly so caption and image touch */
-		transform: translateY(calc(var(--space-m) * -0.5));
 		z-index: 1;
-		pointer-events: auto;
+		pointer-events: none;
 		padding: 0;
-		color: var(--colofon-dd-color, var(--color-text-muted, #6b7280));
 		background: transparent;
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+	}
+
+	.caption {
+		font-family: var(--caption-font-family, inherit);
+		font-size: var(--caption-font-size, 0.875rem);
+		font-weight: var(--caption-font-weight, 400);
+		font-style: var(--caption-font-style, normal);
+		color: var(--caption-color, #6b7280);
+		line-height: var(--caption-line-height, 1.5);
+		text-align: left;
+	}
+
+	.source {
+		font-family: var(--source-font-family, inherit);
+		font-size: var(--source-font-size, 0.75rem);
+		font-weight: var(--source-font-weight, 400);
+		font-style: var(--source-font-style, normal);
+		color: var(--source-color, #9ca3af);
+		line-height: var(--source-line-height, 1.4);
+		text-align: right;
+		margin-left: auto;
 	}
 
 	.caption-container * {
@@ -128,19 +150,14 @@
 		}
 
 		.gallery-item {
-			/* smaller photo on mobile */
-			grid-template-rows: 200px auto;
-			row-gap: var(--space-xs);
+			/* photo height adapts to actual image size */
+			grid-template-rows: auto auto;
+			row-gap: var(--space-s);
 		}
 
 		.layout-3-special > :nth-child(n) {
 			grid-column: auto;
 			grid-row: auto;
-		}
-
-		/* less overlap on mobile */
-		.caption-container {
-			transform: translateY(calc(var(--space-m) * -0.25));
 		}
 	}
 </style>

@@ -93,4 +93,33 @@
 	.image-container:hover img {
 		transform: var(--image-hover-img-transform, scale(1));
 	}
+
+	figcaption {
+		margin-top: var(--space-s, 0.75rem);
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+	}
+
+	.caption {
+		font-family: var(--caption-font-family, inherit);
+		font-size: var(--caption-font-size, 0.875rem);
+		font-weight: var(--caption-font-weight, 400);
+		font-style: var(--caption-font-style, normal);
+		color: var(--caption-color, #6b7280);
+		line-height: var(--caption-line-height, 1.5);
+		text-align: left;
+	}
+
+	.source {
+		font-family: var(--source-font-family, inherit);
+		font-size: var(--source-font-size, 0.75rem);
+		font-weight: var(--source-font-weight, 400);
+		font-style: var(--source-font-style, normal);
+		color: var(--source-color, #9ca3af);
+		line-height: var(--source-line-height, 1.4);
+		text-align: right;
+		margin-left: auto;
+	}
 </style>
