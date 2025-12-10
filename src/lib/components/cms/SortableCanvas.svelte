@@ -2287,7 +2287,8 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'mediaPair'}
 					<div class="mediapaar-editor">
-						<div class="mediapair-width-control">
+						<div class="mediapaar-controls-row">
+						<div class="control-group">
 							<div class="control-label">Breedte:</div>
 							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
 								<IconButton
@@ -2311,7 +2312,7 @@ Voorbeelden:
 							</div>
 						</div>
 
-						<div class="mediapaar-layout-controls">
+						<div class="control-group">
 							<div class="control-label">Layout:</div>
 							<div class="layout-buttons-grid">
 								<!-- 2-item layouts -->
@@ -2391,8 +2392,9 @@ Voorbeelden:
 								/>
 							</div>
 						</div>
+					</div>
 
-						<div class="mediapaar-items">
+					<div class="mediapaar-items">
 							{#each block.content.items as item, idx (idx)}
 								<div class="mediapaar-item" data-item-index={idx}>
 									<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
@@ -3394,9 +3396,27 @@ Voorbeelden:
 		gap: 1rem;
 	}
 
-	.mediapaar-layout-controls {
+	.mediapaar-controls-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 24px;
+		flex-wrap: wrap;
+	}
+
+	.control-group {
 		display: flex;
 		flex-direction: column;
+		gap: 8px;
+	}
+
+	.control-group .control-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.width-controls {
+		display: flex;
 		gap: 8px;
 	}
 
