@@ -507,8 +507,8 @@ export type MediaItem = {
 };
 
 export interface MediaPairContent {
-	verticalAlign: 'top' | 'bottom';
-	items: [MediaItem, MediaItem];
+	verticalAlign: 'top' | 'center' | 'bottom' | 'bottom-alt' | '3col-left' | '3col-right' | '3row-top' | '3row-bottom';
+	items: MediaItem[];
 	width?: 'normal' | 'wide';
 }
 

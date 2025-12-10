@@ -63,8 +63,8 @@
 	};
 </script>
 
-<section class="media-pair" class:align-top={verticalAlign === 'top'}>
-	{#if items && items.length === 2}
+<section class="media-pair" data-layout={verticalAlign}>
+	{#if items && (items.length === 2 || items.length === 3)}
 		{#each items as item}
 			<div class="media-item">
 				<figure>
@@ -97,7 +97,7 @@
 		<div class="dev-error-overlay">
 			<p><strong>[MediaPair Component Error]</strong></p>
 			<p>
-				Deze component verwacht exact 2 media items, maar ontving
+				Deze component verwacht 2 of 3 media items, maar ontving
 				{items ? items.length : 'geen'}.
 			</p>
 			<p>Controleer de data die wordt doorgegeven vanuit je CMS of `content.json`.</p>
@@ -108,18 +108,104 @@
 <style>
 	.media-pair {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
 		gap: var(--space-m);
 		margin-block: var(--space-l);
 		width: 100%;
+	}
 
-		/* De verticale uitlijning van de items in de grid.
-		   Standaard is 'bottom' (end) alignment. */
+	/* 2-item layouts */
+	.media-pair[data-layout='top'],
+	.media-pair[data-layout='center'],
+	.media-pair[data-layout='bottom'],
+	.media-pair[data-layout='bottom-alt'] {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.media-pair[data-layout='top'] {
+		align-items: start;
+	}
+
+	.media-pair[data-layout='center'] {
+		align-items: center;
+	}
+
+	.media-pair[data-layout='bottom'],
+	.media-pair[data-layout='bottom-alt'] {
 		align-items: end;
 	}
 
-	.media-pair.align-top {
-		align-items: start;
+	/* 3-item layouts: column-based */
+	.media-pair[data-layout='3col-left'],
+	.media-pair[data-layout='3col-right'] {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
+	}
+
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(1) {
+		grid-row: 1 / 3;
+		grid-column: 1;
+	}
+
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(2) {
+		grid-row: 1;
+		grid-column: 2;
+	}
+
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(3) {
+		grid-row: 2;
+		grid-column: 2;
+	}
+
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(1) {
+		grid-row: 1;
+		grid-column: 1;
+	}
+
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(2) {
+		grid-row: 2;
+		grid-column: 1;
+	}
+
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(3) {
+		grid-row: 1 / 3;
+		grid-column: 2;
+	}
+
+	/* 3-item layouts: row-based */
+	.media-pair[data-layout='3row-top'],
+	.media-pair[data-layout='3row-bottom'] {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
+	}
+
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(1) {
+		grid-row: 1;
+		grid-column: 1 / 3;
+	}
+
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(2) {
+		grid-row: 2;
+		grid-column: 1;
+	}
+
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(3) {
+		grid-row: 2;
+		grid-column: 2;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(1) {
+		grid-row: 1;
+		grid-column: 1;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(2) {
+		grid-row: 1;
+		grid-column: 2;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(3) {
+		grid-row: 2;
+		grid-column: 1 / 3;
 	}
 
 	.media-item {

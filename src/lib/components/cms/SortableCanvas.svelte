@@ -5,6 +5,7 @@
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 	import TextBlock from '$lib/components/TextBlock.svelte';
+	import MediaPairIcons from '$lib/assets/icons/MediaPairIcons.svelte';
 
 	// === PROPS ===
 	let {
@@ -226,6 +227,31 @@
 			default:
 				return '';
 		}
+	}
+
+	// ✅ MediaPair Layout Helpers
+	function is3ItemLayout(layout: string): boolean {
+		return ['3col-left', '3col-right', '3row-top', '3row-bottom'].includes(layout);
+	}
+
+	function adjustMediaPairItems(block: any) {
+		const needs3Items = is3ItemLayout(block.content.verticalAlign || 'top');
+		const currentCount = block.content.items?.length || 0;
+
+		if (needs3Items && currentCount === 2) {
+			// Add third item
+			block.content.items.push({
+				type: 'image',
+				orientation: 'landscape',
+				url: '',
+				caption: '',
+				source: ''
+			});
+		} else if (!needs3Items && currentCount === 3) {
+			// Remove third item
+			block.content.items = block.content.items.slice(0, 2);
+		}
+		dispatch('save');
 	}
 
 	function handleFocusClick(event: MouseEvent, block: ContentBlock) {
@@ -2285,83 +2311,90 @@ Voorbeelden:
 							</div>
 						</div>
 
-						<div class="mediapaar-controls">
-							<button
-								type="button"
-								class="swap-btn"
-								onclick={() => dispatch('media', { type: 'swap', blockId: block.id })}
-							>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<path d="M8 7h12M8 7l4-4M8 7l4 4M16 17H4M16 17l-4 4M16 17l-4-4" />
-								</svg>
-								Wissel
-							</button>
+						<div class="mediapaar-layout-controls">
+							<div class="control-label">Layout:</div>
+							<div class="layout-buttons-grid">
+								<!-- 2-item layouts -->
+								<IconButton
+									icon="icon-mediapair-top"
+									label="Top"
+									active={block.content.verticalAlign === 'top'}
+									onclick={() => {
+										block.content.verticalAlign = 'top';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-center"
+									label="Center"
+									active={block.content.verticalAlign === 'center'}
+									onclick={() => {
+										block.content.verticalAlign = 'center';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-bottom"
+									label="Bottom"
+									active={block.content.verticalAlign === 'bottom'}
+									onclick={() => {
+										block.content.verticalAlign = 'bottom';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-bottom-alt"
+									label="Bottom Alt"
+									active={block.content.verticalAlign === 'bottom-alt'}
+									onclick={() => {
+										block.content.verticalAlign = 'bottom-alt';
+										adjustMediaPairItems(block);
+									}}
+								/>
 
-							<div class="valign-picker">
-								<span class="input-label">Uitlijning:</span>
-								<div class="valign-options">
-									<label class:active={block.content.verticalAlign === 'top'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="top"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon top">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'center'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="center"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon center">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'bottom'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="bottom"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon bottom">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'bottom-alt'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="bottom-alt"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon bottom-alt">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-								</div>
+								<!-- 3-item layouts -->
+								<IconButton
+									icon="icon-mediapair-3col-left"
+									label="3 Col Left"
+									active={block.content.verticalAlign === '3col-left'}
+									onclick={() => {
+										block.content.verticalAlign = '3col-left';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-3col-right"
+									label="3 Col Right"
+									active={block.content.verticalAlign === '3col-right'}
+									onclick={() => {
+										block.content.verticalAlign = '3col-right';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-3row-top"
+									label="3 Row Top"
+									active={block.content.verticalAlign === '3row-top'}
+									onclick={() => {
+										block.content.verticalAlign = '3row-top';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-3row-bottom"
+									label="3 Row Bottom"
+									active={block.content.verticalAlign === '3row-bottom'}
+									onclick={() => {
+										block.content.verticalAlign = '3row-bottom';
+										adjustMediaPairItems(block);
+									}}
+								/>
 							</div>
 						</div>
 
 						<div class="mediapaar-items">
 							{#each block.content.items as item, idx (idx)}
-								<div class="mediapaar-item">
+								<div class="mediapaar-item" data-item-index={idx}>
 									<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
 									<select
 										class="type-select"
@@ -3361,141 +3394,47 @@ Voorbeelden:
 		gap: 1rem;
 	}
 
-	.mediapaar-controls {
+	.mediapaar-layout-controls {
 		display: flex;
-		gap: 15px;
-		align-items: center;
-		padding: 12px;
-		background: #f9fafb;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-	}
-
-	.swap-btn {
-		padding: 8px 14px;
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 0.875rem;
-		font-weight: 600;
-		transition: all 0.15s;
-		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: 8px;
-		color: #374151;
 	}
 
-	.swap-btn:hover {
-		border-color: #d10a10;
-		background: #fef2f2;
-		color: #d10a10;
-	}
-
-	.swap-btn svg {
-		width: 16px;
-		height: 16px;
-	}
-
-	.valign-picker {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-
-	.valign-options {
-		display: flex;
-		gap: 5px;
-		background: white;
-		padding: 4px;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-	}
-
-	.valign-options input[type='radio'] {
-		display: none;
-	}
-
-	.valign-options label {
-		cursor: pointer;
-		padding: 6px;
-		border-radius: 4px;
-		transition: all 0.15s;
-		border: 2px solid transparent;
-	}
-
-	.valign-options label.active {
-		border-color: #d10a10;
-		background: #fef2f2;
-	}
-
-	.valign-icon {
+	.layout-buttons-grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr 1fr;
-		gap: 2px;
-		width: 40px;
-		height: 30px;
-	}
-
-	.valign-icon div {
-		background: #6b7280;
-		opacity: 0.3;
-		border-radius: 2px;
-		transition: opacity 0.2s;
-	}
-
-	.valign-options label.active .valign-icon div {
-		opacity: 1;
-	}
-
-	.valign-icon.top div:nth-child(1) {
-		grid-row: 1 / 3;
-		grid-column: 1;
-	}
-	.valign-icon.top div:nth-child(2) {
-		grid-row: 1;
-		grid-column: 2;
-	}
-
-	.valign-icon.center div:nth-child(1) {
-		grid-row: 1 / 3;
-		grid-column: 1;
-	}
-	.valign-icon.center div:nth-child(2) {
-		grid-row: 2;
-		grid-column: 2;
-	}
-
-	.valign-icon.bottom div:nth-child(1) {
-		grid-row: 1;
-		grid-column: 1;
-	}
-	.valign-icon.bottom div:nth-child(2) {
-		grid-row: 1 / 3;
-		grid-column: 2;
-	}
-
-	.valign-icon.bottom-alt div:nth-child(1) {
-		grid-row: 2;
-		grid-column: 1;
-	}
-	.valign-icon.bottom-alt div:nth-child(2) {
-		grid-row: 1 / 3;
-		grid-column: 2;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 8px;
 	}
 
 	.mediapaar-items {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
+		display: flex;
 		gap: 15px;
+		overflow-x: auto;
+		overflow-y: visible;
 	}
 
 	.mediapaar-item {
+		flex: 0 0 320px;
 		border: 1px solid #e5e7eb;
 		padding: 15px;
 		border-radius: 6px;
 		background: #f9fafb;
+	}
+
+	/* Grayscale gradients for visual identification */
+	.mediapaar-item[data-item-index='0'] {
+		background: linear-gradient(135deg, #d1d5db 0%, #e5e7eb 100%);
+		border-color: #6b7280;
+	}
+
+	.mediapaar-item[data-item-index='1'] {
+		background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
+		border-color: #9ca3af;
+	}
+
+	.mediapaar-item[data-item-index='2'] {
+		background: linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%);
+		border-color: #d1d5db;
 	}
 
 	.mediapaar-item h5 {
@@ -4277,3 +4216,5 @@ Voorbeelden:
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 </style>
+
+<MediaPairIcons />
