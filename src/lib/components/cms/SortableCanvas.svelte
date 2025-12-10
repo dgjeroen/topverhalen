@@ -3402,7 +3402,7 @@ Voorbeelden:
 
 	.layout-buttons-grid {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(8, 1fr);
 		gap: 8px;
 	}
 
