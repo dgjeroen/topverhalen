@@ -109,7 +109,8 @@
 	.media-pair {
 		display: grid;
 		gap: var(--space-m);
-		margin-block: var(--space-l);
+		margin-top: var(--space-l);
+		margin-bottom: var(--space-l);
 		width: 100%;
 	}
 
@@ -134,22 +135,31 @@
 		align-items: end;
 	}
 
-	/* 3-item layouts: column-based (strak grid met aspect-ratio) */
+	/* 3-item layouts: column-based */
 	.media-pair[data-layout='3col-left'],
 	.media-pair[data-layout='3col-right'] {
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: 1fr 1fr;
+		aspect-ratio: 2 / 1;
+		align-items: stretch;
 	}
 
-	/* 3col-left: Staand links (1:1), twee landscape rechts (elk 2:1) */
+	/* 3col-left: Staand links (origineel), landscape rechtsboven (origineel), rechtsonder vult op */
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(1) {
 		grid-row: 1 / 3;
 		grid-column: 1;
 	}
 
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(1) figure {
-		aspect-ratio: 1 / 1;
+		width: 100%;
 		height: 100%;
+	}
+
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(1) img,
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(1) video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(2) {
@@ -158,8 +168,18 @@
 	}
 
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(2) figure {
-		aspect-ratio: 2 / 1;
 		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(2) img,
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(2) video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(3) {
@@ -168,19 +188,35 @@
 	}
 
 	.media-pair[data-layout='3col-left'] .media-item:nth-child(3) figure {
-		aspect-ratio: 2 / 1;
-		width: 100%;
+		height: 100%;
 	}
 
-	/* 3col-right: Twee landscape links (elk 2:1), staand rechts (1:1) */
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(3) img,
+	.media-pair[data-layout='3col-left'] .media-item:nth-child(3) video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* 3col-right: Landscape linksboven (origineel), linksonder vult op, staand rechts (origineel) */
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(1) {
 		grid-row: 1;
 		grid-column: 1;
 	}
 
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(1) figure {
-		aspect-ratio: 2 / 1;
 		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(1) img,
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(1) video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(2) {
@@ -189,8 +225,15 @@
 	}
 
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(2) figure {
-		aspect-ratio: 2 / 1;
 		width: 100%;
+		height: 100%;
+	}
+
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(2) img,
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(2) video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(3) {
@@ -199,26 +242,43 @@
 	}
 
 	.media-pair[data-layout='3col-right'] .media-item:nth-child(3) figure {
-		aspect-ratio: 1 / 1;
+		width: 100%;
 		height: 100%;
 	}
 
-	/* 3-item layouts: row-based (strak grid met aspect-ratio) */
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(3) img,
+	.media-pair[data-layout='3col-right'] .media-item:nth-child(3) video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	/* 3-item layouts: row-based (strak grid met aspect-ratios) */
 	.media-pair[data-layout='3row-top'],
 	.media-pair[data-layout='3row-bottom'] {
 		grid-template-columns: 1fr 1fr;
 		grid-template-rows: 1fr 1fr;
+		align-items: stretch;
+		max-width: var(--content-width, 100%);
+		aspect-ratio: 2 / 1;
 	}
 
-	/* 3row-top: Breed boven (2:1), twee vierkant onder (elk 1:1) */
+	/* 3row-top: Breed boven, twee onder vullen op */
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(1) {
 		grid-row: 1;
 		grid-column: 1 / 3;
 	}
 
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(1) figure {
-		aspect-ratio: 2 / 1;
+		height: 100%;
+		aspect-ratio: 16 / 9;
+	}
+
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(1) img,
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(1) video {
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(2) {
@@ -227,8 +287,14 @@
 	}
 
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(2) figure {
-		aspect-ratio: 1 / 1;
+		height: 100%;
+	}
+
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(2) img,
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(2) video {
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(3) {
@@ -237,19 +303,31 @@
 	}
 
 	.media-pair[data-layout='3row-top'] .media-item:nth-child(3) figure {
-		aspect-ratio: 1 / 1;
-		width: 100%;
+		height: 100%;
 	}
 
-	/* 3row-bottom: Twee vierkant boven (elk 1:1), breed onder (2:1) */
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(3) img,
+	.media-pair[data-layout='3row-top'] .media-item:nth-child(3) video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* 3row-bottom: Twee boven vullen op, breed onder */
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(1) {
 		grid-row: 1;
 		grid-column: 1;
 	}
 
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(1) figure {
-		aspect-ratio: 1 / 1;
+		height: 100%;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(1) img,
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(1) video {
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(2) {
@@ -258,8 +336,14 @@
 	}
 
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(2) figure {
-		aspect-ratio: 1 / 1;
+		height: 100%;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(2) img,
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(2) video {
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(3) {
@@ -268,8 +352,15 @@
 	}
 
 	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(3) figure {
-		aspect-ratio: 2 / 1;
+		height: 100%;
+		aspect-ratio: 16 / 9;
+	}
+
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(3) img,
+	.media-pair[data-layout='3row-bottom'] .media-item:nth-child(3) video {
 		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.media-item {
@@ -286,23 +377,20 @@
 	.media-item img,
 	.media-item video {
 		width: 100%;
-		height: 100%;
 		display: block;
-		object-fit: cover;
 	}
 
-	/* Voor 3-item layouts: zorg dat img/video de aspect-ratio vullen */
-	.media-pair[data-layout='3col-left'] figure img,
-	.media-pair[data-layout='3col-left'] figure video,
-	.media-pair[data-layout='3col-right'] figure img,
-	.media-pair[data-layout='3col-right'] figure video,
-	.media-pair[data-layout='3row-top'] figure img,
-	.media-pair[data-layout='3row-top'] figure video,
-	.media-pair[data-layout='3row-bottom'] figure img,
-	.media-pair[data-layout='3row-bottom'] figure video {
-		object-fit: cover;
-		width: 100%;
+	/* Alleen voor 2-item layouts: gebruik cover */
+	.media-pair[data-layout='top'] .media-item img,
+	.media-pair[data-layout='top'] .media-item video,
+	.media-pair[data-layout='center'] .media-item img,
+	.media-pair[data-layout='center'] .media-item video,
+	.media-pair[data-layout='bottom'] .media-item img,
+	.media-pair[data-layout='bottom'] .media-item video,
+	.media-pair[data-layout='bottom-alt'] .media-item img,
+	.media-pair[data-layout='bottom-alt'] .media-item video {
 		height: 100%;
+		object-fit: cover;
 	}
 
 	/*	.media-item figcaption {
