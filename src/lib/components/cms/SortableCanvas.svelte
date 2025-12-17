@@ -481,13 +481,19 @@
 
 	function getGalleryLayoutInfo(block: ContentBlock) {
 		if (block.type !== 'gallery') return '';
+		const count = block.content.images.length;
+		const cols = block.content.columns;
+
+		// Speciale melding voor 4 foto's in 2x2 grid
+		if (count === 4 && cols === 2) {
+			return '2x2 Grid • 4 foto\'s';
+		}
+
 		const layoutMap: Record<number, string> = {
 			2: '2 Kolommen',
 			3: '3 Kolommen',
 			4: '4 Kolommen'
 		};
-		const count = block.content.images.length;
-		const cols = block.content.columns;
 		return `${layoutMap[cols] || `${cols} kolommen`} • ${count} foto's`;
 	}
 
