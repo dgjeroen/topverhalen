@@ -3403,6 +3403,8 @@ Voorbeelden:
 		padding: 4px;
 		border-radius: 6px;
 		border: 1px solid #e5e7eb;
+		width: fit-content;
+		flex-shrink: 0;
 	}
 
 	.layout-options input[type='radio'] {
