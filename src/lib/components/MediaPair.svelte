@@ -11,8 +11,16 @@
 	const layoutInfo = $derived.by(() => {
 		if (!items || items.length !== 3) return null;
 
-		const portraitIndex = items.findIndex((item) => item.orientation === 'portrait');
-		const landscapeItems = items.filter((item) => item.orientation === 'landscape');
+		// Zoek portrait item, of gebruik het eerste item als fallback
+		let portraitIndex = items.findIndex((item) => item.orientation === 'portrait');
+
+		// Als er geen portrait item is, gebruik het eerste item als portrait
+		if (portraitIndex === -1) {
+			portraitIndex = 0;
+		}
+
+		// Filter landscape items (alle items behalve de portrait)
+		const landscapeItems = items.filter((_, idx) => idx !== portraitIndex);
 
 		// Bepaal of portrait item links of rechts staat
 		const portraitPosition = verticalAlign?.includes('right') ? 'right' : 'left';
@@ -98,7 +106,7 @@
 
 {#if items && items.length === 2}
 	<!-- 2 Items: naast elkaar met originele aspect ratio's -->
-	<section class="media-pair two-items">
+	<section class="media-pair two-items" data-layout={verticalAlign}>
 		{#each items as item}
 			<div class="media-item">
 				<figure>
@@ -346,6 +354,17 @@
 	.media-pair.two-items {
 		display: flex;
 		gap: var(--space-m);
+		align-items: flex-end; /* Standaard: bottom alignment */
+	}
+
+	/* Specifieke alignment voor verschillende layouts */
+	.media-pair.two-items[data-layout='top'] {
+		align-items: flex-start;
+	}
+
+	.media-pair.two-items[data-layout='center'],
+	.media-pair.two-items[data-layout='bottom-alt'] {
+		align-items: flex-end; /* Bottom alignment voor liggende items */
 	}
 
 	.media-pair.two-items .media-item {
@@ -357,6 +376,7 @@
 		width: 100%;
 		height: auto;
 		object-fit: contain;
+		border-radius: var(--border-radius-base); /* Consistente afronding voor alle hoeken */
 	}
 
 	/* === 3 ITEMS: PORTRAIT + 2 LANDSCAPE GESTAPELD === */
