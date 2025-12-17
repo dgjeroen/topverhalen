@@ -67,26 +67,6 @@
 		<!-- Item 3: Staand blok rechts -->
 		<rect x="18" y="2" width="12" height="20" rx="1" fill="currentColor" opacity="0.35" class="item-3" />
 	</symbol>
-
-	<!-- Layout 7: 1 item boven breed, 2 items onder naast elkaar -->
-	<symbol id="icon-mediapair-3row-top" viewBox="0 0 32 24">
-		<!-- Item 1: Breed blok boven -->
-		<rect x="2" y="2" width="28" height="9" rx="1" fill="currentColor" opacity="0.9" class="item-1" />
-		<!-- Item 2: Links blok onder -->
-		<rect x="2" y="13" width="13" height="9" rx="1" fill="currentColor" opacity="0.6" class="item-2" />
-		<!-- Item 3: Rechts blok onder -->
-		<rect x="17" y="13" width="13" height="9" rx="1" fill="currentColor" opacity="0.35" class="item-3" />
-	</symbol>
-
-	<!-- Layout 8: 2 items boven naast elkaar, 1 item onder breed -->
-	<symbol id="icon-mediapair-3row-bottom" viewBox="0 0 32 24">
-		<!-- Item 1: Links blok boven -->
-		<rect x="2" y="2" width="13" height="9" rx="1" fill="currentColor" opacity="0.9" class="item-1" />
-		<!-- Item 2: Rechts blok boven -->
-		<rect x="17" y="2" width="13" height="9" rx="1" fill="currentColor" opacity="0.6" class="item-2" />
-		<!-- Item 3: Breed blok onder -->
-		<rect x="2" y="13" width="28" height="9" rx="1" fill="currentColor" opacity="0.35" class="item-3" />
-	</symbol>
 </svg>
 
 <style>

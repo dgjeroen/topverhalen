@@ -231,7 +231,7 @@
 
 	// ✅ MediaPair Layout Helpers
 	function is3ItemLayout(layout: string): boolean {
-		return ['3col-left', '3col-right', '3row-top', '3row-bottom'].includes(layout);
+		return ['3col-left', '3col-right'].includes(layout);
 	}
 
 	function adjustMediaPairItems(block: any) {
@@ -2372,24 +2372,6 @@ Voorbeelden:
 										adjustMediaPairItems(block);
 									}}
 								/>
-								<IconButton
-									icon="icon-mediapair-3row-top"
-									label="3 Row Top"
-									active={block.content.verticalAlign === '3row-top'}
-									onclick={() => {
-										block.content.verticalAlign = '3row-top';
-										adjustMediaPairItems(block);
-									}}
-								/>
-								<IconButton
-									icon="icon-mediapair-3row-bottom"
-									label="3 Row Bottom"
-									active={block.content.verticalAlign === '3row-bottom'}
-									onclick={() => {
-										block.content.verticalAlign = '3row-bottom';
-										adjustMediaPairItems(block);
-									}}
-								/>
 							</div>
 						</div>
 					</div>
@@ -2407,6 +2389,20 @@ Voorbeelden:
 										<option value="image">Afbeelding</option>
 										<option value="video">Video</option>
 									</select>
+
+									<label style="display: block; margin-top: 0.75rem;">
+										<span style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151;">
+											Oriëntatie:
+										</span>
+										<select
+											class="type-select"
+											bind:value={item.orientation}
+											onchange={() => dispatch('save')}
+										>
+											<option value="landscape">Liggend (landscape)</option>
+											<option value="portrait">Staand (portrait)</option>
+										</select>
+									</label>
 
 									<input
 										type="url"
@@ -2444,22 +2440,63 @@ Voorbeelden:
 										/>
 									{/if}
 
-									{#if item.url}
-										<div class="media-preview-container">
-											{#if item.type === 'image'}
-												<img src={item.url} alt="" class="media-preview-small" />
-											{:else}
-												<video
+									{#if item.url && item.type === 'image'}
+										<div style="margin-top: 1rem;">
+											<div
+												style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;"
+											>
+												Focuspunt
+											</div>
+											<div
+												role="button"
+												tabindex="0"
+												onclick={(e) => {
+													const rect = e.currentTarget.getBoundingClientRect();
+													const x = ((e.clientX - rect.left) / rect.width) * 100;
+													const y = ((e.clientY - rect.top) / rect.height) * 100;
+													item.focusX = Math.round(x);
+													item.focusY = Math.round(y);
+													dispatch('save');
+												}}
+												onkeydown={(e) => {
+													if (e.key === 'Enter' || e.key === ' ') {
+														e.preventDefault();
+														e.currentTarget.click();
+													}
+												}}
+												style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
+											>
+												<img
 													src={item.url}
-													poster={item.poster || ''}
-													autoplay
-													muted
-													loop
-													class="media-preview-small"
-												>
-													<track kind="captions" />
-												</video>
-											{/if}
+													alt="Focus preview"
+													style="width: 100%; height: auto; display: block; object-fit: contain;"
+												/>
+												<div
+													class="focus-dot"
+													style:left="{item.focusX || 50}%"
+													style:top="{item.focusY || 50}%"
+												></div>
+											</div>
+											<p
+												class="control-hint"
+												style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+											>
+												Klik op het belangrijkste deel • X: {item.focusX || 50}% Y: {item.focusY ||
+													50}%
+											</p>
+										</div>
+									{:else if item.url && item.type === 'video'}
+										<div class="media-preview-container">
+											<video
+												src={item.url}
+												poster={item.poster || ''}
+												autoplay
+												muted
+												loop
+												class="media-preview-small"
+											>
+												<track kind="captions" />
+											</video>
 										</div>
 									{/if}
 								</div>
