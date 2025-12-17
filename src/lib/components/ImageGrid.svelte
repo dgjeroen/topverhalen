@@ -13,7 +13,7 @@
 <div
 	class="gallery-grid"
 	class:layout-3-special={images.length === 3 && columns === 2}
-	class:layout-4-square={images.length === 4 && columns === 4}
+	class:layout-4-square={images.length === 4 && columns === 2}
 	style="--grid-columns: {columns}; --gallery-aspect: {aspectRatio === 'original'
 		? 'auto'
 		: aspectRatio.replace(':', ' / ')};"
@@ -57,6 +57,11 @@
 	.layout-3-special > :nth-child(3) {
 		grid-column: 2;
 		grid-row: 1 / -1;
+	}
+
+	/* 4 images in 2x2 square grid */
+	.layout-4-square {
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 	.gallery-item {
@@ -103,40 +108,22 @@
 	}
 
 	.caption-container {
-		position: relative;
-		z-index: 1;
-		pointer-events: none;
-		padding: 0;
-		background: transparent;
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: 1rem;
+		padding-top: var(--space-s);
+		font-size: var(--font-size-s);
+		color: var(--color-text-muted);
+		display: block;
+		overflow: hidden;
 	}
 
 	.caption {
-		font-family: var(--caption-font-family, inherit);
-		font-size: var(--caption-font-size, 0.875rem);
-		font-weight: var(--caption-font-weight, 400);
-		font-style: var(--caption-font-style, normal);
-		color: var(--caption-color, #6b7280);
-		line-height: var(--caption-line-height, 1.5);
-		text-align: left;
+		display: inline;
 	}
 
 	.source {
-		font-family: var(--source-font-family, inherit);
-		font-size: var(--source-font-size, 0.75rem);
-		font-weight: var(--source-font-weight, 400);
-		font-style: var(--source-font-style, normal);
-		color: var(--source-color, #9ca3af);
-		line-height: var(--source-line-height, 1.4);
-		text-align: right;
-		margin-left: auto;
-	}
-
-	.caption-container * {
-		pointer-events: auto;
+		font-style: italic;
+		white-space: nowrap;
+		float: right;
+		margin-left: var(--space-xs);
 	}
 
 	@media (max-width: 768px) {

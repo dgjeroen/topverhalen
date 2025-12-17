@@ -504,12 +504,16 @@ export type MediaItem = {
 	poster?: string;
 	source?: string;
 	showControls?: boolean;
+	focusX?: number;
+	focusY?: number;
 };
 
 export interface MediaPairContent {
-	verticalAlign: 'top' | 'bottom';
-	items: [MediaItem, MediaItem];
+	verticalAlign: 'top' | 'center' | 'bottom' | 'bottom-alt' | '3col-left' | '3col-right';
+	items: MediaItem[];
 	width?: 'normal' | 'wide';
+	caption?: string;
+	source?: string;
 }
 
 export interface TextFrameContent {

@@ -5,6 +5,7 @@
 	import Sortable from 'sortablejs';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 	import TextBlock from '$lib/components/TextBlock.svelte';
+	import MediaPairIcons from '$lib/assets/icons/MediaPairIcons.svelte';
 
 	// === PROPS ===
 	let {
@@ -226,6 +227,31 @@
 			default:
 				return '';
 		}
+	}
+
+	// ✅ MediaPair Layout Helpers
+	function is3ItemLayout(layout: string): boolean {
+		return ['3col-left', '3col-right'].includes(layout);
+	}
+
+	function adjustMediaPairItems(block: any) {
+		const needs3Items = is3ItemLayout(block.content.verticalAlign || 'top');
+		const currentCount = block.content.items?.length || 0;
+
+		if (needs3Items && currentCount === 2) {
+			// Add third item
+			block.content.items.push({
+				type: 'image',
+				orientation: 'landscape',
+				url: '',
+				caption: '',
+				source: ''
+			});
+		} else if (!needs3Items && currentCount === 3) {
+			// Remove third item
+			block.content.items = block.content.items.slice(0, 2);
+		}
+		dispatch('save');
 	}
 
 	function handleFocusClick(event: MouseEvent, block: ContentBlock) {
@@ -455,26 +481,28 @@
 
 	function getGalleryLayoutInfo(block: ContentBlock) {
 		if (block.type !== 'gallery') return '';
+		const count = block.content.images.length;
+		const cols = block.content.columns;
+
+		// Speciale melding voor 4 foto's in 2x2 grid
+		if (count === 4 && cols === 2) {
+			return '2x2 Grid • 4 foto\'s';
+		}
+
 		const layoutMap: Record<number, string> = {
 			2: '2 Kolommen',
 			3: '3 Kolommen',
 			4: '4 Kolommen'
 		};
-		const count = block.content.images.length;
-		const cols = block.content.columns;
 		return `${layoutMap[cols] || `${cols} kolommen`} • ${count} foto's`;
 	}
 
 	function isGalleryAddDisabled(block: ContentBlock): boolean {
 		if (block.type !== 'gallery') return true;
-		const cols = block.content.columns;
 		const count = block.content.images.length;
 
-		if ([2, 3, 4].includes(cols)) return count >= cols;
-		if (cols === 2 && count >= 4) return true;
-		if (cols === 3 && count >= 6) return true;
-
-		return false;
+		// Maximum 4 foto's voor alle layouts (2, 3, of 4 naast elkaar / 2x2)
+		return count >= 4;
 	}
 
 	// ✅ GOED (Stabiel & Waterdicht)
@@ -1521,11 +1549,19 @@ Voorbeelden:
 							<div class="control-group">
 								<div class="control-label">Layout:</div>
 								<div class="layout-options">
-									<label class:active={block.content.columns === 2}>
+									<!-- Button 1: 2 naast elkaar - precies 2 foto's -->
+									<label
+										class:active={block.content.columns === 2 && block.content.images.length === 2}
+										class:disabled={block.content.images.length !== 2}
+										title={block.content.images.length !== 2
+											? 'Alleen beschikbaar met precies 2 foto\'s'
+											: '2 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={2}
+											disabled={block.content.images.length !== 2}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-2">
@@ -1533,11 +1569,20 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
-									<label class:active={block.content.columns === 3}>
+
+									<!-- Button 2: 3 naast elkaar - precies 3 foto's -->
+									<label
+										class:active={block.content.columns === 3 && block.content.images.length === 3}
+										class:disabled={block.content.images.length !== 3}
+										title={block.content.images.length !== 3
+											? 'Alleen beschikbaar met precies 3 foto\'s'
+											: '3 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={3}
+											disabled={block.content.images.length !== 3}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-3">
@@ -1546,14 +1591,46 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
-									<label class:active={block.content.columns === 4}>
+
+									<!-- Button 3: 4 naast elkaar - precies 4 foto's -->
+									<label
+										class:active={block.content.columns === 4 && block.content.images.length === 4}
+										class:disabled={block.content.images.length !== 4}
+										title={block.content.images.length !== 4
+											? 'Alleen beschikbaar met precies 4 foto\'s'
+											: '4 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={4}
+											disabled={block.content.images.length !== 4}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-4">
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+										</div>
+									</label>
+
+									<!-- Button 4: 2x2 Grid - precies 4 foto's -->
+									<label
+										class:active={block.content.columns === 2 && block.content.images.length === 4}
+										class:disabled={block.content.images.length !== 4}
+										title={block.content.images.length !== 4
+											? 'Alleen beschikbaar met precies 4 foto\'s'
+											: '2x2 Grid layout'}
+									>
+										<input
+											type="radio"
+											bind:group={block.content.columns}
+											value={2}
+											disabled={block.content.images.length !== 4}
+											onchange={() => dispatch('save')}
+										/>
+										<div class="layout-icon grid-2x2">
 											<div></div>
 											<div></div>
 											<div></div>
@@ -2261,7 +2338,8 @@ Voorbeelden:
 					</div>
 				{:else if block.type === 'mediaPair'}
 					<div class="mediapaar-editor">
-						<div class="mediapair-width-control">
+						<div class="mediapaar-controls-row">
+						<div class="control-group">
 							<div class="control-label">Breedte:</div>
 							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
 								<IconButton
@@ -2285,83 +2363,73 @@ Voorbeelden:
 							</div>
 						</div>
 
-						<div class="mediapaar-controls">
-							<button
-								type="button"
-								class="swap-btn"
-								onclick={() => dispatch('media', { type: 'swap', blockId: block.id })}
-							>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-								>
-									<path d="M8 7h12M8 7l4-4M8 7l4 4M16 17H4M16 17l-4 4M16 17l-4-4" />
-								</svg>
-								Wissel
-							</button>
+						<div class="control-group">
+							<div class="control-label">Layout:</div>
+							<div class="layout-buttons-grid">
+								<!-- 2-item layouts -->
+								<IconButton
+									icon="icon-mediapair-top"
+									label="Top"
+									active={block.content.verticalAlign === 'top'}
+									onclick={() => {
+										block.content.verticalAlign = 'top';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-center"
+									label="Center"
+									active={block.content.verticalAlign === 'center'}
+									onclick={() => {
+										block.content.verticalAlign = 'center';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-bottom"
+									label="Bottom"
+									active={block.content.verticalAlign === 'bottom'}
+									onclick={() => {
+										block.content.verticalAlign = 'bottom';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-bottom-alt"
+									label="Bottom Alt"
+									active={block.content.verticalAlign === 'bottom-alt'}
+									onclick={() => {
+										block.content.verticalAlign = 'bottom-alt';
+										adjustMediaPairItems(block);
+									}}
+								/>
 
-							<div class="valign-picker">
-								<span class="input-label">Uitlijning:</span>
-								<div class="valign-options">
-									<label class:active={block.content.verticalAlign === 'top'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="top"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon top">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'center'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="center"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon center">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'bottom'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="bottom"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon bottom">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-									<label class:active={block.content.verticalAlign === 'bottom-alt'}>
-										<input
-											type="radio"
-											bind:group={block.content.verticalAlign}
-											value="bottom-alt"
-											onchange={() => dispatch('save')}
-										/>
-										<div class="valign-icon bottom-alt">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
-								</div>
+								<!-- 3-item layouts -->
+								<IconButton
+									icon="icon-mediapair-3col-left"
+									label="3 Col Left"
+									active={block.content.verticalAlign === '3col-left'}
+									onclick={() => {
+										block.content.verticalAlign = '3col-left';
+										adjustMediaPairItems(block);
+									}}
+								/>
+								<IconButton
+									icon="icon-mediapair-3col-right"
+									label="3 Col Right"
+									active={block.content.verticalAlign === '3col-right'}
+									onclick={() => {
+										block.content.verticalAlign = '3col-right';
+										adjustMediaPairItems(block);
+									}}
+								/>
 							</div>
 						</div>
+					</div>
 
-						<div class="mediapaar-items">
+					<div class="mediapaar-items">
 							{#each block.content.items as item, idx (idx)}
-								<div class="mediapaar-item">
+								<div class="mediapaar-item" data-item-index={idx}>
 									<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
 									<select
 										class="type-select"
@@ -2372,6 +2440,20 @@ Voorbeelden:
 										<option value="image">Afbeelding</option>
 										<option value="video">Video</option>
 									</select>
+
+									<label style="display: block; margin-top: 0.75rem;">
+										<span style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151;">
+											Oriëntatie:
+										</span>
+										<select
+											class="type-select"
+											bind:value={item.orientation}
+											onchange={() => dispatch('save')}
+										>
+											<option value="landscape">Liggend (landscape)</option>
+											<option value="portrait">Staand (portrait)</option>
+										</select>
+									</label>
 
 									<input
 										type="url"
@@ -2391,44 +2473,87 @@ Voorbeelden:
 										/>
 									{/if}
 
-									<textarea
-										placeholder="Bijschrift"
-										bind:value={item.caption}
-										oninput={() => dispatch('save')}
-										class="slide-textarea"
-										rows="2"
-									></textarea>
-
-									{#if item.type === 'image'}
-										<input
-											type="text"
-											placeholder="Bron"
-											bind:value={item.source}
-											oninput={() => dispatch('save')}
-											class="slide-input"
-										/>
-									{/if}
-
-									{#if item.url}
-										<div class="media-preview-container">
-											{#if item.type === 'image'}
-												<img src={item.url} alt="" class="media-preview-small" />
-											{:else}
-												<video
+									{#if item.url && item.type === 'image'}
+										<div style="margin-top: 1rem;">
+											<div
+												style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151;"
+											>
+												Focuspunt
+											</div>
+											<div
+												role="button"
+												tabindex="0"
+												onclick={(e) => {
+													const rect = e.currentTarget.getBoundingClientRect();
+													const x = ((e.clientX - rect.left) / rect.width) * 100;
+													const y = ((e.clientY - rect.top) / rect.height) * 100;
+													item.focusX = Math.round(x);
+													item.focusY = Math.round(y);
+													dispatch('save');
+												}}
+												onkeydown={(e) => {
+													if (e.key === 'Enter' || e.key === ' ') {
+														e.preventDefault();
+														e.currentTarget.click();
+													}
+												}}
+												style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
+											>
+												<img
 													src={item.url}
-													poster={item.poster || ''}
-													autoplay
-													muted
-													loop
-													class="media-preview-small"
-												>
-													<track kind="captions" />
-												</video>
-											{/if}
+													alt="Focus preview"
+													style="width: 100%; height: auto; display: block; object-fit: contain;"
+												/>
+												<div
+													class="focus-dot"
+													style:left="{item.focusX || 50}%"
+													style:top="{item.focusY || 50}%"
+												></div>
+											</div>
+											<p
+												class="control-hint"
+												style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+											>
+												Klik op het belangrijkste deel • X: {item.focusX || 50}% Y: {item.focusY ||
+													50}%
+											</p>
+										</div>
+									{:else if item.url && item.type === 'video'}
+										<div class="media-preview-container">
+											<video
+												src={item.url}
+												poster={item.poster || ''}
+												autoplay
+												muted
+												loop
+												class="media-preview-small"
+											>
+												<track kind="captions" />
+											</video>
 										</div>
 									{/if}
 								</div>
 							{/each}
+						</div>
+
+						<!-- Gezamenlijk bijschrift voor hele MediaPair -->
+						<div style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">
+							<h5 style="margin-top: 0; margin-bottom: 0.75rem; color: #111827;">Gezamenlijk bijschrift</h5>
+							<textarea
+								placeholder="Bijschrift voor alle items"
+								bind:value={block.content.caption}
+								oninput={() => dispatch('save')}
+								class="slide-textarea"
+								rows="2"
+								style="margin-bottom: 0.5rem;"
+							></textarea>
+							<input
+								type="text"
+								placeholder="Bron (fotograaf/agency)"
+								bind:value={block.content.source}
+								oninput={() => dispatch('save')}
+								class="slide-input"
+							/>
 						</div>
 					</div>
 				{:else if block.type === 'audio'}
@@ -3289,7 +3414,12 @@ Voorbeelden:
 		flex: 2;
 	}
 
-	.gallery-controls .control-group:not(:has(.aspect-controls)) {
+	/* Layout krijgt meer ruimte voor 4 buttons */
+	.gallery-controls .control-group:has(.layout-options) {
+		flex: 1.4;
+	}
+
+	.gallery-controls .control-group:not(:has(.aspect-controls)):not(:has(.layout-options)) {
 		flex: 1;
 	}
 
@@ -3300,6 +3430,8 @@ Voorbeelden:
 		padding: 4px;
 		border-radius: 6px;
 		border: 1px solid #e5e7eb;
+		width: fit-content;
+		flex-shrink: 0;
 	}
 
 	.layout-options input[type='radio'] {
@@ -3317,6 +3449,11 @@ Voorbeelden:
 	.layout-options label.active {
 		border-color: #d10a10;
 		background: #fef2f2;
+	}
+
+	.layout-options label.disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 
 	.layout-icon {
@@ -3349,6 +3486,11 @@ Voorbeelden:
 		grid-template-columns: 1fr 1fr 1fr 1fr;
 	}
 
+	.layout-icon.grid-2x2 {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
+	}
+
 	.gallery-info {
 		font-size: 0.8125rem;
 		color: #6b7280;
@@ -3361,141 +3503,65 @@ Voorbeelden:
 		gap: 1rem;
 	}
 
-	.mediapaar-controls {
+	.mediapaar-controls-row {
 		display: flex;
-		gap: 15px;
-		align-items: center;
-		padding: 12px;
-		background: #f9fafb;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
+		align-items: flex-start;
+		gap: 24px;
+		flex-wrap: wrap;
 	}
 
-	.swap-btn {
-		padding: 8px 14px;
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		cursor: pointer;
+	.control-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.control-group .control-label {
 		font-size: 0.875rem;
 		font-weight: 600;
-		transition: all 0.15s;
-		display: flex;
-		align-items: center;
-		gap: 8px;
 		color: #374151;
 	}
 
-	.swap-btn:hover {
-		border-color: #d10a10;
-		background: #fef2f2;
-		color: #d10a10;
-	}
-
-	.swap-btn svg {
-		width: 16px;
-		height: 16px;
-	}
-
-	.valign-picker {
+	.width-controls {
 		display: flex;
-		align-items: center;
-		gap: 10px;
+		gap: 8px;
 	}
 
-	.valign-options {
-		display: flex;
-		gap: 5px;
-		background: white;
-		padding: 4px;
-		border-radius: 6px;
-		border: 1px solid #e5e7eb;
-	}
-
-	.valign-options input[type='radio'] {
-		display: none;
-	}
-
-	.valign-options label {
-		cursor: pointer;
-		padding: 6px;
-		border-radius: 4px;
-		transition: all 0.15s;
-		border: 2px solid transparent;
-	}
-
-	.valign-options label.active {
-		border-color: #d10a10;
-		background: #fef2f2;
-	}
-
-	.valign-icon {
+	.layout-buttons-grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr 1fr;
-		gap: 2px;
-		width: 40px;
-		height: 30px;
-	}
-
-	.valign-icon div {
-		background: #6b7280;
-		opacity: 0.3;
-		border-radius: 2px;
-		transition: opacity 0.2s;
-	}
-
-	.valign-options label.active .valign-icon div {
-		opacity: 1;
-	}
-
-	.valign-icon.top div:nth-child(1) {
-		grid-row: 1 / 3;
-		grid-column: 1;
-	}
-	.valign-icon.top div:nth-child(2) {
-		grid-row: 1;
-		grid-column: 2;
-	}
-
-	.valign-icon.center div:nth-child(1) {
-		grid-row: 1 / 3;
-		grid-column: 1;
-	}
-	.valign-icon.center div:nth-child(2) {
-		grid-row: 2;
-		grid-column: 2;
-	}
-
-	.valign-icon.bottom div:nth-child(1) {
-		grid-row: 1;
-		grid-column: 1;
-	}
-	.valign-icon.bottom div:nth-child(2) {
-		grid-row: 1 / 3;
-		grid-column: 2;
-	}
-
-	.valign-icon.bottom-alt div:nth-child(1) {
-		grid-row: 2;
-		grid-column: 1;
-	}
-	.valign-icon.bottom-alt div:nth-child(2) {
-		grid-row: 1 / 3;
-		grid-column: 2;
+		grid-template-columns: repeat(8, 1fr);
+		gap: 8px;
 	}
 
 	.mediapaar-items {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
+		display: flex;
 		gap: 15px;
+		overflow-x: auto;
+		overflow-y: visible;
 	}
 
 	.mediapaar-item {
+		flex: 0 0 320px;
 		border: 1px solid #e5e7eb;
 		padding: 15px;
 		border-radius: 6px;
 		background: #f9fafb;
+	}
+
+	/* Grayscale gradients for visual identification */
+	.mediapaar-item[data-item-index='0'] {
+		background: linear-gradient(135deg, #d1d5db 0%, #e5e7eb 100%);
+		border-color: #6b7280;
+	}
+
+	.mediapaar-item[data-item-index='1'] {
+		background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
+		border-color: #9ca3af;
+	}
+
+	.mediapaar-item[data-item-index='2'] {
+		background: linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%);
+		border-color: #d1d5db;
 	}
 
 	.mediapaar-item h5 {
@@ -4277,3 +4343,5 @@ Voorbeelden:
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 </style>
+
+<MediaPairIcons />
