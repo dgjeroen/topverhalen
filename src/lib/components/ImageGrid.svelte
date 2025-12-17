@@ -13,7 +13,7 @@
 <div
 	class="gallery-grid"
 	class:layout-3-special={images.length === 3 && columns === 2}
-	class:layout-4-square={images.length === 4 && columns === 4}
+	class:layout-4-square={images.length === 4 && columns === 2}
 	style="--grid-columns: {columns}; --gallery-aspect: {aspectRatio === 'original'
 		? 'auto'
 		: aspectRatio.replace(':', ' / ')};"
@@ -57,6 +57,11 @@
 	.layout-3-special > :nth-child(3) {
 		grid-column: 2;
 		grid-row: 1 / -1;
+	}
+
+	/* 4 images in 2x2 square grid */
+	.layout-4-square {
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 	.gallery-item {
