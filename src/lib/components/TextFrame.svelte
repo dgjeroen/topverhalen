@@ -344,23 +344,22 @@
 	}
 
 	figcaption {
-		padding-top: var(--space-s, 0.75rem);
-		font-size: var(--textframe-caption-size, var(--font-size-s, 0.875rem)) !important;
-		color: var(--textframe-caption-color, var(--color-text-muted, #6b7280)) !important;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
+		padding-top: var(--space-s);
+		font-size: var(--font-size-s);
+		color: var(--color-text-muted);
+		display: block;
+		overflow: hidden;
 	}
 
 	.caption {
-		text-align: left;
+		display: inline;
 	}
 
 	.source {
-		text-align: right;
 		font-style: italic;
-		color: inherit !important;
+		white-space: nowrap;
+		float: right;
+		margin-left: var(--space-xs);
 	}
 
 	/* ========================================
@@ -412,10 +411,7 @@
 		object-fit: cover;
 	}
 
-	.inline-image figcaption {
-		display: flex;
-		width: 100%;
-	}
+	/* inline-image figcaption inherits from base figcaption */
 
 	.inline-image.float-left {
 		float: left;
