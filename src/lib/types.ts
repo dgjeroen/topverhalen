@@ -512,6 +512,8 @@ export interface MediaPairContent {
 	verticalAlign: 'top' | 'center' | 'bottom' | 'bottom-alt' | '3col-left' | '3col-right';
 	items: MediaItem[];
 	width?: 'normal' | 'wide';
+	caption?: string;
+	source?: string;
 }
 
 export interface TextFrameContent {

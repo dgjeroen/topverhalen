@@ -2422,24 +2422,6 @@ Voorbeelden:
 										/>
 									{/if}
 
-									<textarea
-										placeholder="Bijschrift"
-										bind:value={item.caption}
-										oninput={() => dispatch('save')}
-										class="slide-textarea"
-										rows="2"
-									></textarea>
-
-									{#if item.type === 'image'}
-										<input
-											type="text"
-											placeholder="Bron"
-											bind:value={item.source}
-											oninput={() => dispatch('save')}
-											class="slide-input"
-										/>
-									{/if}
-
 									{#if item.url && item.type === 'image'}
 										<div style="margin-top: 1rem;">
 											<div
@@ -2501,6 +2483,26 @@ Voorbeelden:
 									{/if}
 								</div>
 							{/each}
+						</div>
+
+						<!-- Gezamenlijk bijschrift voor hele MediaPair -->
+						<div style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">
+							<h5 style="margin-top: 0; margin-bottom: 0.75rem; color: #111827;">Gezamenlijk bijschrift</h5>
+							<textarea
+								placeholder="Bijschrift voor alle items"
+								bind:value={block.content.caption}
+								oninput={() => dispatch('save')}
+								class="slide-textarea"
+								rows="2"
+								style="margin-bottom: 0.5rem;"
+							></textarea>
+							<input
+								type="text"
+								placeholder="Bron (fotograaf/agency)"
+								bind:value={block.content.source}
+								oninput={() => dispatch('save')}
+								class="slide-input"
+							/>
 						</div>
 					</div>
 				{:else if block.type === 'audio'}

@@ -5,7 +5,7 @@
 	import { dev } from '$app/environment';
 	import type { MediaPairContent } from '$lib/types';
 
-	let { items, verticalAlign = 'bottom' }: MediaPairContent = $props();
+	let { items, verticalAlign = 'bottom', caption, source }: MediaPairContent = $props();
 
 	// Bereken layout informatie voor 3-item configuratie
 	const layoutInfo = $derived.by(() => {
@@ -106,44 +106,47 @@
 
 {#if items && items.length === 2}
 	<!-- 2 Items: naast elkaar met originele aspect ratio's -->
-	<section class="media-pair two-items" data-layout={verticalAlign}>
-		{#each items as item}
-			<div class="media-item">
-				<figure>
-					{#if item.type === 'image'}
-						<img src={item.url} alt={item.caption || 'Afbeelding in mediapaar'} loading="lazy" />
-					{:else if item.type === 'video'}
-						<video
-							use:playHls={item.url}
-							use:playOnView
-							playsinline
-							muted
-							loop
-							poster={item.poster || ''}
-							controls={item.showControls ?? true}
-						></video>
-					{/if}
+	<figure class="media-pair-container">
+		<section class="media-pair two-items" data-layout={verticalAlign}>
+			{#each items as item}
+				<div class="media-item">
+					<div class="media-wrapper">
+						{#if item.type === 'image'}
+							<img src={item.url} alt={caption || 'Afbeelding in mediapaar'} loading="lazy" />
+						{:else if item.type === 'video'}
+							<video
+								use:playHls={item.url}
+								use:playOnView
+								playsinline
+								muted
+								loop
+								poster={item.poster || ''}
+								controls={item.showControls ?? true}
+							></video>
+						{/if}
+					</div>
+				</div>
+			{/each}
+		</section>
 
-					{#if item.caption || item.source}
-						<figcaption>
-							<span class="caption">{item.caption}</span>
-							{#if item.source}
-								<span class="source">{item.source}</span>
-							{/if}
-						</figcaption>
-					{/if}
-				</figure>
-			</div>
-		{/each}
-	</section>
+		{#if caption || source}
+			<figcaption>
+				<span class="caption">{caption}</span>
+				{#if source}
+					<span class="source">{source}</span>
+				{/if}
+			</figcaption>
+		{/if}
+	</figure>
 {:else if items && items.length === 3 && layoutInfo}
 	<!-- 3 Items: portrait + 2 landscape gestapeld -->
-	<section
-		class="media-pair three-items"
-		data-portrait-position={layoutInfo.portraitPosition}
-		data-has-video={layoutInfo.hasVideo}
-		data-video-index={layoutInfo.videoIndex}
-	>
+	<figure class="media-pair-container">
+		<section
+			class="media-pair three-items"
+			data-portrait-position={layoutInfo.portraitPosition}
+			data-has-video={layoutInfo.hasVideo}
+			data-video-index={layoutInfo.videoIndex}
+		>
 		{#if layoutInfo.portraitPosition === 'left'}
 			<!-- Portrait item links -->
 			<div class="portrait-column">
@@ -152,7 +155,7 @@
 						{#if items[layoutInfo.portraitIndex].type === 'image'}
 							<img
 								src={items[layoutInfo.portraitIndex].url}
-								alt={items[layoutInfo.portraitIndex].caption || 'Afbeelding in mediapaar'}
+								alt={caption || 'Afbeelding in mediapaar'}
 								loading="lazy"
 							/>
 						{:else if items[layoutInfo.portraitIndex].type === 'video'}
@@ -167,14 +170,6 @@
 							></video>
 						{/if}
 
-						{#if items[layoutInfo.portraitIndex].caption || items[layoutInfo.portraitIndex].source}
-							<figcaption>
-								<span class="caption">{items[layoutInfo.portraitIndex].caption}</span>
-								{#if items[layoutInfo.portraitIndex].source}
-									<span class="source">{items[layoutInfo.portraitIndex].source}</span>
-								{/if}
-							</figcaption>
-						{/if}
 					</figure>
 				</div>
 			</div>
@@ -192,7 +187,7 @@
 							{#if item.type === 'image'}
 								<img
 									src={item.url}
-									alt={item.caption || 'Afbeelding in mediapaar'}
+									alt={caption || 'Afbeelding in mediapaar'}
 									loading="lazy"
 									style:object-position={getObjectPosition(item)}
 								/>
@@ -208,14 +203,6 @@
 								></video>
 							{/if}
 
-							{#if item.caption || item.source}
-								<figcaption>
-									<span class="caption">{item.caption}</span>
-									{#if item.source}
-										<span class="source">{item.source}</span>
-									{/if}
-								</figcaption>
-							{/if}
 						</figure>
 					</div>
 				{/each}
@@ -234,7 +221,7 @@
 							{#if item.type === 'image'}
 								<img
 									src={item.url}
-									alt={item.caption || 'Afbeelding in mediapaar'}
+									alt={caption || 'Afbeelding in mediapaar'}
 									loading="lazy"
 									style:object-position={getObjectPosition(item)}
 								/>
@@ -250,14 +237,6 @@
 								></video>
 							{/if}
 
-							{#if item.caption || item.source}
-								<figcaption>
-									<span class="caption">{item.caption}</span>
-									{#if item.source}
-										<span class="source">{item.source}</span>
-									{/if}
-								</figcaption>
-							{/if}
 						</figure>
 					</div>
 				{/each}
@@ -270,7 +249,7 @@
 						{#if items[layoutInfo.portraitIndex].type === 'image'}
 							<img
 								src={items[layoutInfo.portraitIndex].url}
-								alt={items[layoutInfo.portraitIndex].caption || 'Afbeelding in mediapaar'}
+								alt={caption || 'Afbeelding in mediapaar'}
 								loading="lazy"
 							/>
 						{:else if items[layoutInfo.portraitIndex].type === 'video'}
@@ -285,19 +264,21 @@
 							></video>
 						{/if}
 
-						{#if items[layoutInfo.portraitIndex].caption || items[layoutInfo.portraitIndex].source}
-							<figcaption>
-								<span class="caption">{items[layoutInfo.portraitIndex].caption}</span>
-								{#if items[layoutInfo.portraitIndex].source}
-									<span class="source">{items[layoutInfo.portraitIndex].source}</span>
-								{/if}
-							</figcaption>
-						{/if}
 					</figure>
 				</div>
 			</div>
 		{/if}
-	</section>
+		</section>
+
+		{#if caption || source}
+			<figcaption>
+				<span class="caption">{caption}</span>
+				{#if source}
+					<span class="source">{source}</span>
+				{/if}
+			</figcaption>
+		{/if}
+	</figure>
 {:else if dev}
 	<div class="dev-error-overlay">
 		<p><strong>[MediaPair Component Error]</strong></p>
@@ -311,13 +292,17 @@
 
 <style>
 	/* === COMMON STYLES === */
+	.media-pair-container {
+		margin: var(--space-l) 0;
+	}
+
 	.media-pair {
-		margin-top: var(--space-l);
-		margin-bottom: var(--space-l);
 		width: 100%;
 	}
 
-	.media-item figure {
+	/* Media wrappers voor beide 2-item en 3-item layouts */
+	.media-item figure,
+	.media-item .media-wrapper {
 		margin: 0;
 		overflow: hidden;
 		border-radius: var(--border-radius-base);
@@ -331,7 +316,8 @@
 		display: block;
 	}
 
-	.media-item figcaption {
+	/* Gezamenlijk bijschrift onder de hele MediaPair */
+	.media-pair-container figcaption {
 		padding-top: var(--space-s);
 		font-size: var(--font-size-s);
 		color: var(--color-text-muted);
@@ -339,11 +325,11 @@
 		overflow: hidden;
 	}
 
-	.media-item .caption {
+	.media-pair-container .caption {
 		display: inline;
 	}
 
-	.media-item .source {
+	.media-pair-container .source {
 		font-style: italic;
 		white-space: nowrap;
 		float: right;
