@@ -502,9 +502,10 @@
 		const cols = block.content.columns;
 		const count = block.content.images.length;
 
-		if ([2, 3, 4].includes(cols)) return count >= cols;
-		if (cols === 2 && count >= 4) return true;
-		if (cols === 3 && count >= 6) return true;
+		// Bepaal maximum aantal foto's per layout
+		if (cols === 2) return count >= 4; // Max 4 voor 2x2 grid optie
+		if (cols === 3) return count >= 3;
+		if (cols === 4) return count >= 4;
 
 		return false;
 	}
