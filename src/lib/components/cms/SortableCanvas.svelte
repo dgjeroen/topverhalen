@@ -3387,7 +3387,12 @@ Voorbeelden:
 		flex: 2;
 	}
 
-	.gallery-controls .control-group:not(:has(.aspect-controls)) {
+	/* Layout krijgt meer ruimte voor 4 buttons */
+	.gallery-controls .control-group:has(.layout-options) {
+		flex: 1.4;
+	}
+
+	.gallery-controls .control-group:not(:has(.aspect-controls)):not(:has(.layout-options)) {
 		flex: 1;
 	}
 
