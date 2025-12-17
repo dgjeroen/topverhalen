@@ -499,15 +499,10 @@
 
 	function isGalleryAddDisabled(block: ContentBlock): boolean {
 		if (block.type !== 'gallery') return true;
-		const cols = block.content.columns;
 		const count = block.content.images.length;
 
-		// Bepaal maximum aantal foto's per layout
-		if (cols === 2) return count >= 4; // Max 4 voor 2x2 grid optie
-		if (cols === 3) return count >= 3;
-		if (cols === 4) return count >= 4;
-
-		return false;
+		// Maximum 4 foto's voor alle layouts (2, 3, of 4 naast elkaar / 2x2)
+		return count >= 4;
 	}
 
 	// ✅ GOED (Stabiel & Waterdicht)
@@ -1554,11 +1549,19 @@ Voorbeelden:
 							<div class="control-group">
 								<div class="control-label">Layout:</div>
 								<div class="layout-options">
-									<label class:active={block.content.columns === 2 && block.content.images.length !== 4}>
+									<!-- Button 1: 2 naast elkaar - precies 2 foto's -->
+									<label
+										class:active={block.content.columns === 2 && block.content.images.length === 2}
+										class:disabled={block.content.images.length !== 2}
+										title={block.content.images.length !== 2
+											? 'Alleen beschikbaar met precies 2 foto\'s'
+											: '2 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={2}
+											disabled={block.content.images.length !== 2}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-2">
@@ -1566,11 +1569,20 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
-									<label class:active={block.content.columns === 3}>
+
+									<!-- Button 2: 3 naast elkaar - precies 3 foto's -->
+									<label
+										class:active={block.content.columns === 3 && block.content.images.length === 3}
+										class:disabled={block.content.images.length !== 3}
+										title={block.content.images.length !== 3
+											? 'Alleen beschikbaar met precies 3 foto\'s'
+											: '3 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={3}
+											disabled={block.content.images.length !== 3}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-3">
@@ -1579,11 +1591,20 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
-									<label class:active={block.content.columns === 4}>
+
+									<!-- Button 3: 4 naast elkaar - precies 4 foto's -->
+									<label
+										class:active={block.content.columns === 4 && block.content.images.length === 4}
+										class:disabled={block.content.images.length !== 4}
+										title={block.content.images.length !== 4
+											? 'Alleen beschikbaar met precies 4 foto\'s'
+											: '4 foto\'s naast elkaar'}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
 											value={4}
+											disabled={block.content.images.length !== 4}
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-4">
@@ -1593,6 +1614,8 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
+
+									<!-- Button 4: 2x2 Grid - precies 4 foto's -->
 									<label
 										class:active={block.content.columns === 2 && block.content.images.length === 4}
 										class:disabled={block.content.images.length !== 4}
