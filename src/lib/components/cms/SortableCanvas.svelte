@@ -1553,20 +1553,20 @@ Voorbeelden:
 							<div class="control-group">
 								<div class="control-label">Layout:</div>
 								<div class="layout-options">
-									<label
-										class:active={block.content.columns === 2 && block.content.images.length !== 4}
-									>
-										<input
-											type="radio"
-											bind:group={block.content.columns}
-											value={2}
-											onchange={() => dispatch('save')}
-										/>
-										<div class="layout-icon cols-2">
-											<div></div>
-											<div></div>
-										</div>
-									</label>
+									{#if block.content.images.length !== 4}
+										<label class:active={block.content.columns === 2}>
+											<input
+												type="radio"
+												bind:group={block.content.columns}
+												value={2}
+												onchange={() => dispatch('save')}
+											/>
+											<div class="layout-icon cols-2">
+												<div></div>
+												<div></div>
+											</div>
+										</label>
+									{/if}
 									<label class:active={block.content.columns === 3}>
 										<input
 											type="radio"
@@ -1594,22 +1594,22 @@ Voorbeelden:
 											<div></div>
 										</div>
 									</label>
-									<label
-										class:active={block.content.columns === 2 && block.content.images.length === 4}
-									>
-										<input
-											type="radio"
-											bind:group={block.content.columns}
-											value={2}
-											onchange={() => dispatch('save')}
-										/>
-										<div class="layout-icon grid-2x2">
-											<div></div>
-											<div></div>
-											<div></div>
-											<div></div>
-										</div>
-									</label>
+									{#if block.content.images.length === 4}
+										<label class:active={block.content.columns === 2}>
+											<input
+												type="radio"
+												bind:group={block.content.columns}
+												value={2}
+												onchange={() => dispatch('save')}
+											/>
+											<div class="layout-icon grid-2x2">
+												<div></div>
+												<div></div>
+												<div></div>
+												<div></div>
+											</div>
+										</label>
+									{/if}
 								</div>
 							</div>
 
