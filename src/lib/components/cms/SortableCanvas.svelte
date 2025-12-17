@@ -1553,7 +1553,9 @@ Voorbeelden:
 							<div class="control-group">
 								<div class="control-label">Layout:</div>
 								<div class="layout-options">
-									<label class:active={block.content.columns === 2}>
+									<label
+										class:active={block.content.columns === 2 && block.content.images.length !== 4}
+									>
 										<input
 											type="radio"
 											bind:group={block.content.columns}
@@ -1586,6 +1588,22 @@ Voorbeelden:
 											onchange={() => dispatch('save')}
 										/>
 										<div class="layout-icon cols-4">
+											<div></div>
+											<div></div>
+											<div></div>
+											<div></div>
+										</div>
+									</label>
+									<label
+										class:active={block.content.columns === 2 && block.content.images.length === 4}
+									>
+										<input
+											type="radio"
+											bind:group={block.content.columns}
+											value={2}
+											onchange={() => dispatch('save')}
+										/>
+										<div class="layout-icon grid-2x2">
 											<div></div>
 											<div></div>
 											<div></div>
@@ -3427,6 +3445,11 @@ Voorbeelden:
 
 	.layout-icon.cols-4 {
 		grid-template-columns: 1fr 1fr 1fr 1fr;
+	}
+
+	.layout-icon.grid-2x2 {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
 	}
 
 	.gallery-info {
