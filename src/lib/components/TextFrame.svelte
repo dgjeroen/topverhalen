@@ -90,6 +90,12 @@
 							alt={visibleImage.alt}
 							class:rounded={visibleImage.rounded}
 							loading="lazy"
+							style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+							style:aspect-ratio={visibleImage.rounded
+								? '1'
+								: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+									? visibleImage.aspectRatio.replace(':', ' / ')
+									: 'auto'}
 						/>
 						{#if showCaption && (visibleImage.caption || visibleImage.source)}
 							<figcaption>
@@ -111,6 +117,12 @@
 							alt={visibleImage.alt}
 							class:rounded={visibleImage.rounded}
 							loading="lazy"
+							style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+							style:aspect-ratio={visibleImage.rounded
+								? '1'
+								: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+									? visibleImage.aspectRatio.replace(':', ' / ')
+									: 'auto'}
 						/>
 						{#if showCaption && (visibleImage.caption || visibleImage.source)}
 							<figcaption>
@@ -136,6 +148,12 @@
 								alt={visibleImage.alt}
 								class:rounded={visibleImage.rounded}
 								loading="lazy"
+								style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+								style:aspect-ratio={visibleImage.rounded
+									? '1'
+									: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+										? visibleImage.aspectRatio.replace(':', ' / ')
+										: 'auto'}
 							/>
 							{#if showCaption && (visibleImage.caption || visibleImage.source)}
 								<figcaption>
@@ -374,6 +392,7 @@
 		height: auto;
 		display: block;
 		border-radius: var(--textframe-img-radius, 6px) !important;
+		object-fit: cover;
 	}
 
 	.frame-image-top img.rounded {
@@ -403,6 +422,7 @@
 		height: auto;
 		display: block;
 		border-radius: var(--textframe-img-radius, 6px) !important;
+		object-fit: cover;
 	}
 
 	.inline-image img.rounded {

@@ -532,6 +532,9 @@ export interface TextFrameContent {
 		layout: 'top-rect' | 'top-rect-bottom' | 'inline-square-left' | 'inline-square-right';
 		rounded: boolean;
 		hidden?: boolean;
+		focusX?: number;
+		focusY?: number;
+		aspectRatio?: 'original' | '4:3' | '16:9' | '4:5' | '1:1';
 	} | null;
 	collapsible?: boolean;
 	defaultOpen?: boolean;
