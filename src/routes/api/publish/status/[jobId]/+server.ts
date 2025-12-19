@@ -9,21 +9,21 @@ import { verifySession } from '$lib/server/auth';
  * Haal huidige status van een publish job op
  */
 export const GET: RequestHandler = async ({ params, cookies }) => {
-    // ✅ Auth check
-    const sessionToken = cookies.get('session');
-    const session = await verifySession(sessionToken);
+	// ✅ Auth check
+	const sessionToken = cookies.get('session');
+	const session = await verifySession(sessionToken);
 
-    if (!session) {
-        throw error(401, 'Niet ingelogd');
-    }
+	if (!session) {
+		throw error(401, 'Niet ingelogd');
+	}
 
-    // ✅ Haal job op
-    const job = await getJob(params.jobId);
+	// ✅ Haal job op
+	const job = await getJob(params.jobId);
 
-    if (!job) {
-        throw error(404, 'Job niet gevonden');
-    }
+	if (!job) {
+		throw error(404, 'Job niet gevonden');
+	}
 
-    // ✅ Return job details
-    return json(job);
+	// ✅ Return job details
+	return json(job);
 };

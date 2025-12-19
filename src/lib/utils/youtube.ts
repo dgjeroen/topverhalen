@@ -6,13 +6,13 @@
  * @returns De video ID of null als er geen wordt gevonden.
  */
 export function getYouTubeVideoId(url: string): string | null {
-    // De reguliere expressie is nu uitgebreid met 'live\/'
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|live\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
+	// De reguliere expressie is nu uitgebreid met 'live\/'
+	const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|live\/|watch\?v=|&v=)([^#&?]*).*/;
+	const match = url.match(regExp);
 
-    if (match && match[2].length === 11) {
-        return match[2];
-    }
+	if (match && match[2].length === 11) {
+		return match[2];
+	}
 
-    return null;
+	return null;
 }

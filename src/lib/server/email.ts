@@ -3,22 +3,22 @@ import { Resend } from 'resend';
 import { env } from '$env/dynamic/private';
 
 export async function sendMagicLink(email: string, token: string, baseUrl: string) {
-    // ✅ Gebruik $env/dynamic/private
-    const apiKey = env.RESEND_API_KEY;
+	// ✅ Gebruik $env/dynamic/private
+	const apiKey = env.RESEND_API_KEY;
 
-    if (!apiKey) {
-        throw new Error('RESEND_API_KEY is niet ingesteld');
-    }
+	if (!apiKey) {
+		throw new Error('RESEND_API_KEY is niet ingesteld');
+	}
 
-    const resend = new Resend(apiKey);
-    const magicLink = `${baseUrl}/cms/auth/verify?token=${token}`;
+	const resend = new Resend(apiKey);
+	const magicLink = `${baseUrl}/cms/auth/verify?token=${token}`;
 
-    try {
-        await resend.emails.send({
-            from: 'Topverhalen CMS <noreply@topverhaal.nl>',
-            to: email,
-            subject: 'Login naar Topverhalen CMS',
-            html: `
+	try {
+		await resend.emails.send({
+			from: 'Topverhalen CMS <noreply@topverhaal.nl>',
+			to: email,
+			subject: 'Login naar Topverhalen CMS',
+			html: `
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -52,9 +52,9 @@ export async function sendMagicLink(email: string, token: string, baseUrl: strin
                 </body>
                 </html>
             `
-        });
-    } catch (error) {
-        console.error('Email send error:', error);
-        throw new Error('Kon email niet versturen');
-    }
+		});
+	} catch (error) {
+		console.error('Email send error:', error);
+		throw new Error('Kon email niet versturen');
+	}
 }

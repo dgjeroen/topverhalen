@@ -1,262 +1,262 @@
 {
-  "version": 21,
-  "data": [
-    {
-      "type": "heroVideo",
-      "content": {
-        "url": "https://sf-video.dpgmedia.net/008e9f27-cd41-4d27-9212-c86f9a39316e-version-1758387444879/008e9f27-cd41-4d27-9212-c86f9a39316e.m3u8",
-        "label": "Vitesse is terug",
-        "title": "‘Ik dacht dat ik mijn club kwijt was’",
-        "source": "Rob Teerink"
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Rob Teerink (60) was Vitesse kwijt. Zijn club, zijn leven. Maar dankzij een mirakel heeft de oer-Arnhemmer zijn grote liefde terug. Dit is de dag van Rob. Voor de eerste keer terug naar GelreDome."
-        ],
-        "isLead": true
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "10.03 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Dit is de dag dat ik mijn vrienden weer ga zien. In de stad. Bij mijn vaste plekje op ‘Zuid’ in het stadion. Honderd man om me heen. Ik ken ze bijna allemaal even goed.",
-          "Dat heb ik zó gemist. Het samen beleven, de sfeer. Ik leefde iedere week naar de wedstrijden toe. Thuis op de bank, in de fabriek van Heinz waar ik werk. En ineens was dat gevoel weg.",
-          "Ik dacht echt dat ik mijn club kwijt was. Juristen zeiden het hè, maar 1 procent kans dat we het zouden overleven. Dan is het wel voorbij. Ik had al bijna mijn shawls en shirtjes uitgewassen en ze in een grote doos gestopt. Terug naar de amateurs, een fusieclub, dat zag ik niet zitten. Vitesse moet wel Vitesse blijven. En anders maar niet."
-        ]
-      }
-    },
-    {
-      "type": "slider",
-      "content": {
-        "images": [
-          {
-            "url": "https://images3.persgroep.net/rcs/x1PSlcxS-JCyVjJrRI6NgD7IL2Y/diocontent/262789904/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-            "caption": "Thuis in Arnhem-Zuid heeft Rob een indrukwekkende verzameling shirts en shawls, bijna een Vitesse-museum.",
-            "source": "Bron: Milan Schellingerhout"
-          },
-          {
-            "url": "https://images4.persgroep.net/rcs/F2J25Ibt2RLzsQunp8DXVC3GoJY/diocontent/262789911/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-            "caption": "Rob miste geen enkele Europese wedstrijd. De shawls vertellen het verhaal van de Arnhemse club in Europa.",
-            "source": "Bron: Milan Schellingerhout"
-          },
-          {
-            "url": "https://images1.persgroep.net/rcs/X4IbUn339BvV6_DDuykhSr2IpbM/diocontent/262789899/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-            "caption": "Een Vitesse-dekbed in het mini-museum van Rob en vooral nog meer shawls, onder meer van alle Europese tegenstanders van Vitesse.",
-            "source": "Bron: Milan Schellingerhout"
-          },
-          {
-            "url": "https://images1.persgroep.net/rcs/QdH2HBp26ZLa89ZECV_9dDb_gAs/diocontent/262789912/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-            "caption": "Rob is geliefd tot buiten de landsgrenzen. Als hij zijn huis weer eens openstelt voor mensen die een wedstrijd bezoeken, krijgt hij vaak een speldje.",
-            "source": "Bron: Milan Schellingerhout"
-          }
-        ]
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Man, ik ben zo kwaad geweest. Op de KNVB vooral. Maar ook op supporters van andere clubs. Waarom zoveel haat? Tegen de één-na-oudste club van Nederland. Ik werd er echt niet goed van. Ja, natuurlijk weet ik wel dat Vitesse - bepaalde figuren dan - zichzelf ook kapot heeft gemaakt.",
-          "Maar toch… die KNVB. De gevolgen voor supporters en de stad, daar is nooit goed over nagedacht. Als ik in Engeland of Duitsland naar wedstrijden ga, kennen ze Arnhem van twee dingen. Dat is voetbal en de brug. Dat gooi je toch niet weg?"
-        ]
-      }
-    },
-    {
-      "type": "image",
-      "content": {
-        "url": "https://images1.persgroep.net/rcs/dCQso4OSsLmiJq8hpZSlIiiOjrQ/diocontent/262789913/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-        "caption": "Rob mijmert thuis op de bank over het Vitesse van toen en nu. Zijn huiskamer hangt vol met Vitesse-relikwieën.",
-        "source": "Bron: Milan Schellingerhout",
-        "parallax": true
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "12.15 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Dit is voor mij de mooiste wedstrijd van het jaar. De Airborne. En dan ook nog eens de eerste keer thuis sinds we terug zijn. Ik heb niet veel met GelreDome, dat neem ik maar op de koop toe omdat ik al zó lang supporter van Vitesse ben, maar een uitverkocht stadion is toch fantastisch!",
-          "Ik heb voor heel veel mensen kaarten geregeld. Er hebben ook een paar mensen bij me geslapen. Dat komt echt door die Airborne-wedstrijd.",
-          "Ik trek zo mijn vest met pins weer aan. Al is het te zwaar om de hele dag aan te hebben. Dan ben ik een bezienswaardigheid hoor, ben er al vaak mee op de foto gegaan."
-        ]
-      }
-    },
-    {
-      "type": "mediaPair",
-      "content": {
-        "verticalAlign": "top",
-        "items": [
-          {
-            "type": "video",
-            "orientation": "landscape",
-            "url": "https://sf-video.dpgmedia.net/db7622de-0926-4bf2-9e94-bf0ee8aa8668-version-1758298968643/db7622de-0926-4bf2-9e94-bf0ee8aa8668.m3u8",
-            "poster": "https://images.mychannels.video/imgix/productions/2025/9/c91e7b5c-b60f-4ed7-ac05-f23db48ae3a7/Shirt.00_00_04_07.Still004.png",
-            "caption": "",
-            "showControls": false
-          },
-          {
-            "type": "image",
-            "orientation": "portrait",
-            "url": "https://images2.persgroep.net/rcs/wmIe3ut45EN39qsnRrnXbB6f6R4/diocontent/262789895/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-            "caption": "Rob met zijn indrukwekkende vest vol pins. Hij draagt het vest voor elke thuiswedstrijd, hier bij het supportershome van Vitesse.",
-            "source": "Bron: Milan Schellingerhout",
-            "parallax": true
-          }
-        ]
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "12.57 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Bij deze dag hoort ook een bezoek aan de oorlogsbegraafplaats in Oosterbeek. Daar zoek ik naar het graf van soldaat James McKenzie. Ik heb ook een Airborne-shirt met zijn naam erop. Hij werd maar 30, dat is het rugnummer.",
-          "Bij de Airborne-wedstrijd komt alles samen voor mij. Daardoor heb ik zo veel mensen leren kennen uit heel Europa. Dat contact is speciaal, ieder jaar weer. Ik hoop ze zo allemaal te zien in de kroeg."
-        ]
-      }
-    },
-    {
-      "type": "video",
-      "content": {
-        "url": "https://sf-video.dpgmedia.net/799cfe72-e332-412b-9dd3-1c8e2586a0d3-version-1758285540832/799cfe72-e332-412b-9dd3-1c8e2586a0d3.m3u8"
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "15.23 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Ik heb de afgelopen maanden ’s avonds op de bank vaak gedacht: potver, al die mooie momenten. De eerste keer Europa in, begin jaren 90. Promoveren en meteen de grens over.",
-          "Derry City, Dundee United. Die waren goed toen hè, wonnen zelfs van FC Barcelona. En wij versloegen ze met 0-4. Ik kon het niet geloven.",
-          "Dat doet me nu echt nog veel meer dan de bekerwinst. Daar heb ik het dan ook over met mijn vrienden, in de Unibar, Het Barretje en de Heeren van Aemstel. Daar zit ik voor iedere thuiswedstrijd."
-        ]
-      }
-    },
-    {
-      "type": "image",
-      "content": {
-        "url": "https://images1.persgroep.net/rcs/swZqNIUrsFXzdvXgyp_5UjP3Mmg/diocontent/262883631/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-        "caption": "Rob maakt voor iedere thuiswedstrijd een vast rondje langs zijn stamcafés in de binnenstad: Unibar, Het Barretje en de Heeren van Aemstel.",
-        "source": "Bron: Milan Schellingerhout",
-        "parallax": true
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Monnikenhuize, dát is mijn club. Voor het eerst toen ik een jaar of 14 was. Het was voor mij heel simpel. Ik woon in Arnhem, dus ik ben voor Vitesse. Vanuit Presikhaaf, via Angerenstein door de bossen.",
-          "Ik had de sleutel van het stadion, kun je het je voorstellen? ‘Sluit jij maar af Rob’. Ik kon altijd zo binnenlopen, even koffie drinken met Henk ten Cate, die toen trainer was. Het was de mooiste tijd, maar ook de slechtste. Zaten soms maar een paar honderd toeschouwers.",
-          "Wat ik allemaal heb meegemaakt, dat kan niemand meer van me afpakken."
-        ]
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "19.15 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Vandaag beleef ik de wedstrijden wel anders dan vroeger. Toen kende ik alle opstellingen uit m’n kop. Nu ken ik amper nog een speler. Alles om de wedstrijd heen is veel belangrijker geworden.",
-          "Dat voelde ik nóg sterker toen Vitesse naar de knoppen was. Al blijft het voor mij wel zo: hoe slechter het is, hoe fanatieker ik word.",
-          "Het is nog maar heel even tot de wedstrijd begint. In het supportershome bij het stadion neem ik nog een laatste biertje voordat ik de tribune opzoek. Mijn plek, vlak bij de ingang. Ik ben nu zo blij dat we er nog zijn, dat de uitslag me niet eens zo veel uitmaakt. Feest wordt het toch. Het kan ook zomaar weer iets worden hier hè. We gaan bouwen, met goede sponsoren en goede mensen. En de club nóóit meer weggeven."
-        ]
-      }
-    },
-    {
-      "type": "quote",
-      "content": {
-        "text": "Wat een fantastische dag. Nu de wedstrijd nog",
-        "author": "Rob Teerink"
-      }
-    },
-    {
-      "type": "image",
-      "content": {
-        "url": "https://images3.persgroep.net/rcs/lGqc7UOnvCrNxBtXVqu5uwT-pgo/diocontent/262893311/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
-        "caption": "Rob in het stadion vlak voor de aftrap van de Airborne-wedstrijd.",
-        "source": "Bron: Rob Teerink",
-        "parallax": true
-      }
-    },
-    {
-      "type": "subheading",
-      "content": {
-        "text": "22.07 uur",
-        "level": 4
-      }
-    },
-    {
-      "type": "textblock",
-      "content": {
-        "text": [
-          "Mooi! Wat was dit mooi. Geweldig, die sfeer in het stadion. De hele wedstrijd lang. En nog gewonnen ook. Het voelde alsof we naar de volgende ronde in Europa gingen.",
-          "Dit is weer een nieuwe Vitesse-herinnering voor altijd. Het was echt niet normaal. We zijn terug. Echt terug."
-        ]
-      }
-    },
-    {
-      "type": "video",
-      "content": {
-        "url": "https://sf-video.dpgmedia.net/cff98a5b-cbb0-4748-bd5f-2e7361d8a39c-version-1758433990069/cff98a5b-cbb0-4748-bd5f-2e7361d8a39c.m3u8"
-      }
-    },
-    {
-      "type": "colofon",
-      "content": {
-        "items": [
-          {
-            "functie": "Verslaggever",
-            "namen": "Pim Dikkers"
-          },
-          {
-            "functie": "Foto en video",
-            "namen": "Milan Schellingerhout"
-          },
-          {
-            "functie": "Coördinatie",
-            "namen": "Harm Graat en Walter Nieuwkamp"
-          },
-          {
-            "functie": "Techniek en vormgeving",
-            "namen": "Jeroen Kuitert en Niels Wolfraad"
-          }
-        ]
-      }
-    }
-  ]
+	"version": 21,
+	"data": [
+		{
+			"type": "heroVideo",
+			"content": {
+				"url": "https://sf-video.dpgmedia.net/008e9f27-cd41-4d27-9212-c86f9a39316e-version-1758387444879/008e9f27-cd41-4d27-9212-c86f9a39316e.m3u8",
+				"label": "Vitesse is terug",
+				"title": "‘Ik dacht dat ik mijn club kwijt was’",
+				"source": "Rob Teerink"
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Rob Teerink (60) was Vitesse kwijt. Zijn club, zijn leven. Maar dankzij een mirakel heeft de oer-Arnhemmer zijn grote liefde terug. Dit is de dag van Rob. Voor de eerste keer terug naar GelreDome."
+				],
+				"isLead": true
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "10.03 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Dit is de dag dat ik mijn vrienden weer ga zien. In de stad. Bij mijn vaste plekje op ‘Zuid’ in het stadion. Honderd man om me heen. Ik ken ze bijna allemaal even goed.",
+					"Dat heb ik zó gemist. Het samen beleven, de sfeer. Ik leefde iedere week naar de wedstrijden toe. Thuis op de bank, in de fabriek van Heinz waar ik werk. En ineens was dat gevoel weg.",
+					"Ik dacht echt dat ik mijn club kwijt was. Juristen zeiden het hè, maar 1 procent kans dat we het zouden overleven. Dan is het wel voorbij. Ik had al bijna mijn shawls en shirtjes uitgewassen en ze in een grote doos gestopt. Terug naar de amateurs, een fusieclub, dat zag ik niet zitten. Vitesse moet wel Vitesse blijven. En anders maar niet."
+				]
+			}
+		},
+		{
+			"type": "slider",
+			"content": {
+				"images": [
+					{
+						"url": "https://images3.persgroep.net/rcs/x1PSlcxS-JCyVjJrRI6NgD7IL2Y/diocontent/262789904/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+						"caption": "Thuis in Arnhem-Zuid heeft Rob een indrukwekkende verzameling shirts en shawls, bijna een Vitesse-museum.",
+						"source": "Bron: Milan Schellingerhout"
+					},
+					{
+						"url": "https://images4.persgroep.net/rcs/F2J25Ibt2RLzsQunp8DXVC3GoJY/diocontent/262789911/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+						"caption": "Rob miste geen enkele Europese wedstrijd. De shawls vertellen het verhaal van de Arnhemse club in Europa.",
+						"source": "Bron: Milan Schellingerhout"
+					},
+					{
+						"url": "https://images1.persgroep.net/rcs/X4IbUn339BvV6_DDuykhSr2IpbM/diocontent/262789899/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+						"caption": "Een Vitesse-dekbed in het mini-museum van Rob en vooral nog meer shawls, onder meer van alle Europese tegenstanders van Vitesse.",
+						"source": "Bron: Milan Schellingerhout"
+					},
+					{
+						"url": "https://images1.persgroep.net/rcs/QdH2HBp26ZLa89ZECV_9dDb_gAs/diocontent/262789912/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+						"caption": "Rob is geliefd tot buiten de landsgrenzen. Als hij zijn huis weer eens openstelt voor mensen die een wedstrijd bezoeken, krijgt hij vaak een speldje.",
+						"source": "Bron: Milan Schellingerhout"
+					}
+				]
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Man, ik ben zo kwaad geweest. Op de KNVB vooral. Maar ook op supporters van andere clubs. Waarom zoveel haat? Tegen de één-na-oudste club van Nederland. Ik werd er echt niet goed van. Ja, natuurlijk weet ik wel dat Vitesse - bepaalde figuren dan - zichzelf ook kapot heeft gemaakt.",
+					"Maar toch… die KNVB. De gevolgen voor supporters en de stad, daar is nooit goed over nagedacht. Als ik in Engeland of Duitsland naar wedstrijden ga, kennen ze Arnhem van twee dingen. Dat is voetbal en de brug. Dat gooi je toch niet weg?"
+				]
+			}
+		},
+		{
+			"type": "image",
+			"content": {
+				"url": "https://images1.persgroep.net/rcs/dCQso4OSsLmiJq8hpZSlIiiOjrQ/diocontent/262789913/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+				"caption": "Rob mijmert thuis op de bank over het Vitesse van toen en nu. Zijn huiskamer hangt vol met Vitesse-relikwieën.",
+				"source": "Bron: Milan Schellingerhout",
+				"parallax": true
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "12.15 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Dit is voor mij de mooiste wedstrijd van het jaar. De Airborne. En dan ook nog eens de eerste keer thuis sinds we terug zijn. Ik heb niet veel met GelreDome, dat neem ik maar op de koop toe omdat ik al zó lang supporter van Vitesse ben, maar een uitverkocht stadion is toch fantastisch!",
+					"Ik heb voor heel veel mensen kaarten geregeld. Er hebben ook een paar mensen bij me geslapen. Dat komt echt door die Airborne-wedstrijd.",
+					"Ik trek zo mijn vest met pins weer aan. Al is het te zwaar om de hele dag aan te hebben. Dan ben ik een bezienswaardigheid hoor, ben er al vaak mee op de foto gegaan."
+				]
+			}
+		},
+		{
+			"type": "mediaPair",
+			"content": {
+				"verticalAlign": "top",
+				"items": [
+					{
+						"type": "video",
+						"orientation": "landscape",
+						"url": "https://sf-video.dpgmedia.net/db7622de-0926-4bf2-9e94-bf0ee8aa8668-version-1758298968643/db7622de-0926-4bf2-9e94-bf0ee8aa8668.m3u8",
+						"poster": "https://images.mychannels.video/imgix/productions/2025/9/c91e7b5c-b60f-4ed7-ac05-f23db48ae3a7/Shirt.00_00_04_07.Still004.png",
+						"caption": "",
+						"showControls": false
+					},
+					{
+						"type": "image",
+						"orientation": "portrait",
+						"url": "https://images2.persgroep.net/rcs/wmIe3ut45EN39qsnRrnXbB6f6R4/diocontent/262789895/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+						"caption": "Rob met zijn indrukwekkende vest vol pins. Hij draagt het vest voor elke thuiswedstrijd, hier bij het supportershome van Vitesse.",
+						"source": "Bron: Milan Schellingerhout",
+						"parallax": true
+					}
+				]
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "12.57 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Bij deze dag hoort ook een bezoek aan de oorlogsbegraafplaats in Oosterbeek. Daar zoek ik naar het graf van soldaat James McKenzie. Ik heb ook een Airborne-shirt met zijn naam erop. Hij werd maar 30, dat is het rugnummer.",
+					"Bij de Airborne-wedstrijd komt alles samen voor mij. Daardoor heb ik zo veel mensen leren kennen uit heel Europa. Dat contact is speciaal, ieder jaar weer. Ik hoop ze zo allemaal te zien in de kroeg."
+				]
+			}
+		},
+		{
+			"type": "video",
+			"content": {
+				"url": "https://sf-video.dpgmedia.net/799cfe72-e332-412b-9dd3-1c8e2586a0d3-version-1758285540832/799cfe72-e332-412b-9dd3-1c8e2586a0d3.m3u8"
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "15.23 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Ik heb de afgelopen maanden ’s avonds op de bank vaak gedacht: potver, al die mooie momenten. De eerste keer Europa in, begin jaren 90. Promoveren en meteen de grens over.",
+					"Derry City, Dundee United. Die waren goed toen hè, wonnen zelfs van FC Barcelona. En wij versloegen ze met 0-4. Ik kon het niet geloven.",
+					"Dat doet me nu echt nog veel meer dan de bekerwinst. Daar heb ik het dan ook over met mijn vrienden, in de Unibar, Het Barretje en de Heeren van Aemstel. Daar zit ik voor iedere thuiswedstrijd."
+				]
+			}
+		},
+		{
+			"type": "image",
+			"content": {
+				"url": "https://images1.persgroep.net/rcs/swZqNIUrsFXzdvXgyp_5UjP3Mmg/diocontent/262883631/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+				"caption": "Rob maakt voor iedere thuiswedstrijd een vast rondje langs zijn stamcafés in de binnenstad: Unibar, Het Barretje en de Heeren van Aemstel.",
+				"source": "Bron: Milan Schellingerhout",
+				"parallax": true
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Monnikenhuize, dát is mijn club. Voor het eerst toen ik een jaar of 14 was. Het was voor mij heel simpel. Ik woon in Arnhem, dus ik ben voor Vitesse. Vanuit Presikhaaf, via Angerenstein door de bossen.",
+					"Ik had de sleutel van het stadion, kun je het je voorstellen? ‘Sluit jij maar af Rob’. Ik kon altijd zo binnenlopen, even koffie drinken met Henk ten Cate, die toen trainer was. Het was de mooiste tijd, maar ook de slechtste. Zaten soms maar een paar honderd toeschouwers.",
+					"Wat ik allemaal heb meegemaakt, dat kan niemand meer van me afpakken."
+				]
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "19.15 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Vandaag beleef ik de wedstrijden wel anders dan vroeger. Toen kende ik alle opstellingen uit m’n kop. Nu ken ik amper nog een speler. Alles om de wedstrijd heen is veel belangrijker geworden.",
+					"Dat voelde ik nóg sterker toen Vitesse naar de knoppen was. Al blijft het voor mij wel zo: hoe slechter het is, hoe fanatieker ik word.",
+					"Het is nog maar heel even tot de wedstrijd begint. In het supportershome bij het stadion neem ik nog een laatste biertje voordat ik de tribune opzoek. Mijn plek, vlak bij de ingang. Ik ben nu zo blij dat we er nog zijn, dat de uitslag me niet eens zo veel uitmaakt. Feest wordt het toch. Het kan ook zomaar weer iets worden hier hè. We gaan bouwen, met goede sponsoren en goede mensen. En de club nóóit meer weggeven."
+				]
+			}
+		},
+		{
+			"type": "quote",
+			"content": {
+				"text": "Wat een fantastische dag. Nu de wedstrijd nog",
+				"author": "Rob Teerink"
+			}
+		},
+		{
+			"type": "image",
+			"content": {
+				"url": "https://images3.persgroep.net/rcs/lGqc7UOnvCrNxBtXVqu5uwT-pgo/diocontent/262893311/_limit/1600/1600?appId=552f56ee0ced50acc86e35b780571316&desiredformat=webp",
+				"caption": "Rob in het stadion vlak voor de aftrap van de Airborne-wedstrijd.",
+				"source": "Bron: Rob Teerink",
+				"parallax": true
+			}
+		},
+		{
+			"type": "subheading",
+			"content": {
+				"text": "22.07 uur",
+				"level": 4
+			}
+		},
+		{
+			"type": "textblock",
+			"content": {
+				"text": [
+					"Mooi! Wat was dit mooi. Geweldig, die sfeer in het stadion. De hele wedstrijd lang. En nog gewonnen ook. Het voelde alsof we naar de volgende ronde in Europa gingen.",
+					"Dit is weer een nieuwe Vitesse-herinnering voor altijd. Het was echt niet normaal. We zijn terug. Echt terug."
+				]
+			}
+		},
+		{
+			"type": "video",
+			"content": {
+				"url": "https://sf-video.dpgmedia.net/cff98a5b-cbb0-4748-bd5f-2e7361d8a39c-version-1758433990069/cff98a5b-cbb0-4748-bd5f-2e7361d8a39c.m3u8"
+			}
+		},
+		{
+			"type": "colofon",
+			"content": {
+				"items": [
+					{
+						"functie": "Verslaggever",
+						"namen": "Pim Dikkers"
+					},
+					{
+						"functie": "Foto en video",
+						"namen": "Milan Schellingerhout"
+					},
+					{
+						"functie": "Coördinatie",
+						"namen": "Harm Graat en Walter Nieuwkamp"
+					},
+					{
+						"functie": "Techniek en vormgeving",
+						"namen": "Jeroen Kuitert en Niels Wolfraad"
+					}
+				]
+			}
+		}
+	]
 }

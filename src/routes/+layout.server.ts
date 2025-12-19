@@ -7,24 +7,24 @@ import type { LayoutServerLoad } from './$types';
 import type { ContentFile } from '$lib/types';
 
 export const load: LayoutServerLoad = async ({ url }) => {
-    // Skip content loading voor CMS routes
-    if (url.pathname.startsWith('/cms')) {
-        return {};
-    }
+	// Skip content loading voor CMS routes
+	if (url.pathname.startsWith('/cms')) {
+		return {};
+	}
 
-    // Alleen laden voor story routes
-    const filePath = path.join(process.cwd(), 'src/lib/data/content.json');
+	// Alleen laden voor story routes
+	const filePath = path.join(process.cwd(), 'src/lib/data/content.json');
 
-    // Check of bestand bestaat (voor Vercel compatibility)
-    if (!existsSync(filePath)) {
-        console.warn('content.json niet gevonden, skip laden');
-        return {};
-    }
+	// Check of bestand bestaat (voor Vercel compatibility)
+	if (!existsSync(filePath)) {
+		console.warn('content.json niet gevonden, skip laden');
+		return {};
+	}
 
-    const fileContent = readFileSync(filePath, 'utf-8');
-    const contentData: ContentFile = JSON.parse(fileContent);
+	const fileContent = readFileSync(filePath, 'utf-8');
+	const contentData: ContentFile = JSON.parse(fileContent);
 
-    return {
-        content: contentData
-    };
+	return {
+		content: contentData
+	};
 };

@@ -21,6 +21,7 @@
 	import SliderStyleEditor from '$lib/components/cms/editors/SliderStyleEditor.svelte';
 	import SubheadingSoccerStyleEditor from '$lib/components/cms/editors/SubheadingSoccerStyleEditor.svelte';
 	import TimelineStyleEditor from '$lib/components/cms/editors/TimelineStyleEditor.svelte';
+	import VideoStyleEditor from '$lib/components/cms/editors/VideoStyleEditor.svelte';
 
 	// ✅ NIEUW: Import save manager en localStorage utils
 	import { saveManager, rateLimitWarning } from '$lib/stores/saveManager';
@@ -372,7 +373,14 @@
 			case 'quote':
 				return { text: '', author: '', typewriter: true, italic: true };
 			case 'image':
-				return { url: '', caption: '', source: '', parallax: false, aspectRatio: 'original', width: 'normal' };
+				return {
+					url: '',
+					caption: '',
+					source: '',
+					parallax: false,
+					aspectRatio: 'original',
+					width: 'normal'
+				};
 			case 'video':
 				return { url: '', poster: '', width: 'normal' };
 			case 'embed':
@@ -992,6 +1000,8 @@
 						<SliderStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'audio'}
 						<AudioStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
+					{:else if selectedStyleComponent === 'video'}
+						<VideoStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'colofon'}
 						<ColofonStyleEditor bind:theme={currentTheme} onsave={handleStyleSave} />
 					{:else if selectedStyleComponent === 'timeline'}

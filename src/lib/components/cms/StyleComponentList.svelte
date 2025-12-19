@@ -15,6 +15,7 @@
 		{ id: 'textframe', label: 'Tekstkader', icon: 'icon-block-text-frame' },
 		{ id: 'quote', label: 'Citaat', icon: 'icon-block-quote' },
 		{ id: 'image', label: 'Afbeelding', icon: 'icon-block-image' },
+		{ id: 'video', label: 'Video', icon: 'icon-block-video' },
 		{ id: 'slider', label: 'Fotoslider', icon: 'icon-block-slider' },
 		{ id: 'audio', label: 'Audio', icon: 'icon-block-audio' },
 		{ id: 'subheadingMedium', label: 'Extra tussenkop (H3)', icon: 'icon-block-h3' },

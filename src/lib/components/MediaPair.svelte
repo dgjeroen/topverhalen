@@ -147,127 +147,123 @@
 			data-has-video={layoutInfo.hasVideo}
 			data-video-index={layoutInfo.videoIndex}
 		>
-		{#if layoutInfo.portraitPosition === 'left'}
-			<!-- Portrait item links -->
-			<div class="portrait-column">
-				<div class="media-item portrait-item">
-					<figure>
-						{#if items[layoutInfo.portraitIndex].type === 'image'}
-							<img
-								src={items[layoutInfo.portraitIndex].url}
-								alt={caption || 'Afbeelding in mediapaar'}
-								loading="lazy"
-							/>
-						{:else if items[layoutInfo.portraitIndex].type === 'video'}
-							<video
-								use:playHls={items[layoutInfo.portraitIndex].url}
-								use:playOnView
-								playsinline
-								muted
-								loop
-								poster={items[layoutInfo.portraitIndex].poster || ''}
-								controls={items[layoutInfo.portraitIndex].showControls ?? true}
-							></video>
-						{/if}
-
-					</figure>
-				</div>
-			</div>
-
-			<!-- Landscape items rechts gestapeld -->
-			<div class="landscape-column">
-				{#each layoutInfo.landscapeItems as item, index}
-					<div
-						class="media-item landscape-item"
-						class:is-video={item.type === 'video'}
-						class:is-image={item.type === 'image'}
-						data-stack-index={index}
-					>
+			{#if layoutInfo.portraitPosition === 'left'}
+				<!-- Portrait item links -->
+				<div class="portrait-column">
+					<div class="media-item portrait-item">
 						<figure>
-							{#if item.type === 'image'}
+							{#if items[layoutInfo.portraitIndex].type === 'image'}
 								<img
-									src={item.url}
+									src={items[layoutInfo.portraitIndex].url}
 									alt={caption || 'Afbeelding in mediapaar'}
 									loading="lazy"
-									style:object-position={getObjectPosition(item)}
 								/>
-							{:else if item.type === 'video'}
+							{:else if items[layoutInfo.portraitIndex].type === 'video'}
 								<video
-									use:playHls={item.url}
+									use:playHls={items[layoutInfo.portraitIndex].url}
 									use:playOnView
 									playsinline
 									muted
 									loop
-									poster={item.poster || ''}
-									controls={item.showControls ?? true}
+									poster={items[layoutInfo.portraitIndex].poster || ''}
+									controls={items[layoutInfo.portraitIndex].showControls ?? true}
 								></video>
 							{/if}
-
 						</figure>
 					</div>
-				{/each}
-			</div>
-		{:else}
-			<!-- Landscape items links gestapeld -->
-			<div class="landscape-column">
-				{#each layoutInfo.landscapeItems as item, index}
-					<div
-						class="media-item landscape-item"
-						class:is-video={item.type === 'video'}
-						class:is-image={item.type === 'image'}
-						data-stack-index={index}
-					>
+				</div>
+
+				<!-- Landscape items rechts gestapeld -->
+				<div class="landscape-column">
+					{#each layoutInfo.landscapeItems as item, index}
+						<div
+							class="media-item landscape-item"
+							class:is-video={item.type === 'video'}
+							class:is-image={item.type === 'image'}
+							data-stack-index={index}
+						>
+							<figure>
+								{#if item.type === 'image'}
+									<img
+										src={item.url}
+										alt={caption || 'Afbeelding in mediapaar'}
+										loading="lazy"
+										style:object-position={getObjectPosition(item)}
+									/>
+								{:else if item.type === 'video'}
+									<video
+										use:playHls={item.url}
+										use:playOnView
+										playsinline
+										muted
+										loop
+										poster={item.poster || ''}
+										controls={item.showControls ?? true}
+									></video>
+								{/if}
+							</figure>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<!-- Landscape items links gestapeld -->
+				<div class="landscape-column">
+					{#each layoutInfo.landscapeItems as item, index}
+						<div
+							class="media-item landscape-item"
+							class:is-video={item.type === 'video'}
+							class:is-image={item.type === 'image'}
+							data-stack-index={index}
+						>
+							<figure>
+								{#if item.type === 'image'}
+									<img
+										src={item.url}
+										alt={caption || 'Afbeelding in mediapaar'}
+										loading="lazy"
+										style:object-position={getObjectPosition(item)}
+									/>
+								{:else if item.type === 'video'}
+									<video
+										use:playHls={item.url}
+										use:playOnView
+										playsinline
+										muted
+										loop
+										poster={item.poster || ''}
+										controls={item.showControls ?? true}
+									></video>
+								{/if}
+							</figure>
+						</div>
+					{/each}
+				</div>
+
+				<!-- Portrait item rechts -->
+				<div class="portrait-column">
+					<div class="media-item portrait-item">
 						<figure>
-							{#if item.type === 'image'}
+							{#if items[layoutInfo.portraitIndex].type === 'image'}
 								<img
-									src={item.url}
+									src={items[layoutInfo.portraitIndex].url}
 									alt={caption || 'Afbeelding in mediapaar'}
 									loading="lazy"
-									style:object-position={getObjectPosition(item)}
 								/>
-							{:else if item.type === 'video'}
+							{:else if items[layoutInfo.portraitIndex].type === 'video'}
 								<video
-									use:playHls={item.url}
+									use:playHls={items[layoutInfo.portraitIndex].url}
 									use:playOnView
 									playsinline
 									muted
 									loop
-									poster={item.poster || ''}
-									controls={item.showControls ?? true}
+									poster={items[layoutInfo.portraitIndex].poster || ''}
+									controls={items[layoutInfo.portraitIndex].showControls ?? true}
 								></video>
 							{/if}
-
 						</figure>
 					</div>
-				{/each}
-			</div>
-
-			<!-- Portrait item rechts -->
-			<div class="portrait-column">
-				<div class="media-item portrait-item">
-					<figure>
-						{#if items[layoutInfo.portraitIndex].type === 'image'}
-							<img
-								src={items[layoutInfo.portraitIndex].url}
-								alt={caption || 'Afbeelding in mediapaar'}
-								loading="lazy"
-							/>
-						{:else if items[layoutInfo.portraitIndex].type === 'video'}
-							<video
-								use:playHls={items[layoutInfo.portraitIndex].url}
-								use:playOnView
-								playsinline
-								muted
-								loop
-								poster={items[layoutInfo.portraitIndex].poster || ''}
-								controls={items[layoutInfo.portraitIndex].showControls ?? true}
-							></video>
-						{/if}
-
-					</figure>
 				</div>
-			</div>
-		{/if}
+			{/if}
 		</section>
 
 		{#if caption || source}
