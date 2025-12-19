@@ -18,11 +18,11 @@
 	$: isBars = indicatorStyle === 'bars';
 
 	// Generate dynamic CSS variables based on indicator style
-	// Match preview styling exactly: dots = 8px circles, bars = 20px x 6px rectangles
+	// Match preview styling exactly: dots = 8px circles, bars = 30px x 3px rectangles
 	$: indicatorVars = isBars
 		? {
-				'--slider-dot-width': '20px',
-				'--slider-dot-height': '6px',
+				'--slider-dot-width': '30px',
+				'--slider-dot-height': '3px',
 				'--slider-dot-border-radius': '2px',
 				'--slider-dot-scale': '1.15',
 				'--slider-dots-bg': 'transparent',

@@ -278,9 +278,10 @@
 		</div>
 	</div>
 
-	<!-- Always show container options for both dots and bars -->
-	<div class="section">
-		<h3>Indicator Container</h3>
+	<!-- Only show container options for dots (bars have transparent container) -->
+	{#if isDots}
+		<div class="section">
+			<h3>Indicator Container</h3>
 
 		<div class="control-group">
 			<label for="dots-bg">Achtergrondkleur</label>
@@ -341,13 +342,14 @@
 			<span class="hint">Bijv: 8px, 0.5rem</span>
 		</div>
 	</div>
+	{/if}
 
 	<div class="section">
 		<h3>Indicator Kleuren</h3>
 		<p class="section-note">
 			💡 Vorm en grootte zijn gefixeerd zoals in de preview. {isDots
 				? 'Dots zijn 8×8px ronde cirkels.'
-				: 'Bars zijn 20×6px rechthoekjes.'}
+				: 'Bars zijn 30×3px rechthoekjes.'}
 		</p>
 
 		<div class="control-group">
