@@ -135,6 +135,7 @@ export type Theme = {
 	'textframe-caption-color'?: string;
 	'textframe-caption-size'?: string;
 	'textframe-img-radius'?: string;
+	'textframe-inline-img-width'?: string;
 	'textframe-toggle-size'?: string;
 	'textframe-toggle-color'?: string;
 	'textframe-toggle-bg'?: string;

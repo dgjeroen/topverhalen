@@ -393,7 +393,7 @@
 	}
 
 	.inline-image {
-		width: 50%;
+		width: var(--textframe-inline-img-width, 50%);
 		margin: 0.5rem 0 0 0;
 		display: block;
 	}
