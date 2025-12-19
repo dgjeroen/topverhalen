@@ -17,7 +17,7 @@
 	if (!theme['slider-dots-padding']) theme['slider-dots-padding'] = '6px 12px';
 	if (!theme['slider-dots-gap']) theme['slider-dots-gap'] = '8px';
 	if (!theme['slider-dot-size']) theme['slider-dot-size'] = '12px';
-	if (!theme['slider-dot-bg']) theme['slider-dot-bg'] = '#ffffff';
+	if (!theme['slider-dot-bg']) theme['slider-dot-bg'] = '#d1d5db';
 	if (!theme['slider-dot-border-width']) theme['slider-dot-border-width'] = '2px';
 	if (!theme['slider-dot-border-radius']) theme['slider-dot-border-radius'] = '50%';
 	if (!theme['slider-dot-active-bg']) theme['slider-dot-active-bg'] = '#d10a10';

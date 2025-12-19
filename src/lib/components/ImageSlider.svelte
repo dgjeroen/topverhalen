@@ -24,13 +24,19 @@
 				'--slider-dot-width': '20px',
 				'--slider-dot-height': '6px',
 				'--slider-dot-border-radius': '2px',
-				'--slider-dot-scale': '1.15'
+				'--slider-dot-scale': '1.15',
+				'--slider-dots-bg': 'transparent',
+				'--slider-dots-padding': '0',
+				'--slider-dots-gap': '6px'
 			}
 		: {
 				'--slider-dot-width': '8px',
 				'--slider-dot-height': '8px',
 				'--slider-dot-border-radius': '50%',
-				'--slider-dot-scale': '1.2'
+				'--slider-dot-scale': '1.2',
+				'--slider-dots-bg': theme['slider-dots-bg'] || 'rgba(255, 255, 255, 0.9)',
+				'--slider-dots-padding': theme['slider-dots-padding'] || '4px 8px',
+				'--slider-dots-gap': theme['slider-dots-gap'] || '6px'
 			};
 
 	let touchstartX = 0;
@@ -135,7 +141,7 @@
 	>
 		<div
 			class="dots-nav"
-			style="--slider-dot-width: {indicatorVars['--slider-dot-width']}; --slider-dot-height: {indicatorVars['--slider-dot-height']}; --slider-dot-border-radius: {indicatorVars['--slider-dot-border-radius']}; --slider-dot-scale: {indicatorVars['--slider-dot-scale']};"
+			style="--slider-dot-width: {indicatorVars['--slider-dot-width']}; --slider-dot-height: {indicatorVars['--slider-dot-height']}; --slider-dot-border-radius: {indicatorVars['--slider-dot-border-radius']}; --slider-dot-scale: {indicatorVars['--slider-dot-scale']}; --slider-dots-bg: {indicatorVars['--slider-dots-bg']}; --slider-dots-padding: {indicatorVars['--slider-dots-padding']}; --slider-dots-gap: {indicatorVars['--slider-dots-gap']};"
 		>
 			{#each images as _, i}
 				<button
@@ -296,6 +302,10 @@
 	.dots-nav button {
 		width: var(--slider-dot-width, 8px);
 		height: var(--slider-dot-height, 8px);
+		min-width: var(--slider-dot-width, 8px);
+		min-height: var(--slider-dot-height, 8px);
+		max-width: var(--slider-dot-width, 8px);
+		max-height: var(--slider-dot-height, 8px);
 		border-radius: var(--slider-dot-border-radius, 50%);
 		border: none;
 		background-color: var(--slider-dot-bg, #d1d5db);
@@ -304,6 +314,7 @@
 		outline: none;
 		box-sizing: border-box;
 		flex-shrink: 0;
+		padding: 0;
 	}
 
 	.dots-nav button:focus {
