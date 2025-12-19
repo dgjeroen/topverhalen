@@ -543,6 +543,7 @@ export interface TextFrameContent {
 export interface TimelineContent {
 	title?: string;
 	timelines: TimelineItem[];
+	useHorizontalLayout?: boolean;
 }
 
 export interface EmbedContent {

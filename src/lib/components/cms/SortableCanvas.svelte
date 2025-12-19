@@ -2307,6 +2307,21 @@ Voorbeelden:
 							</span>
 						</div>
 
+						<div style="margin-bottom: 1.5rem;">
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.useHorizontalLayout}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Gebruik horizontale layout op desktop</span>
+							</label>
+							<p class="control-hint" style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">
+								💡 Handig voor tijdlijnen met veel items. Op mobiel wordt altijd de horizontale
+								carousel getoond.
+							</p>
+						</div>
+
 						<!-- TIMELINE ITEMS -->
 						<div class="splide-container">
 							<div id="splide-{block.id}" class="splide">

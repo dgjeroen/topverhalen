@@ -6,11 +6,13 @@
 	let {
 		timelines,
 		title = 'Tijdlijn', // ✅ ADD: Default title
-		theme = {}
+		theme = {},
+		useHorizontalLayout = false
 	}: {
 		timelines: TimelineItem[];
 		title?: string;
 		theme?: Theme;
+		useHorizontalLayout?: boolean;
 	} = $props();
 
 	// Check if mobile and desktop should use same styling
@@ -112,7 +114,7 @@
 	});
 </script>
 
-{#if isDesktop}
+{#if isDesktop && !useHorizontalLayout}
 	<section
 		class="timeline-section"
 		style:--timeline-section-margin={theme['timeline-section-margin'] || '4rem'}
