@@ -24,23 +24,17 @@
 
 	// Local UI state for the button opacity slider (0-100)
 	let btnOpacity = Math.round((parseColor(theme['slider-btn-bg'])?.a ?? 1) * 100);
-	let containerOpacity = Math.round((parseColor(theme['slider-container-bg'])?.a ?? 1) * 100);
 
 	// Track whether transparency is enabled (controls whether opacity slider is active)
 	let useBtnTransparency = (parseColor(theme['slider-btn-bg'])?.a ?? 1) < 1;
-	let useContainerTransparency = (parseColor(theme['slider-container-bg'])?.a ?? 1) < 1;
 
 	// Keep a last-alpha so we can restore a reasonable default when enabling transparency
 	let lastBtnAlpha = parseColor(theme['slider-btn-bg'])?.a ?? 1;
-	let lastContainerAlpha = parseColor(theme['slider-container-bg'])?.a ?? 1;
 
 	onMount(() => {
 		btnOpacity = Math.round((parseColor(theme['slider-btn-bg'])?.a ?? 1) * 100);
-		containerOpacity = Math.round((parseColor(theme['slider-container-bg'])?.a ?? 1) * 100);
 		useBtnTransparency = (parseColor(theme['slider-btn-bg'])?.a ?? 1) < 1;
-		useContainerTransparency = (parseColor(theme['slider-container-bg'])?.a ?? 1) < 1;
 		lastBtnAlpha = parseFloat((parseColor(theme['slider-btn-bg'])?.a ?? 1).toString());
-		lastContainerAlpha = parseFloat((parseColor(theme['slider-container-bg'])?.a ?? 1).toString());
 	});
 
 	// Helpers
@@ -101,50 +95,6 @@
 		onsave();
 	}
 
-	function onBtnOpacityInput(v: number) {
-		// ensure transparency mode is active when dragging
-		if (!useBtnTransparency) {
-			useBtnTransparency = true;
-		}
-		btnOpacity = v;
-		const alpha = v / 100;
-		const c = parseColor(theme['slider-btn-bg']) ?? { r: 255, g: 255, b: 255, a: 1 };
-		theme['slider-btn-bg'] = toRgbaString({ r: c.r, g: c.g, b: c.b, a: alpha });
-	}
-
-	function onBtnOpacityChange() {
-		lastBtnAlpha = parseColor(theme['slider-btn-bg'])?.a ?? 1;
-		onsave();
-	}
-
-	function toggleContainerTransparent(checked: boolean) {
-		useContainerTransparency = checked;
-		const c = parseColor(theme['slider-container-bg']) ?? { r: 255, g: 255, b: 255, a: 1 };
-		if (checked) {
-			const alpha = lastContainerAlpha < 1 ? lastContainerAlpha : 0.8;
-			theme['slider-container-bg'] = toRgbaString({ r: c.r, g: c.g, b: c.b, a: alpha });
-			containerOpacity = Math.round(alpha * 100);
-		} else {
-			theme['slider-container-bg'] = toRgbaString({ r: c.r, g: c.g, b: c.b, a: 1 });
-			containerOpacity = 100;
-		}
-		lastContainerAlpha = parseFloat((parseColor(theme['slider-container-bg'])?.a ?? 1).toString());
-		onsave();
-	}
-
-	function onContainerOpacityInput(v: number) {
-		if (!useContainerTransparency) useContainerTransparency = true;
-		containerOpacity = v;
-		const alpha = v / 100;
-		const c = parseColor(theme['slider-container-bg']) ?? { r: 255, g: 255, b: 255, a: 1 };
-		theme['slider-container-bg'] = toRgbaString({ r: c.r, g: c.g, b: c.b, a: alpha });
-		onsave();
-	}
-
-	function onContainerOpacityChange() {
-		lastContainerAlpha = parseColor(theme['slider-container-bg'])?.a ?? 1;
-		onsave();
-	}
 </script>
 
 <div class="style-editor">
@@ -393,44 +343,15 @@
 	</div>
 
 	<div class="section">
-		<h3>{isDots ? 'Dots' : 'Bars'} (Actief)</h3>
+		<h3>Indicator Kleuren</h3>
+		<p class="section-note">
+			💡 Vorm en grootte zijn gefixeerd zoals in de preview. {isDots
+				? 'Dots zijn 8×8px ronde cirkels.'
+				: 'Bars zijn 20×6px rechthoekjes.'}
+		</p>
 
 		<div class="control-group">
-			<label for="dot-size">{isDots ? 'Grootte (diameter)' : 'Hoogte'}</label>
-			<input
-				id="dot-size"
-				type="text"
-				bind:value={theme['slider-dot-size']}
-				on:change={onsave}
-				placeholder={isDots ? '12px' : '6px'}
-				class="text-input"
-			/>
-			<span class="hint"
-				>{isDots
-					? 'Bijv: 12px, 14px, 1rem'
-					: 'Hoogte van de streep. Breedte is 20px standaard'}</span
-			>
-		</div>
-
-		<div class="control-group">
-			<label for="dot-border-radius">Vorm (afronding hoeken)</label>
-			<input
-				id="dot-border-radius"
-				type="text"
-				bind:value={theme['slider-dot-border-radius']}
-				on:change={onsave}
-				placeholder={isDots ? '50%' : '2px'}
-				class="text-input"
-			/>
-			<span class="hint"
-				>{isDots
-					? 'Rond: 50% of 100px. Vierkant: 0'
-					: 'Rechthoekig: 0 of 2px. Afgerond: 4px of 8px'}</span
-			>
-		</div>
-
-		<div class="control-group">
-			<label for="dot-active-bg">Achtergrondkleur</label>
+			<label for="dot-active-bg">Actieve indicator</label>
 			<div class="color-control">
 				<input
 					id="dot-active-bg"
@@ -446,14 +367,11 @@
 					placeholder="#d10a10"
 				/>
 			</div>
+			<span class="hint">De kleur van de huidige slide indicator</span>
 		</div>
-	</div>
-
-	<div class="section">
-		<h3>{isDots ? 'Dots' : 'Bars'} (Inactief)</h3>
 
 		<div class="control-group">
-			<label for="dot-bg">Achtergrondkleur</label>
+			<label for="dot-bg">Inactieve indicators</label>
 			<div class="color-control">
 				<input id="dot-bg" type="color" bind:value={theme['slider-dot-bg']} on:change={onsave} />
 				<input
@@ -461,9 +379,10 @@
 					class="color-value"
 					bind:value={theme['slider-dot-bg']}
 					on:change={onsave}
-					placeholder="#ffffff"
+					placeholder="#d1d5db"
 				/>
 			</div>
+			<span class="hint">De kleur van de overige indicators</span>
 		</div>
 	</div>
 </div>
@@ -493,6 +412,17 @@
 		color: #374151;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
+	}
+
+	.section-note {
+		margin: 0 0 1rem 0;
+		padding: 0.75rem;
+		background: #f3f4f6;
+		border-left: 3px solid #d10a10;
+		border-radius: 4px;
+		font-size: 0.8125rem;
+		color: #4b5563;
+		line-height: 1.5;
 	}
 
 	.control-group {
