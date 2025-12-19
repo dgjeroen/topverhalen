@@ -328,84 +328,88 @@
 		</div>
 	</div>
 
-	{#if isDots}
-		<div class="section">
-			<h3>Dots Container</h3>
+	<!-- Always show container options for both dots and bars -->
+	<div class="section">
+		<h3>Indicator Container</h3>
 
-			<div class="control-group">
-				<label for="dots-bg">Achtergrondkleur</label>
-				<div class="color-control">
-					<input
-						id="dots-bg"
-						type="color"
-						bind:value={theme['slider-dots-bg']}
-						on:change={onsave}
-					/>
-					<input
-						type="text"
-						class="color-value"
-						bind:value={theme['slider-dots-bg']}
-						on:change={onsave}
-						placeholder="rgba(255,255,255,0.9)"
-					/>
-				</div>
-			</div>
-
-			<div class="control-group">
-				<label for="dots-radius">Afronding</label>
+		<div class="control-group">
+			<label for="dots-bg">Achtergrondkleur</label>
+			<div class="color-control">
 				<input
-					id="dots-radius"
-					type="text"
-					bind:value={theme['slider-dots-border-radius']}
+					id="dots-bg"
+					type="color"
+					bind:value={theme['slider-dots-bg']}
 					on:change={onsave}
-					placeholder="50px"
-					class="text-input"
 				/>
-				<span class="hint">Rond: 50px of 999px (pill), hoekig: 8px of 12px</span>
-			</div>
-
-			<div class="control-group">
-				<label for="dots-padding">Padding</label>
 				<input
-					id="dots-padding"
 					type="text"
-					bind:value={theme['slider-dots-padding']}
+					class="color-value"
+					bind:value={theme['slider-dots-bg']}
 					on:change={onsave}
-					placeholder="6px 12px"
-					class="text-input"
+					placeholder="rgba(255,255,255,0.9)"
 				/>
-				<span class="hint">Bijv: 4px 8px, 0.5rem 1rem</span>
 			</div>
-
-			<div class="control-group">
-				<label for="dots-gap">Afstand tussen dots</label>
-				<input
-					id="dots-gap"
-					type="text"
-					bind:value={theme['slider-dots-gap']}
-					on:change={onsave}
-					placeholder="8px"
-					class="text-input"
-				/>
-				<span class="hint">Bijv: 8px, 0.5rem</span>
-			</div>
+			<span class="hint">Voor transparant: gebruik 'transparent' of rgba(255,255,255,0)</span>
 		</div>
-	{/if}
+
+		<div class="control-group">
+			<label for="dots-radius">Afronding container</label>
+			<input
+				id="dots-radius"
+				type="text"
+				bind:value={theme['slider-dots-border-radius']}
+				on:change={onsave}
+				placeholder="50px"
+				class="text-input"
+			/>
+			<span class="hint">Rond: 50px of 999px (pill), hoekig: 8px of 12px</span>
+		</div>
+
+		<div class="control-group">
+			<label for="dots-padding">Padding container</label>
+			<input
+				id="dots-padding"
+				type="text"
+				bind:value={theme['slider-dots-padding']}
+				on:change={onsave}
+				placeholder="6px 12px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 4px 8px, 0.5rem 1rem</span>
+		</div>
+
+		<div class="control-group">
+			<label for="dots-gap">Afstand tussen {isDots ? 'dots' : 'strepen'}</label>
+			<input
+				id="dots-gap"
+				type="text"
+				bind:value={theme['slider-dots-gap']}
+				on:change={onsave}
+				placeholder="8px"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 8px, 0.5rem</span>
+		</div>
+	</div>
 
 	<div class="section">
 		<h3>{isDots ? 'Dots' : 'Bars'} (Actief)</h3>
 
 		<div class="control-group">
-			<label for="dot-size">Grootte</label>
+			<label for="dot-size">{isDots ? 'Grootte (diameter)' : 'Hoogte'}</label>
 			<input
 				id="dot-size"
 				type="text"
 				bind:value={theme['slider-dot-size']}
 				on:change={onsave}
-				placeholder="12px"
+				placeholder={isDots ? '12px' : '6px'}
 				class="text-input"
 			/>
-			<span class="hint">Bijv: 12px, 14px, 1rem (inclusief rand)</span>
+			<span class="hint"
+				>{isDots
+					? 'Bijv: 12px, 14px, 1rem'
+					: 'Hoogte van de streep. Breedte is 20px standaard'}</span
+			>
 		</div>
 
 		<div class="control-group">

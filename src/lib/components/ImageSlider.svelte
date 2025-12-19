@@ -1,6 +1,6 @@
 <!-- src/lib/components/ImageSlider.svelte -->
 <script lang="ts">
-	import type { SliderContent } from '$lib/types';
+	import type { SliderContent, Theme } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
 	import { onMount } from 'svelte';
 
@@ -8,9 +8,25 @@
 		orientation?: 'portrait' | 'landscape';
 	};
 	export let images: ImageWithOrientation[];
+	export let theme: Theme = {};
 
 	let currentIndex = 0;
 	$: currentImage = images[currentIndex];
+
+	// Apply different styles based on indicator type
+	$: indicatorStyle = theme['slider-indicator-style'] || 'dots';
+	$: isBars = indicatorStyle === 'bars';
+
+	// Generate dynamic CSS variables based on indicator style
+	$: indicatorVars = isBars
+		? {
+				'--slider-dot-width': theme['slider-bar-width'] || '20px',
+				'--slider-dot-border-radius': theme['slider-dot-border-radius'] || '2px'
+			}
+		: {
+				'--slider-dot-width': theme['slider-dot-size'] || '12px',
+				'--slider-dot-border-radius': theme['slider-dot-border-radius'] || '50%'
+			};
 
 	let touchstartX = 0;
 	let touchendX = 0;
@@ -112,7 +128,10 @@
 		ontouchstart={handleTouchStart}
 		ontouchend={handleTouchEnd}
 	>
-		<div class="dots-nav">
+		<div
+			class="dots-nav"
+			style="--slider-dot-width: {indicatorVars['--slider-dot-width']}; --slider-dot-border-radius: {indicatorVars['--slider-dot-border-radius']};"
+		>
 			{#each images as _, i}
 				<button
 					class:active={currentIndex === i}

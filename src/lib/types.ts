@@ -278,6 +278,7 @@ export type Theme = {
 	'slider-btn-color'?: string;
 	'slider-btn-size'?: string;
 	'slider-btn-font-size'?: string;
+	'slider-indicator-style'?: 'dots' | 'bars';
 	'slider-dots-bg'?: string;
 	'slider-dots-padding'?: string;
 	'slider-dots-border-radius'?: string;
@@ -285,8 +286,10 @@ export type Theme = {
 	'slider-dot-size'?: string;
 	'slider-dot-bg'?: string;
 	'slider-dot-border-width'?: string;
+	'slider-dot-border-radius'?: string;
 	'slider-dot-active-bg'?: string;
 	'slider-dot-active-border-width'?: string;
+	'slider-bar-width'?: string;
 
 	// ============================================
 	// ACHTERGROND AFBEELDING (Desktop only)
