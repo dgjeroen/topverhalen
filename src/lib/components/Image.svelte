@@ -5,7 +5,8 @@
 	import ImageParallax from './ImageParallax.svelte';
 
 	// DE FIX: Destructure de props direct uit de ImageContent interface
-	let { url, caption, source, parallax, aspectRatio, focusX, focusY, width }: ImageContent = $props();
+	let { url, caption, source, parallax, aspectRatio, focusX, focusY, width }: ImageContent =
+		$props();
 </script>
 
 {#if parallax}

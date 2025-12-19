@@ -5,43 +5,43 @@ import type { RequestHandler } from './$types';
 import { verifyMagicToken, createSession } from '$lib/server/auth';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-    const token = url.searchParams.get('token');
+	const token = url.searchParams.get('token');
 
-    if (!token) {
-        throw redirect(303, '/cms/login?error=invalid_token');
-    }
+	if (!token) {
+		throw redirect(303, '/cms/login?error=invalid_token');
+	}
 
-    try {
-        // Verifieer magic token
-        const user = await verifyMagicToken(token);
+	try {
+		// Verifieer magic token
+		const user = await verifyMagicToken(token);
 
-        if (!user) {
-            throw redirect(303, '/cms/login?error=expired_token');
-        }
+		if (!user) {
+			throw redirect(303, '/cms/login?error=expired_token');
+		}
 
-        // Maak sessie aan
-        const sessionId = await createSession(user.email);
+		// Maak sessie aan
+		const sessionId = await createSession(user.email);
 
-        // Zet cookie
-        cookies.set('session', sessionId, {
-            path: '/',
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: !dev, // ✅ In productie: true, in dev: false
-            maxAge: 60 * 60 * 24 // 24 uur
-        });
+		// Zet cookie
+		cookies.set('session', sessionId, {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: !dev, // ✅ In productie: true, in dev: false
+			maxAge: 60 * 60 * 24 // 24 uur
+		});
 
-        // Redirect naar CMS
-        throw redirect(303, '/cms');
-    } catch (err) {
-        console.error('Token verification error:', err);
+		// Redirect naar CMS
+		throw redirect(303, '/cms');
+	} catch (err) {
+		console.error('Token verification error:', err);
 
-        // Als het een redirect is, gooi door
-        if (err && typeof err === 'object' && 'status' in err && err.status === 303) {
-            throw err;
-        }
+		// Als het een redirect is, gooi door
+		if (err && typeof err === 'object' && 'status' in err && err.status === 303) {
+			throw err;
+		}
 
-        // Anders: verificatie gefaald
-        throw redirect(303, '/cms/login?error=verification_failed');
-    }
+		// Anders: verificatie gefaald
+		throw redirect(303, '/cms/login?error=verification_failed');
+	}
 };

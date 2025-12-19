@@ -150,22 +150,6 @@
 		outline: none;
 	}
 
-	.color-input-group {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	.color-picker {
-		width: 40px;
-		height: 38px;
-		border: 1px solid #d1d5db;
-		border-radius: 4px;
-		cursor: pointer;
-		padding: 0;
-		background: none;
-	}
-
 	.hint {
 		font-size: 0.75rem;
 		color: #9ca3af;

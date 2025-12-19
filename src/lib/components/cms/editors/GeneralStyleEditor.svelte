@@ -115,8 +115,8 @@
 			</div>
 			<span class="hint">
 				<strong>Tip:</strong> Raadpleeg de
-				<a href="https://adr-brand-guide.web.app/kleuren.html" target="_blank">Brand Guide</a> voor
-				aanbevolen kleuren.
+				<a href="https://adr-brand-guide.web.app/kleuren.html" target="_blank">Brand Guide</a> voor aanbevolen
+				kleuren.
 			</span>
 		</div>
 	</div>

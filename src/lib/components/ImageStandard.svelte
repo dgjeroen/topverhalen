@@ -27,9 +27,7 @@
 	);
 
 	// Object position for cropping
-	const objectPosition = $derived(
-		needsCropping ? `${focusX ?? 50}% ${focusY ?? 50}%` : undefined
-	);
+	const objectPosition = $derived(needsCropping ? `${focusX ?? 50}% ${focusY ?? 50}%` : undefined);
 </script>
 
 <figure>

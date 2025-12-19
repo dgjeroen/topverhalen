@@ -3,7 +3,14 @@
 	import type { ImageContent } from '$lib/types';
 	import { lightbox } from '$lib/stores/lightbox';
 
-	let { url, caption, source, aspectRatio = 'original', focusX = 50, focusY = 50 }: ImageContent = $props();
+	let {
+		url,
+		caption,
+		source,
+		aspectRatio = 'original',
+		focusX = 50,
+		focusY = 50
+	}: ImageContent = $props();
 	let y = $state(0);
 	let containerEl = $state<HTMLElement | undefined>(undefined);
 	let imgEl = $state<HTMLImageElement | undefined>(undefined);
@@ -41,10 +48,7 @@
 <svelte:window bind:scrollY={y} />
 
 <figure>
-	<div
-		class="parallax-wrapper"
-		style:aspect-ratio={cssAspectRatio}
-	>
+	<div class="parallax-wrapper" style:aspect-ratio={cssAspectRatio}>
 		<button
 			class="parallax-window"
 			bind:this={containerEl}

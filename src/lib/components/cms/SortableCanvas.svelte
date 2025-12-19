@@ -486,7 +486,7 @@
 
 		// Speciale melding voor 4 foto's in 2x2 grid
 		if (count === 4 && cols === 2) {
-			return '2x2 Grid • 4 foto\'s';
+			return "2x2 Grid • 4 foto's";
 		}
 
 		const layoutMap: Record<number, string> = {
@@ -1554,8 +1554,8 @@ Voorbeelden:
 										class:active={block.content.columns === 2 && block.content.images.length === 2}
 										class:disabled={block.content.images.length !== 2}
 										title={block.content.images.length !== 2
-											? 'Alleen beschikbaar met precies 2 foto\'s'
-											: '2 foto\'s naast elkaar'}
+											? "Alleen beschikbaar met precies 2 foto's"
+											: "2 foto's naast elkaar"}
 									>
 										<input
 											type="radio"
@@ -1575,8 +1575,8 @@ Voorbeelden:
 										class:active={block.content.columns === 3 && block.content.images.length === 3}
 										class:disabled={block.content.images.length !== 3}
 										title={block.content.images.length !== 3
-											? 'Alleen beschikbaar met precies 3 foto\'s'
-											: '3 foto\'s naast elkaar'}
+											? "Alleen beschikbaar met precies 3 foto's"
+											: "3 foto's naast elkaar"}
 									>
 										<input
 											type="radio"
@@ -1597,8 +1597,8 @@ Voorbeelden:
 										class:active={block.content.columns === 4 && block.content.images.length === 4}
 										class:disabled={block.content.images.length !== 4}
 										title={block.content.images.length !== 4
-											? 'Alleen beschikbaar met precies 4 foto\'s'
-											: '4 foto\'s naast elkaar'}
+											? "Alleen beschikbaar met precies 4 foto's"
+											: "4 foto's naast elkaar"}
 									>
 										<input
 											type="radio"
@@ -1620,7 +1620,7 @@ Voorbeelden:
 										class:active={block.content.columns === 2 && block.content.images.length === 4}
 										class:disabled={block.content.images.length !== 4}
 										title={block.content.images.length !== 4
-											? 'Alleen beschikbaar met precies 4 foto\'s'
+											? "Alleen beschikbaar met precies 4 foto's"
 											: '2x2 Grid layout'}
 									>
 										<input
@@ -2339,95 +2339,95 @@ Voorbeelden:
 				{:else if block.type === 'mediaPair'}
 					<div class="mediapaar-editor">
 						<div class="mediapaar-controls-row">
-						<div class="control-group">
-							<div class="control-label">Breedte:</div>
-							<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
-								<IconButton
-									icon="icon-width-narrow"
-									label="Normaal"
-									active={block.content.width === 'normal'}
-									onclick={() => {
-										block.content.width = 'normal';
-										dispatch('save');
-									}}
-								/>
-								<IconButton
-									icon="icon-width-wide"
-									label="Breed"
-									active={block.content.width === 'wide'}
-									onclick={() => {
-										block.content.width = 'wide';
-										dispatch('save');
-									}}
-								/>
+							<div class="control-group">
+								<div class="control-label">Breedte:</div>
+								<div class="width-controls" role="toolbar" aria-label="Breedte selectie">
+									<IconButton
+										icon="icon-width-narrow"
+										label="Normaal"
+										active={block.content.width === 'normal'}
+										onclick={() => {
+											block.content.width = 'normal';
+											dispatch('save');
+										}}
+									/>
+									<IconButton
+										icon="icon-width-wide"
+										label="Breed"
+										active={block.content.width === 'wide'}
+										onclick={() => {
+											block.content.width = 'wide';
+											dispatch('save');
+										}}
+									/>
+								</div>
+							</div>
+
+							<div class="control-group">
+								<div class="control-label">Layout:</div>
+								<div class="layout-buttons-grid">
+									<!-- 2-item layouts -->
+									<IconButton
+										icon="icon-mediapair-top"
+										label="Top"
+										active={block.content.verticalAlign === 'top'}
+										onclick={() => {
+											block.content.verticalAlign = 'top';
+											adjustMediaPairItems(block);
+										}}
+									/>
+									<IconButton
+										icon="icon-mediapair-center"
+										label="Center"
+										active={block.content.verticalAlign === 'center'}
+										onclick={() => {
+											block.content.verticalAlign = 'center';
+											adjustMediaPairItems(block);
+										}}
+									/>
+									<IconButton
+										icon="icon-mediapair-bottom"
+										label="Bottom"
+										active={block.content.verticalAlign === 'bottom'}
+										onclick={() => {
+											block.content.verticalAlign = 'bottom';
+											adjustMediaPairItems(block);
+										}}
+									/>
+									<IconButton
+										icon="icon-mediapair-bottom-alt"
+										label="Bottom Alt"
+										active={block.content.verticalAlign === 'bottom-alt'}
+										onclick={() => {
+											block.content.verticalAlign = 'bottom-alt';
+											adjustMediaPairItems(block);
+										}}
+									/>
+
+									<!-- 3-item layouts -->
+									<IconButton
+										icon="icon-mediapair-3col-left"
+										label="3 Col Left"
+										active={block.content.verticalAlign === '3col-left'}
+										onclick={() => {
+											block.content.verticalAlign = '3col-left';
+											adjustMediaPairItems(block);
+										}}
+									/>
+									<IconButton
+										icon="icon-mediapair-3col-right"
+										label="3 Col Right"
+										active={block.content.verticalAlign === '3col-right'}
+										onclick={() => {
+											block.content.verticalAlign = '3col-right';
+											adjustMediaPairItems(block);
+										}}
+									/>
+								</div>
 							</div>
 						</div>
 
-						<div class="control-group">
-							<div class="control-label">Layout:</div>
-							<div class="layout-buttons-grid">
-								<!-- 2-item layouts -->
-								<IconButton
-									icon="icon-mediapair-top"
-									label="Top"
-									active={block.content.verticalAlign === 'top'}
-									onclick={() => {
-										block.content.verticalAlign = 'top';
-										adjustMediaPairItems(block);
-									}}
-								/>
-								<IconButton
-									icon="icon-mediapair-center"
-									label="Center"
-									active={block.content.verticalAlign === 'center'}
-									onclick={() => {
-										block.content.verticalAlign = 'center';
-										adjustMediaPairItems(block);
-									}}
-								/>
-								<IconButton
-									icon="icon-mediapair-bottom"
-									label="Bottom"
-									active={block.content.verticalAlign === 'bottom'}
-									onclick={() => {
-										block.content.verticalAlign = 'bottom';
-										adjustMediaPairItems(block);
-									}}
-								/>
-								<IconButton
-									icon="icon-mediapair-bottom-alt"
-									label="Bottom Alt"
-									active={block.content.verticalAlign === 'bottom-alt'}
-									onclick={() => {
-										block.content.verticalAlign = 'bottom-alt';
-										adjustMediaPairItems(block);
-									}}
-								/>
-
-								<!-- 3-item layouts -->
-								<IconButton
-									icon="icon-mediapair-3col-left"
-									label="3 Col Left"
-									active={block.content.verticalAlign === '3col-left'}
-									onclick={() => {
-										block.content.verticalAlign = '3col-left';
-										adjustMediaPairItems(block);
-									}}
-								/>
-								<IconButton
-									icon="icon-mediapair-3col-right"
-									label="3 Col Right"
-									active={block.content.verticalAlign === '3col-right'}
-									onclick={() => {
-										block.content.verticalAlign = '3col-right';
-										adjustMediaPairItems(block);
-									}}
-								/>
-							</div>
-						</div>
-					</div>
-
-					<div class="mediapaar-items">
+						<div class="mediapaar-items">
 							{#each block.content.items as item, idx (idx)}
 								<div class="mediapaar-item" data-item-index={idx}>
 									<h5>{item.type === 'image' ? 'Afbeelding' : 'Video'}</h5>
@@ -2442,7 +2442,9 @@ Voorbeelden:
 									</select>
 
 									<label style="display: block; margin-top: 0.75rem;">
-										<span style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151;">
+										<span
+											style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151;"
+										>
 											Oriëntatie:
 										</span>
 										<select
@@ -2537,8 +2539,12 @@ Voorbeelden:
 						</div>
 
 						<!-- Gezamenlijk bijschrift voor hele MediaPair -->
-						<div style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">
-							<h5 style="margin-top: 0; margin-bottom: 0.75rem; color: #111827;">Gezamenlijk bijschrift</h5>
+						<div
+							style="margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;"
+						>
+							<h5 style="margin-top: 0; margin-bottom: 0.75rem; color: #111827;">
+								Gezamenlijk bijschrift
+							</h5>
 							<textarea
 								placeholder="Bijschrift voor alle items"
 								bind:value={block.content.caption}
@@ -2871,6 +2877,8 @@ Voorbeelden:
 		</div>
 	{/if}
 </div>
+
+<MediaPairIcons />
 
 <style>
 	.canvas-wrapper {
@@ -4343,5 +4351,3 @@ Voorbeelden:
 		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 	}
 </style>
-
-<MediaPairIcons />

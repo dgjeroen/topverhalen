@@ -426,14 +426,7 @@
 		/>
 		<path d="M 4 16 L 7 16 M 25 16 L 28 16" stroke="currentColor" stroke-width="2" />
 		<path d="M 16 6 L 16 9 M 16 23 L 16 26" stroke="currentColor" stroke-width="2" />
-		<text
-			x="16"
-			y="18"
-			text-anchor="middle"
-			font-size="6"
-			font-weight="600"
-			fill="currentColor"
-		>
+		<text x="16" y="18" text-anchor="middle" font-size="6" font-weight="600" fill="currentColor">
 			AUTO
 		</text>
 	</symbol>
@@ -450,14 +443,7 @@
 			stroke-width="2"
 			rx="2"
 		/>
-		<text
-			x="16"
-			y="18"
-			text-anchor="middle"
-			font-size="7"
-			font-weight="600"
-			fill="currentColor"
-		>
+		<text x="16" y="18" text-anchor="middle" font-size="7" font-weight="600" fill="currentColor">
 			4:3
 		</text>
 	</symbol>
@@ -474,14 +460,7 @@
 			stroke-width="2"
 			rx="2"
 		/>
-		<text
-			x="16"
-			y="18"
-			text-anchor="middle"
-			font-size="6"
-			font-weight="600"
-			fill="currentColor"
-		>
+		<text x="16" y="18" text-anchor="middle" font-size="6" font-weight="600" fill="currentColor">
 			16:9
 		</text>
 	</symbol>
@@ -498,14 +477,7 @@
 			stroke-width="2"
 			rx="2"
 		/>
-		<text
-			x="16"
-			y="18"
-			text-anchor="middle"
-			font-size="7"
-			font-weight="600"
-			fill="currentColor"
-		>
+		<text x="16" y="18" text-anchor="middle" font-size="7" font-weight="600" fill="currentColor">
 			4:5
 		</text>
 	</symbol>
@@ -522,14 +494,7 @@
 			stroke-width="2"
 			rx="2"
 		/>
-		<text
-			x="16"
-			y="18"
-			text-anchor="middle"
-			font-size="7"
-			font-weight="600"
-			fill="currentColor"
-		>
+		<text x="16" y="18" text-anchor="middle" font-size="7" font-weight="600" fill="currentColor">
 			1:1
 		</text>
 	</symbol>

@@ -7,24 +7,24 @@ import { error } from '@sveltejs/kit';
 export const prerender = !!process.env.GIST_ID;
 
 export const load: PageServerLoad = async () => {
-    const gistId = process.env.GIST_ID;
+	const gistId = process.env.GIST_ID;
 
-    if (!gistId) {
-        // In normale Vercel deployment (zonder GIST_ID), return fallback
-        console.log('[Story Route] No GIST_ID, skipping prerender');
-        throw error(404, 'This route is only available during static builds');
-    }
+	if (!gistId) {
+		// In normale Vercel deployment (zonder GIST_ID), return fallback
+		console.log('[Story Route] No GIST_ID, skipping prerender');
+		throw error(404, 'This route is only available during static builds');
+	}
 
-    console.log(`[Static Build] Loading Gist: ${gistId}`);
+	console.log(`[Static Build] Loading Gist: ${gistId}`);
 
-    try {
-        const projectData = await getGist(gistId);
-        return {
-            project: projectData,
-            isPreview: false
-        };
-    } catch (err) {
-        console.error(`[Static Build] Failed to load Gist:`, err);
-        throw error(500, 'Failed to load story data');
-    }
+	try {
+		const projectData = await getGist(gistId);
+		return {
+			project: projectData,
+			isPreview: false
+		};
+	} catch (err) {
+		console.error(`[Static Build] Failed to load Gist:`, err);
+		throw error(500, 'Failed to load story data');
+	}
 };

@@ -161,7 +161,7 @@
      ======================================== */
 	.frame-content {
 		background: var(--textframe-bg-color, #f7f7f7) !important;
-		border: 1px solid var(--textframe-border-color, #E1DEE0) !important;
+		border: 1px solid var(--textframe-border-color, #e1dee0) !important;
 		border-radius: var(--textframe-border-radius, 8px) !important;
 		padding: var(--textframe-padding, var(--space-l, 2rem)) !important;
 		overflow: hidden;
@@ -291,7 +291,7 @@
 	.text-content :global(blockquote) {
 		margin: var(--space-m, 1.5rem) 0;
 		padding: var(--space-s, 0.75rem) var(--space-m, 1.5rem);
-		border-left: 4px solid var(--textframe-border-color, #E1DEE0);
+		border-left: 4px solid var(--textframe-border-color, #e1dee0);
 		background: var(--color-bg-secondary, #f7f7f7);
 		color: var(--textframe-text-color, #32302c);
 		font-style: italic;
@@ -314,7 +314,7 @@
 		border-radius: 4px;
 		font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
 		font-size: 0.9em;
-		border: 1px solid var(--textframe-border-color, #E1DEE0);
+		border: 1px solid var(--textframe-border-color, #e1dee0);
 	}
 
 	.frame-text :global(pre),
@@ -324,7 +324,7 @@
 		border-radius: var(--textframe-border-radius, 8px);
 		overflow-x: auto;
 		margin: var(--space-m, 1.5rem) 0;
-		border: 1px solid var(--textframe-border-color, #E1DEE0);
+		border: 1px solid var(--textframe-border-color, #e1dee0);
 	}
 
 	.frame-text :global(pre code),
