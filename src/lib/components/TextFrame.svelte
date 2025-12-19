@@ -493,22 +493,10 @@
 			font-size: var(--font-size-lg, 1.5rem);
 		}
 
-		.frame-text-inline {
-			display: flex;
-			flex-direction: column;
-		}
-
+		/* Keep inline images at 50% and floating within text on mobile */
 		.inline-image {
-			float: none !important;
-			shape-outside: none;
-			width: 100%;
-			max-width: 100%;
-			margin: 0 0 var(--space-m, 1.5rem) 0 !important;
-			order: -1;
-		}
-
-		.text-content {
-			order: 1;
+			width: 50%;
+			max-width: 50%;
 		}
 	}
 
