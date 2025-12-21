@@ -346,7 +346,8 @@
 		}
 		.timeline-event {
 			position: relative;
-			margin-bottom: 3rem;
+			margin-bottom: -20%;
+			padding-bottom: 15%;
 			width: 50%;
 			transition:
 				opacity 1s ease-out,
@@ -354,6 +355,7 @@
 		}
 		.timeline-event:last-child {
 			margin-bottom: 0;
+			padding-bottom: 0;
 		}
 		.opacity-0 {
 			opacity: 0;
@@ -370,7 +372,23 @@
 			padding-right: 4rem;
 		}
 		.timeline-marker {
-			display: none;
+			position: absolute;
+			top: 0;
+			width: var(--timeline-marker-size, 1rem);
+			height: var(--timeline-marker-size, 1rem);
+			background-color: var(--timeline-marker-bg, #fdf6e9);
+			border: var(--timeline-marker-border-width, 4px) solid
+				var(--timeline-marker-border-color, #2c5599);
+			border-radius: 50%;
+			z-index: 10;
+		}
+		.is-even .timeline-marker {
+			left: 0;
+			transform: translateX(-50%);
+		}
+		.is-odd .timeline-marker {
+			left: 100%;
+			transform: translateX(-50%);
 		}
 		.timeline-event-content {
 			background-color: var(--timeline-card-bg, #fdf6e9);
@@ -460,11 +478,12 @@
 		font-weight: 700;
 		color: var(--timeline-mobile-year-color, #78350f);
 		background-color: var(--timeline-mobile-year-bg, #fdf6e9);
-		padding: 0 0.5rem;
+		padding: 0 0.75rem;
 		border-radius: 4px;
 		z-index: 3;
+		white-space: nowrap;
 	}
-	.timeline-marker {
+	.horizontal-timeline-section .timeline-marker {
 		position: absolute;
 		top: 3.5rem;
 		left: 50%;
