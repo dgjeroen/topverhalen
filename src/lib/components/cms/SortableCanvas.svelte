@@ -279,6 +279,18 @@
 		dispatch('save');
 	}
 
+	function handleTextFrameImageFocusClick(event: MouseEvent, image: any) {
+		const target = event.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+		const x = ((event.clientX - rect.left) / rect.width) * 100;
+		const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+		image.focusX = Math.round(x * 10) / 10;
+		image.focusY = Math.round(y * 10) / 10;
+
+		dispatch('save');
+	}
+
 	// === HULPFUNCTIES ===
 	let splideInstances = new Map<string, any>();
 	let gallerySortables = new Map<string, Sortable>();
@@ -2022,6 +2034,109 @@ Voorbeelden:
 									/>
 								</div>
 
+								{#if block.content.image.url}
+									<div class="control-group">
+										<div
+											style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"
+										>
+											<h5 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #374151;">
+												Focuspunt Instellen
+											</h5>
+											<span style="font-size: 0.75rem; color: #6b7280; font-family: monospace;">
+												X: {block.content.image.focusX ?? 50}% Y: {block.content.image.focusY ?? 50}%
+											</span>
+										</div>
+										<div
+											role="button"
+											tabindex="0"
+											class="focus-interactive-wrapper"
+											onclick={(e) => handleTextFrameImageFocusClick(e, block.content.image)}
+											onkeydown={(e) => {
+												if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+											}}
+											style="position: relative; cursor: crosshair; display: block; width: 100%; border-radius: 6px; overflow: hidden;"
+										>
+											<img
+												src={block.content.image.url}
+												alt="Focus preview"
+												style="width: 100%; height: auto; display: block; object-fit: contain;"
+											/>
+											<div
+												class="focus-dot"
+												style:left="{block.content.image.focusX ?? 50}%"
+												style:top="{block.content.image.focusY ?? 50}%"
+											></div>
+										</div>
+										<p
+											class="control-hint"
+											style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;"
+										>
+											Klik op het belangrijkste deel van de foto
+										</p>
+									</div>
+
+									<div class="control-group">
+										<div class="control-label">Beeldverhouding:</div>
+										<div class="aspect-controls" role="toolbar" aria-label="Beeldverhouding selectie">
+											<IconButton
+												icon="icon-aspect-original"
+												label="Origineel (volledig)"
+												active={(block.content.image.aspectRatio ?? 'original') === 'original'}
+												onclick={() => {
+													if (block.content.image) {
+														block.content.image.aspectRatio = 'original';
+														dispatch('save');
+													}
+												}}
+											/>
+											<IconButton
+												icon="icon-aspect-4-3"
+												label="4:3 (landschap)"
+												active={block.content.image.aspectRatio === '4:3'}
+												onclick={() => {
+													if (block.content.image) {
+														block.content.image.aspectRatio = '4:3';
+														dispatch('save');
+													}
+												}}
+											/>
+											<IconButton
+												icon="icon-aspect-16-9"
+												label="16:9 (breed landschap)"
+												active={block.content.image.aspectRatio === '16:9'}
+												onclick={() => {
+													if (block.content.image) {
+														block.content.image.aspectRatio = '16:9';
+														dispatch('save');
+													}
+												}}
+											/>
+											<IconButton
+												icon="icon-aspect-4-5"
+												label="4:5 (portret)"
+												active={block.content.image.aspectRatio === '4:5'}
+												onclick={() => {
+													if (block.content.image) {
+														block.content.image.aspectRatio = '4:5';
+														dispatch('save');
+													}
+												}}
+											/>
+											<IconButton
+												icon="icon-aspect-1-1"
+												label="1:1 (vierkant)"
+												active={block.content.image.aspectRatio === '1:1'}
+												onclick={() => {
+													if (block.content.image) {
+														block.content.image.aspectRatio = '1:1';
+														dispatch('save');
+													}
+												}}
+											/>
+										</div>
+									</div>
+								{/if}
+
 								<div class="control-group">
 									<label class="control-label" id="width-layout-label" for="width-layout-row">
 										Breedte + Layout
@@ -2190,6 +2305,21 @@ Voorbeelden:
 							>
 								Deze titel wordt getoond boven de tijdlijn
 							</span>
+						</div>
+
+						<div style="margin-bottom: 1.5rem;">
+							<label class="checkbox-label">
+								<input
+									type="checkbox"
+									bind:checked={block.content.useHorizontalLayout}
+									onchange={() => dispatch('save')}
+								/>
+								<span>Gebruik horizontale layout op desktop</span>
+							</label>
+							<p class="control-hint" style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">
+								💡 Handig voor tijdlijnen met veel items. Op mobiel wordt altijd de horizontale
+								carousel getoond.
+							</p>
 						</div>
 
 						<!-- TIMELINE ITEMS -->

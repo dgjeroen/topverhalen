@@ -246,6 +246,19 @@
 			/>
 			<span class="hint">Voor rechthoekige afbeeldingen</span>
 		</div>
+
+		<div class="control-group">
+			<label for="frame-inline-img-width">Inline Afbeelding Breedte</label>
+			<input
+				id="frame-inline-img-width"
+				type="text"
+				bind:value={theme['textframe-inline-img-width']}
+				onchange={onsave}
+				placeholder="50%"
+				class="text-input"
+			/>
+			<span class="hint">Bijv: 40%, 50%, 60%, 300px</span>
+		</div>
 	</div>
 
 	<!-- SECTIE: Inklapbaar Toggle -->

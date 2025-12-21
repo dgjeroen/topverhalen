@@ -28,7 +28,6 @@
 		border-bottom: 1px solid var(--colofon-border-color, var(--color-border, #e5e7eb));
 		padding-block: var(--colofon-padding-block, var(--space-l, 2rem));
 		font-size: var(--colofon-font-size, var(--font-size-m, 1rem));
-		text-align: center;
 	}
 
 	.colofon-container:not(.with-logo) {
@@ -52,11 +51,14 @@
 		font-weight: var(--colofon-dd-weight, 400);
 	}
 
-	/* Inline layout (default) */
+	/* Inline layout (default) - always centered */
 	dl.layout-inline {
 		display: flex;
 		flex-direction: column;
 		gap: var(--colofon-gap, var(--space-s, 0.75rem));
+		max-width: max-content;
+		margin: 0 auto;
+		text-align: center;
 	}
 
 	dl.layout-inline dt,
@@ -70,17 +72,18 @@
 		width: var(--colofon-column-gap, 0.5rem);
 	}
 
-	/* Columns layout */
+	/* Columns layout - block centered, dt alignment configurable */
 	dl.layout-columns {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: auto auto;
 		row-gap: var(--colofon-gap, var(--space-s, 0.75rem));
+		column-gap: var(--colofon-column-gap, 0.5rem);
 		max-width: max-content;
 		margin: 0 auto;
 	}
 
 	dl.layout-columns dt {
-		text-align: right;
+		text-align: var(--colofon-dt-align, right);
 		white-space: nowrap;
 		padding-right: var(--colofon-column-gap, 0.25rem);
 	}

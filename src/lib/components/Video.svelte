@@ -626,7 +626,7 @@
 
 	.volume-slider {
 		width: 80px;
-		height: 14px;
+		height: 6px;
 		background: transparent;
 		border-radius: 3px;
 		outline: none;
@@ -642,9 +642,6 @@
 		height: 6px;
 		background: rgba(255, 255, 255, 0.3);
 		border-radius: 3px;
-		position: relative;
-		top: 50%;
-		transform: translateY(-50%);
 	}
 
 	.volume-slider::-webkit-slider-thumb {

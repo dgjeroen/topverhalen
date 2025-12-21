@@ -135,6 +135,7 @@ export type Theme = {
 	'textframe-caption-color'?: string;
 	'textframe-caption-size'?: string;
 	'textframe-img-radius'?: string;
+	'textframe-inline-img-width'?: string;
 	'textframe-toggle-size'?: string;
 	'textframe-toggle-color'?: string;
 	'textframe-toggle-bg'?: string;
@@ -278,6 +279,7 @@ export type Theme = {
 	'slider-btn-color'?: string;
 	'slider-btn-size'?: string;
 	'slider-btn-font-size'?: string;
+	'slider-indicator-style'?: 'dots' | 'bars';
 	'slider-dots-bg'?: string;
 	'slider-dots-padding'?: string;
 	'slider-dots-border-radius'?: string;
@@ -285,8 +287,10 @@ export type Theme = {
 	'slider-dot-size'?: string;
 	'slider-dot-bg'?: string;
 	'slider-dot-border-width'?: string;
+	'slider-dot-border-radius'?: string;
 	'slider-dot-active-bg'?: string;
 	'slider-dot-active-border-width'?: string;
+	'slider-bar-width'?: string;
 
 	// ============================================
 	// ACHTERGROND AFBEELDING (Desktop only)
@@ -528,6 +532,9 @@ export interface TextFrameContent {
 		layout: 'top-rect' | 'top-rect-bottom' | 'inline-square-left' | 'inline-square-right';
 		rounded: boolean;
 		hidden?: boolean;
+		focusX?: number;
+		focusY?: number;
+		aspectRatio?: 'original' | '4:3' | '16:9' | '4:5' | '1:1';
 	} | null;
 	collapsible?: boolean;
 	defaultOpen?: boolean;
@@ -536,6 +543,7 @@ export interface TextFrameContent {
 export interface TimelineContent {
 	title?: string;
 	timelines: TimelineItem[];
+	useHorizontalLayout?: boolean;
 }
 
 export interface EmbedContent {

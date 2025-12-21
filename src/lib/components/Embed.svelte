@@ -164,14 +164,10 @@
 	</div>
 
 	{#if caption || source}
-		<div class="embed-meta">
-			{#if caption}
-				<p class="embed-caption">{caption}</p>
-			{/if}
-			{#if source}
-				<p class="embed-source">{source}</p>
-			{/if}
-		</div>
+		<figcaption>
+			<span class="caption">{caption}</span>
+			{#if source}<span class="source">{source}</span>{/if}
+		</figcaption>
 	{/if}
 </div>
 
@@ -234,26 +230,28 @@
 		min-width: 326px;
 	}
 
-	/* ✅ Meta */
-	.embed-meta {
-		margin-top: var(--space-s, 0.5rem);
-		padding: 0 var(--space-s, 0.5rem);
+	/* ✅ Caption */
+	figcaption {
+		padding-top: var(--space-s, 0.5rem);
+		font-size: var(--image-caption-font-size, 0.875rem);
+		color: var(--image-caption-color, #6b7280);
+		display: block;
+		overflow: hidden;
 	}
 
-	.embed-caption {
-		margin: 0 0 0.25rem 0;
-		font-size: var(--image-caption-font-size, 0.875rem);
+	.caption {
+		display: inline;
 		font-weight: var(--image-caption-font-weight, 400);
-		color: var(--image-caption-color, #6b7280);
-		text-align: var(--image-caption-align, left);
 		line-height: 1.4;
 	}
 
-	.embed-source {
-		margin: 0;
+	.source {
 		font-size: var(--image-source-font-size, 0.75rem);
 		font-style: var(--image-source-font-style, italic);
 		font-weight: var(--image-source-font-weight, 400);
 		color: var(--image-source-color, #9ca3af);
+		white-space: nowrap;
+		float: right;
+		margin-left: var(--space-xs, 0.25rem);
 	}
 </style>

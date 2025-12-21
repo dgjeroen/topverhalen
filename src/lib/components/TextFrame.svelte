@@ -90,6 +90,12 @@
 							alt={visibleImage.alt}
 							class:rounded={visibleImage.rounded}
 							loading="lazy"
+							style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+							style:aspect-ratio={visibleImage.rounded
+								? '1'
+								: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+									? visibleImage.aspectRatio.replace(':', ' / ')
+									: 'auto'}
 						/>
 						{#if showCaption && (visibleImage.caption || visibleImage.source)}
 							<figcaption>
@@ -111,6 +117,12 @@
 							alt={visibleImage.alt}
 							class:rounded={visibleImage.rounded}
 							loading="lazy"
+							style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+							style:aspect-ratio={visibleImage.rounded
+								? '1'
+								: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+									? visibleImage.aspectRatio.replace(':', ' / ')
+									: 'auto'}
 						/>
 						{#if showCaption && (visibleImage.caption || visibleImage.source)}
 							<figcaption>
@@ -136,6 +148,12 @@
 								alt={visibleImage.alt}
 								class:rounded={visibleImage.rounded}
 								loading="lazy"
+								style:object-position="{visibleImage.focusX ?? 50}% {visibleImage.focusY ?? 50}%"
+								style:aspect-ratio={visibleImage.rounded
+									? '1'
+									: visibleImage.aspectRatio && visibleImage.aspectRatio !== 'original'
+										? visibleImage.aspectRatio.replace(':', ' / ')
+										: 'auto'}
 							/>
 							{#if showCaption && (visibleImage.caption || visibleImage.source)}
 								<figcaption>
@@ -374,6 +392,7 @@
 		height: auto;
 		display: block;
 		border-radius: var(--textframe-img-radius, 6px) !important;
+		object-fit: cover;
 	}
 
 	.frame-image-top img.rounded {
@@ -393,7 +412,7 @@
 	}
 
 	.inline-image {
-		width: 50%;
+		width: var(--textframe-inline-img-width, 50%);
 		margin: 0.5rem 0 0 0;
 		display: block;
 	}
@@ -403,6 +422,7 @@
 		height: auto;
 		display: block;
 		border-radius: var(--textframe-img-radius, 6px) !important;
+		object-fit: cover;
 	}
 
 	.inline-image img.rounded {
@@ -493,22 +513,10 @@
 			font-size: var(--font-size-lg, 1.5rem);
 		}
 
-		.frame-text-inline {
-			display: flex;
-			flex-direction: column;
-		}
-
+		/* Keep inline images at 50% and floating within text on mobile */
 		.inline-image {
-			float: none !important;
-			shape-outside: none;
-			width: 100%;
-			max-width: 100%;
-			margin: 0 0 var(--space-m, 1.5rem) 0 !important;
-			order: -1;
-		}
-
-		.text-content {
-			order: 1;
+			width: 50%;
+			max-width: 50%;
 		}
 	}
 
