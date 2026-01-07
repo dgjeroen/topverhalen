@@ -32,7 +32,12 @@ export default {
 				throw new Error(message);
 			},
 			handleUnseenRoutes: ({ path }) => {
-				if (path.startsWith('/cms/') || path.startsWith('/api/') || path.startsWith('/test-env'))
+				if (
+					!path ||
+					path.startsWith('/cms/') ||
+					path.startsWith('/api/') ||
+					path.startsWith('/test-env')
+				)
 					return;
 				throw new Error(`Unseen route: ${path}`);
 			}
