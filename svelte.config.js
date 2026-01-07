@@ -17,6 +17,7 @@ export default {
 		},
 		prerender: {
 			entries: ['/story'],
+			entries: ['*'],
 			handleHttpError: ({ path, message }) => {
 				// Ignore errors voor routes die we niet willen prerenderen
 				if (
