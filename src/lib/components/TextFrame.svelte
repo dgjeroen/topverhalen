@@ -4,13 +4,6 @@
 	import { marked } from 'marked';
 	import { slide } from 'svelte/transition';
 
-	// ✅ Configure Marked ONCE (outside component instance)
-	marked.use({
-		gfm: true,
-		breaks: true,
-		async: false
-	});
-
 	let {
 		width,
 		heading,
@@ -21,6 +14,13 @@
 	}: TextFrameContent = $props();
 
 	let isOpen = $state(collapsible ? defaultOpen : true);
+
+	// ✅ Configure Marked with ALL features
+	marked.use({
+		gfm: true, // ✅ GitHub Flavored Markdown (tables, strikethrough, etc.)
+		breaks: true, // ✅ Line breaks
+		async: false // ✅ Force synchronous parsing
+	});
 
 	// ✅ PREPROCESSING: Convert custom syntax BEFORE marked parses
 	function preprocessMarkdown(md: string): string {
@@ -43,7 +43,6 @@
 	}
 
 	const parsedText = $derived(() => {
-		if (!text) return '';
 		const preprocessed = preprocessMarkdown(text);
 		const parsed = marked.parse(preprocessed, { breaks: true }) as string;
 		return postprocessHtml(parsed);
@@ -67,7 +66,6 @@
 	{#if collapsible}
 		<button
 			class="collapse-toggle"
-			type="button"
 			class:has-content={isOpen}
 			onclick={() => (isOpen = !isOpen)}
 			aria-expanded={isOpen}
