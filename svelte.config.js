@@ -30,6 +30,11 @@ export default {
 					return;
 				}
 				throw new Error(message);
+			},
+			handleUnseenRoutes: ({ path }) => {
+				if (path.startsWith('/cms/') || path.startsWith('/api/') || path.startsWith('/test-env'))
+					return;
+				throw new Error(`Unseen route: ${path}`);
 			}
 		},
 		paths: {
