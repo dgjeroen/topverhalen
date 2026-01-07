@@ -8,7 +8,7 @@ export default {
 		adapter: adapter({
 			pages: 'build',
 			assets: 'build',
-			fallback: null,
+			fallback: '200.html',
 			precompress: false,
 			strict: false
 		}),
