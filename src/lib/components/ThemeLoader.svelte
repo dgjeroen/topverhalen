@@ -88,7 +88,7 @@ body {
   position: relative;
   background-color: var(--color-background-light, #ffffff);
   overflow: visible;
-  min-height: 100vh;
+  min-height: 100dvh;
   height: auto;
 }
 

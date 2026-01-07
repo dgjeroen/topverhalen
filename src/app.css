@@ -17,7 +17,7 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	overflow: visible !important;
-	min-height: 100vh;
+	min-height: 100dvh;
 	height: auto !important;
 	position: relative;
 }
