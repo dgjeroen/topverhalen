@@ -5,8 +5,10 @@
 
 	let { theme } = $props<{ theme?: Theme }>();
 
-	$effect(() => {
-		if (!theme || Object.keys(theme).length === 0) return;
+	// ✅ FIX: Genereer CSS reactief ($derived) in plaats van in een effect.
+	// Hierdoor wordt de style tag al tijdens SSR/Export in de HTML gezet.
+	const cssContent = $derived.by(() => {
+		if (!theme || Object.keys(theme).length === 0) return '';
 
 		// ✅ FIX: Handle ALL value types (string, number, boolean)
 		// Separate quote variables from other variables for scoping
@@ -63,14 +65,10 @@
 
 		const allVars = cssVars + bgVars;
 
-		if (!allVars.trim()) return;
+		if (!allVars.trim()) return '';
 
-		const oldStyle = document.getElementById('theme-overrides');
-		if (oldStyle) oldStyle.remove();
-
-		const style = document.createElement('style');
-		style.id = 'theme-overrides';
-		style.textContent = `
+		// Retourneer de CSS string voor injectie in de head
+		return `
 :root {
 ${allVars}
 }
@@ -88,7 +86,7 @@ body {
   position: relative;
   background-color: var(--color-background-light, #ffffff);
   overflow: visible;
-  min-height: 100vh;
+  min-height: 100dvh;
   height: auto;
 }
 
@@ -111,17 +109,25 @@ body {
   }
 }
 `;
-		document.head.appendChild(style);
+	});
+
+	// ✅ EFFECT: Alleen voor client-side logica die de DOM nodig heeft (zoals image shapes)
+	$effect(() => {
+		if (!cssContent) return;
 
 		// Apply image shape data attributes after CSS variables are loaded
 		// Use setTimeout to ensure CSS has been applied
 		setTimeout(() => {
 			applyImageShape();
 		}, 0);
-
-		return () => {
-			const el = document.getElementById('theme-overrides');
-			if (el) el.remove();
-		};
 	});
 </script>
+
+<svelte:head>
+	{#if cssContent}
+		<!-- {@html ...} is veilig hier omdat we de content zelf genereren -->
+		<style id="theme-overrides">
+{@html cssContent}
+		</style>
+	{/if}
+</svelte:head>
