@@ -118,7 +118,7 @@ body {
 		// Apply image shape data attributes after CSS variables are loaded
 		// Use setTimeout to ensure CSS has been applied
 		setTimeout(() => {
-			applyImageShape();
+			// applyImageShape(); // Disabled to prevent memory spikes/reloads on mobile
 		}, 0);
 	});
 </script>
