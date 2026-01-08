@@ -13,7 +13,7 @@
 	font-weight: 400;
 	font-display: swap;
 	src:
-		url('/fonts/flama-semicondensed-basic.woff2') format('woff2'),
+		url('../assets/fonts/flama-semicondensed-basic.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/flamasemicondbasic-c316120682.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/flamasemicondbasic-6ce0ecb08f.woff') format('woff');
 }
@@ -25,7 +25,7 @@
 	font-weight: 500;
 	font-display: swap;
 	src:
-		url('/fonts/flama-semicondensed-med.woff2') format('woff2'),
+		url('../assets/fonts/flama-semicondensed-med.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/flamsemicondmed-2976592b95.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/flamsemicondmed-a0dce94791.woff') format('woff');
 }
@@ -37,8 +37,8 @@
 	font-weight: 700;
 	font-display: swap;
 	src:
-		url('/fonts/flama-semicondensed-bold.woff2') format('woff2'),
-		url('/fonts/flama-semicondensed-bold.woff') format('woff'),
+		url('../assets/fonts/flama-semicondensed-bold.woff2') format('woff2'),
+		url('../assets/fonts/flama-semicondensed-bold.woff') format('woff'),
 		url('https://statics.gelderlander.nl/fonts/FlamaSemicond-Bold-8199bf9ba9.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/FlamaProSemicond-Bold-9fcffad7b7.woff')
 			format('woff');
@@ -51,7 +51,7 @@
 	font-weight: 900;
 	font-display: swap;
 	src:
-		url('/fonts/flama-semicondensed-black.woff2') format('woff2'),
+		url('../assets/fonts/flama-semicondensed-black.woff2') format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/FlamaSemicond-Black-6cf7d54458.woff2')
 			format('woff2'),
 		url('https://statics.gelderlander.nl/fonts/FlamaProSemicond-Black-dfaca22687.woff')
