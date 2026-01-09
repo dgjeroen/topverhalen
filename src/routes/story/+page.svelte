@@ -5,16 +5,18 @@
 
 	let { data } = $props<{ data: PageData }>();
 
+	// GEEN invalidateAll of handleFocus hier!
 	let project = $derived(data.project);
 </script>
 
 <svelte:head>
 	<title>{project.storyName || 'Story'}</title>
-
 	{#if data.isPreview}
 		<meta name="robots" content="noindex" />
 	{/if}
 </svelte:head>
+
+<!-- GEEN <svelte:window> hier! -->
 
 <ThemeLoader theme={project.theme} />
 
