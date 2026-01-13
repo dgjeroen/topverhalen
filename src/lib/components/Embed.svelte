@@ -151,7 +151,7 @@
 	});
 </script>
 
-<div class="embed-wrapper">
+<figure class="embed-wrapper">
 	<div
 		class="embed-container"
 		class:has-aspect-ratio={hasAspectRatio}
@@ -169,7 +169,7 @@
 			{#if source}<span class="source">{source}</span>{/if}
 		</figcaption>
 	{/if}
-</div>
+</figure>
 
 <style>
 	.embed-wrapper {

@@ -1130,15 +1130,17 @@
 							<div class="control-group">
 								<div class="control-label">Beeldverhouding:</div>
 								<div class="aspect-controls" role="toolbar" aria-label="Beeldverhouding selectie">
-									<IconButton
-										icon="icon-aspect-original"
-										label="Origineel (volledig)"
-										active={block.content.aspectRatio === 'original'}
-										onclick={() => {
-											block.content.aspectRatio = 'original';
-											dispatch('save');
-										}}
-									/>
+									{#if !block.content.parallax}
+										<IconButton
+											icon="icon-aspect-original"
+											label="Origineel (volledig)"
+											active={block.content.aspectRatio === 'original'}
+											onclick={() => {
+												block.content.aspectRatio = 'original';
+												dispatch('save');
+											}}
+										/>
+									{/if}
 									<IconButton
 										icon="icon-aspect-4-3"
 										label="4:3 (landschap)"
@@ -1183,7 +1185,14 @@
 							<input
 								type="checkbox"
 								bind:checked={block.content.parallax}
-								onchange={() => dispatch('save')}
+								onchange={() => {
+									if (block.content.parallax && block.content.aspectRatio === 'original') {
+										block.content.aspectRatio = '16:9';
+									} else if (!block.content.parallax) {
+										block.content.aspectRatio = 'original';
+									}
+									dispatch('save');
+								}}
 							/>
 							<span>Parallax-effect</span>
 						</label>
